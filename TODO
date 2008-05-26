@@ -1,0 +1,8 @@
+TODO list for the week (26-05 02-06)
+
+- mach_port_t (easy)
+- Define mach_msg_header_t struct & mach_msg_type_t
+- Implement port allocation and deallocation
+- Implement macro with-port.
+- Implement mach_msg.
+- ipc-hello.c should be running nicely in a few days :-)
