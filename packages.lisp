@@ -6,7 +6,8 @@
   (:use :cl :cffi)
   (:export :largest-representable-number
 		   :num-bits
-		   :define-helper-library))
+		   :define-helper-library
+		   :string->integer))
 
 (defpackage :cl-hurd.error
   (:nicknames :hurd-error)
@@ -15,7 +16,8 @@
 (defpackage :cl-mach
   (:nicknames :mach)
   (:use :cl :cffi :hurd-common)
-  (:export :task-self))
+  (:export :task-self
+		   :with-port))
 
 (defpackage :cl-hurd
   (:nicknames :hurd)
