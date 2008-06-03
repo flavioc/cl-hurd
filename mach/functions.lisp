@@ -11,7 +11,7 @@
 
 (defcfun ("mach_port_deallocate" %mach-port-deallocate)
 		 kern-return
-		 (task port)
+		 (task ipc-space)
 		 (name port))
 
 (defun port-deallocate (name &optional (task (task-self)))
