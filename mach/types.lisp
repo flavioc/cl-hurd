@@ -1,7 +1,3 @@
-(in-package :mach)
-
-; kern_return_t
-(defctype kern-return :int)
 
 ; mach_port_t
 (define-foreign-type port-type ()
@@ -23,7 +19,7 @@
   "Translates a port value to a more lispy one"
   (case value
 	((+port-null+) nil)
-	((+port-dead+) 'dead)
+	((+port-dead+) :dead)
 	(t
 	  value)))
 
@@ -31,6 +27,12 @@
   "Translates a lispy port value to a foreign one"
   (case value
 	((nil) +port-null+)
-	((dead) +port-dead+)
+	((:dead) +port-dead+)
 	(t
 	  value)))
+
+;; task_t
+(defctype task port)
+
+;; ipc_space_t
+(defctype ipc-space task)
