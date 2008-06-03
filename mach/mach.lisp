@@ -8,4 +8,5 @@
 (use-foreign-library libmachuser)
 	
 (load "mach/types")
+(load "mach/error")
 (load "mach/functions")
