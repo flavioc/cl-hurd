@@ -7,7 +7,8 @@
   (%mach-task-self))
 
 (defun port-valid (p)
-  (numberp p))
+  (and (numberp p)
+       (> p 0)))
 
 (defcfun ("mach_port_deallocate" %mach-port-deallocate)
 		 kern-return
