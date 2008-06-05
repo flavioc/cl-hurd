@@ -1,5 +1,4 @@
-TODO list for the week (26-05 02-06)
+TODO list for the week (02-06 07-06)
 
-- Implement port deallocation
-- Port hurd errors.
-- Implement macro with-port.
+- Create table functions
+- Access them in lisp.
