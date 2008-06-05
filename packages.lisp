@@ -7,7 +7,8 @@
   (:export :largest-representable-number
 		   :num-bits
 		   :define-helper-library
-		   :string->integer))
+		   :string->integer
+		   :error->string))
 
 (defpackage :cl-hurd.error
   (:nicknames :hurd-error)
