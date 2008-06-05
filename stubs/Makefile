@@ -6,7 +6,7 @@ TARGETS = fs_stubs.so
 # fs stubs
 FS_DEFS = $(DEFS_DIRECTORY)/fs.defs
 GENERATED_FS_SERVER = fs_server
-FS_OBJECTS = $(GENERATED_FS_SERVER).o
+FS_OBJECTS = $(GENERATED_FS_SERVER).o fs_wrapper.o
 
 all: $(TARGETS)
 
