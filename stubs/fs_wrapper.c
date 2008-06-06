@@ -20,43 +20,24 @@
 #include <sys/utsname.h>
 #include <hurd/hurd_types.h>
 
-/* routines that can be set by the middle level */
-typedef enum {
-	FILE_EXEC,
-	FILE_CHOWN,
-	FILE_CHAUTHOR,
-	FILE_CHMOD,
-	FILE_CHFLAGS,
-	FILE_UTIMES,
-	FILE_SET_SIZE,
-	FILE_LOCK,
-	FILE_LOCK_STAT,
-	FILE_CHECK_ACCESS,
-	FILE_NOTICE_CHANGES,
-	FILE_GETCONTROL,
-	FILE_STATFS,
-	FILE_SYNC,
-	FILE_SYNCFS,
-	FILE_GET_STORAGE_INFO,
-	FILE_GETLINKNODE,
-	FILE_GETFH,
-	DIR_LOOKUP,
-	DIR_READDIR,
-	DIR_MKDIR,
-	DIR_RMDIR,
-	DIR_UNLINK,
-	DIR_LINK,
-	DIR_RENAME,
-	DIR_MKFILE,
-	DIR_NOTICE_CHANGES,
-	FILE_SET_TRANSLATOR,
-	FILE_GET_TRANSLATOR,
-	FILE_GET_TRANSLATOR_CNTL,
-	FILE_GET_FS_OPTIONS,
-	FILE_REPARENT
-} FsRoutine;
+#include "fs_wrapper.h"
+
+/* this is NULL initialized */
+static void* routines[_NUMBER_OF_ROUTINES];
 
 /* function wrappers follows... */
+
+/* file exec */
+
+typedef kern_return_t (*file_exec_type)(file_t,
+		mach_port_t, int,
+		data_t, mach_msg_type_number_t,
+		data_t, mach_msg_type_number_t,
+		portarray_t, mach_msg_type_number_t,
+		portarray_t, mach_msg_type_number_t,
+		intarray_t, mach_msg_type_number_t,
+		mach_port_array_t, mach_msg_type_number_t,
+		mach_port_array_t, mach_msg_type_number_t);
 
 kern_return_t
 lisp_file_exec(file_t exec_file,
@@ -72,42 +53,95 @@ lisp_file_exec(file_t exec_file,
 		mach_msg_type_number_t portarrayCnt,
 		intarray_t intarray,
 		mach_msg_type_number_t intarrayCnt,
-		mach_port_array_t deadllocnames,
+		mach_port_array_t deallocnames,
 		mach_msg_type_number_t deallocnamesCnt,
 		mach_port_array_t destroynames,
 		mach_msg_type_number_t destroynamesCnt)
 {
-	/* check routine existence and then run it */
-	return EOPNOTSUPP;
+	if(routines[FILE_EXEC] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_exec_type exec_routine = routines[FILE_EXEC];
+
+	return exec_routine(exec_file, exec_task, flags,
+				argv, argvCnt, envp,
+				envpCnt, fdarray, fdarrayCnt,
+				portarray, portarrayCnt,
+				intarray, intarrayCnt,
+				deallocnames, deallocnamesCnt,
+				destroynames, destroynamesCnt);
 }
+
+/* file chown */
+
+typedef kern_return_t (*file_chown_type)(file_t chown_file,
+		uid_t new_owner,
+		gid_t new_group);
 
 kern_return_t
 lisp_file_chown(file_t chown_file,
 		uid_t new_owner,
 		gid_t new_group)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_CHOWN] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_chown_type chown_routine = routines[FILE_CHOWN];
+
+	return chown_routine(chown_file, new_owner, new_group);
 }
+
+/* file chauthor */
+
+typedef kern_return_t (*file_chauthor_type)(file_t, uid_t);
 
 kern_return_t
 lisp_file_chauthor(file_t chauth_file,
 		uid_t new_author)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_CHAUTHOR] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_chauthor_type chauthor_routine = routines[FILE_CHAUTHOR];
+
+	return chauthor_routine(chauth_file, new_author);
 }
+
+/* file chmod */
+
+typedef kern_return_t (*file_chmod_type)(file_t, mode_t);
 
 kern_return_t
 lisp_file_chmod(file_t chmod_file,
 		mode_t new_mode)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_CHMOD] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_chmod_type chmod_routine = routines[FILE_CHMOD];
+
+	return chmod_routine(chmod_file, new_mode);
 }
+
+/* file chflags */
+
+typedef kern_return_t (*file_chflags_type)(file_t, int);
 
 kern_return_t
 lisp_file_chflags(file_t chflags_file,
 		int new_flags)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_CHFLAGS] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_chflags_type chflags_routine = routines[FILE_CHFLAGS];
+
+	return chflags_routine(chflags_file, new_flags);
 }
 
 kern_return_t
@@ -343,4 +377,10 @@ lisp_file_reparent(file_t file,
 		mach_msg_type_name_t *new_filePoly)
 {
 	return EOPNOTSUPP;
+}
+
+void
+set_routine(const FsRoutine what, void* fun)
+{
+	routines[what] = fun;
 }
