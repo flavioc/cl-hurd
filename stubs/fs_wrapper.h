@@ -50,6 +50,6 @@ typedef enum {
  * just use a generic pointer
  * that will be cast when needed
  */
-void set_routine(const FsRoutine what, void* fun);
+void set_fs_routine(const FsRoutine what, void* fun);
 
 #endif
