@@ -495,12 +495,27 @@ lisp_dir_rmdir(file_t directory,
 	return rmdir_routine(directory, name);
 }
 
+/* dir unlink */
+
+typedef kern_return_t (*dir_unlink_type)(file_t, string_t);
+
 kern_return_t
 lisp_dir_unlink(file_t directory,
 		string_t name)
 {
-	return EOPNOTSUPP;
+	if(routines[DIR_UNLINK] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	dir_unlink_type unlink_routine = routines[DIR_UNLINK];
+
+	return unlink_routine(directory, name);
 }
+
+/* dir link */
+
+typedef kern_return_t (*dir_link_type)(file_t,
+		file_t, string_t, int);
 
 kern_return_t
 lisp_dir_link(file_t dir,
@@ -508,8 +523,20 @@ lisp_dir_link(file_t dir,
 		string_t name,
 		int excl)
 {
-	return EOPNOTSUPP;
+	if(routines[DIR_LINK] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	dir_link_type link_routine = routines[DIR_LINK];
+
+	return link_routine(dir, file, name, excl);
 }
+
+/* dir rename */
+
+typedef kern_return_t (*dir_rename_type)(file_t,
+		string_t, file_t,
+		string_t, int);
 
 kern_return_t
 lisp_dir_rename(file_t olddirectory,
@@ -518,8 +545,21 @@ lisp_dir_rename(file_t olddirectory,
 		string_t newname,
 		int excl)
 {
-	return EOPNOTSUPP;
+	if(routines[DIR_RENAME] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	dir_rename_type rename_routine = routines[DIR_RENAME];
+
+	return rename_routine(olddirectory, oldname,
+			newdirectory, newname, excl);
 }
+
+/* dir mkfile */
+
+typedef kern_return_t (*dir_mkfile_type)(file_t,
+		int, mode_t, mach_port_t *,
+		mach_msg_type_name_t *);
 
 kern_return_t
 lisp_dir_mkfile(file_t directory,
@@ -528,15 +568,41 @@ lisp_dir_mkfile(file_t directory,
 		mach_port_t *newnode,
 		mach_msg_type_name_t *newnodePoly)
 {
-	return EOPNOTSUPP;
+	if(routines[DIR_MKFILE] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	dir_mkfile_type mkfile_routine = routines[DIR_MKFILE];
+
+	return mkfile_routine(directory, flags, mode,
+			newnode, newnodePoly);
 }
+
+/* dir notice changes */
+
+typedef kern_return_t (*dir_notice_changes_type)(file_t,
+		mach_port_t);
 
 kern_return_t
 lisp_dir_notice_changes(file_t directory,
 		mach_port_t port)
 {
-	return EOPNOTSUPP;
+	if(routines[DIR_NOTICE_CHANGES] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	dir_notice_changes_type notice_changes_routine =
+		routines[DIR_NOTICE_CHANGES];
+
+	return notice_changes_routine(directory, port);
 }
+
+/* file set translator */
+
+typedef kern_return_t (*file_set_translator_type)(file_t,
+		int, int, int,
+		data_t, mach_msg_type_number_t,
+		mach_port_t);
 
 kern_return_t
 lisp_file_set_translator(file_t file,
@@ -547,32 +613,85 @@ lisp_file_set_translator(file_t file,
 		mach_msg_type_number_t passiveCnt,
 		mach_port_t active)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_SET_TRANSLATOR] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_set_translator_type set_translator_routine =
+		routines[FILE_SET_TRANSLATOR];
+
+	return set_translator_routine(file, passive_flags,
+			active_flags, oldtrans_flags,
+			passive, passiveCnt, active);
 }
+
+/* file get translator */
+
+typedef kern_return_t (*file_get_translator_type)(file_t,
+		data_t *, mach_msg_type_number_t *);
 
 kern_return_t
 lisp_file_get_translator(file_t file,
 		data_t *translator,
 		mach_msg_type_number_t *translatorCnt)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_GET_TRANSLATOR] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_get_translator_type get_translator_routine =
+		routines[FILE_GET_TRANSLATOR];
+
+	return get_translator_routine(file, translator,
+			translatorCnt);
 }
+
+/* file get translator cntl */
+
+typedef kern_return_t (*file_get_translator_cntl_type)(file_t,
+		mach_port_t *, mach_msg_type_name_t *);
 
 kern_return_t
 lisp_file_get_translator_cntl(file_t file,
 		mach_port_t *translator_cntl,
 		mach_msg_type_name_t *translator_cntlPoly)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_GET_TRANSLATOR_CNTL] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_get_translator_cntl_type get_translator_cntl_routine =
+		routines[FILE_GET_TRANSLATOR_CNTL];
+
+	return get_translator_cntl_routine(file, translator_cntl,
+			translator_cntlPoly);
 }
+
+/* file get fs options */
+
+typedef kern_return_t (*file_get_fs_options_type)(file_t,
+		data_t *, mach_msg_type_number_t *);
 
 kern_return_t
 lisp_file_get_fs_options(file_t file,
 		data_t *options,
 		mach_msg_type_number_t *optionsCnt)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_GET_FS_OPTIONS] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_get_fs_options_type get_fs_options_routine =
+		routines[FILE_GET_FS_OPTIONS];
+
+	return get_fs_options_routine(file, options, optionsCnt);
 }
+
+/* file reparent */
+
+typedef kern_return_t (*file_reparent_type)(file_t,
+		mach_port_t, mach_port_t *,
+		mach_msg_type_name_t *);
 
 kern_return_t
 lisp_file_reparent(file_t file,
@@ -580,7 +699,13 @@ lisp_file_reparent(file_t file,
 		mach_port_t *newfile,
 		mach_msg_type_name_t *new_filePoly)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_REPARENT] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_reparent_type reparent_routine = routines[FILE_REPARENT];
+
+	return reparent_routine(file, parent, newfile, new_filePoly);
 }
 
 void
