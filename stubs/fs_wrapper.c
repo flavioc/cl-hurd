@@ -709,7 +709,7 @@ lisp_file_reparent(file_t file,
 }
 
 void
-set_fs_routine(const FsRoutine what, void* fun)
+set_fs_routine(const FsRoutine what, void *fun)
 {
 	routines[what] = fun;
 }
