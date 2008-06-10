@@ -144,80 +144,200 @@ lisp_file_chflags(file_t chflags_file,
 	return chflags_routine(chflags_file, new_flags);
 }
 
+/* file utimes */
+
+typedef kern_return_t (*file_utimes_type)(file_t,
+		time_value_t, time_value_t);
+
 kern_return_t
 lisp_file_utimes(file_t utimes_file,
 		time_value_t new_atime,
 		time_value_t new_mtime)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_UTIMES] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_utimes_type utimes_routine = routines[FILE_UTIMES];
+
+	return utimes_routine(utimes_file, new_atime, new_mtime);
 }
+
+/* file set size */
+typedef kern_return_t (*file_set_size_type)(file_t, loff_t);
 
 kern_return_t
 lisp_file_set_size(file_t trunc_file,
 		loff_t new_size)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_SET_SIZE] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_set_size_type set_size_routine = routines[FILE_SET_SIZE];
+
+	return set_size_routine(trunc_file, new_size);
 }
+
+/* file lock */
+
+typedef kern_return_t (*file_lock_type)(file_t, int);
 
 kern_return_t
 lisp_file_lock(file_t lock_file,
 		int flags)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_LOCK] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_lock_type lock_routine = routines[FILE_LOCK];
+
+	return lock_routine(lock_file, flags);
 }
+
+/* file lock stat */
+
+typedef kern_return_t (*file_lock_stat_type)(file_t,
+		int *, int *);
 
 kern_return_t
 lisp_file_lock_stat(file_t lock_file,
 		int *mystatus,
 		int *otherstatus)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_LOCK_STAT] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_lock_stat_type lock_stat_routine =
+		routines[FILE_LOCK_STAT];
+
+	return lock_stat_routine(lock_file, mystatus, otherstatus);
 }
+
+/* file check access */
+
+typedef kern_return_t (*file_check_access_type)(file_t, int *);
 
 kern_return_t
 lisp_file_check_access(file_t file,
 		int* allowed)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_CHECK_ACCESS] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_check_access_type check_access_routine =
+		routines[FILE_CHECK_ACCESS];
+
+	return check_access_routine(file, allowed);
 }
+
+/* file notice changes */
+
+typedef kern_return_t (*file_notice_changes_type)(file_t, mach_port_t);
 
 kern_return_t
 lisp_file_notice_changes(file_t file,
 		mach_port_t port)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_NOTICE_CHANGES] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_notice_changes_type notice_changes_routine =
+		routines[FILE_NOTICE_CHANGES];
+
+	return notice_changes_routine(file, port);
 }
+
+/* file getcontrol */
+
+typedef kern_return_t (*file_getcontrol_type)(file_t,
+		mach_port_t *, mach_msg_type_name_t *);
 
 kern_return_t
 lisp_file_getcontrol(file_t file,
 		mach_port_t *control,
 		mach_msg_type_name_t *controlPoly)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_GETCONTROL] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_getcontrol_type getcontrol_routine =
+		routines[FILE_GETCONTROL];
+
+	return getcontrol_routine(file, control, controlPoly);
 }
+
+/* file statfs */
+
+typedef kern_return_t (*file_statfs_type)(file_t,
+		fsys_statfsbuf_t *);
 
 kern_return_t
 lisp_file_statfs(file_t file,
 		fsys_statfsbuf_t *info)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_STATFS] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_statfs_type statfs_routine = routines[FILE_STATFS];
+
+	return statfs_routine(file, info);
 }
+
+/* file sync */
+
+typedef kern_return_t (*file_sync_type)(file_t, int, int);
 
 kern_return_t
 lisp_file_sync(file_t file,
 		int wait,
 		int omit_metadata)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_SYNC] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_sync_type sync_routine = routines[FILE_SYNC];
+
+	return sync_routine(file, wait, omit_metadata);
 }
+
+/* file syncfs */
+
+typedef kern_return_t (*file_syncfs_type)(file_t, int, int);
 
 kern_return_t
 lisp_file_syncfs(file_t file,
 		int wait,
 		int do_children)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_SYNCFS] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_syncfs_type syncfs_routine = routines[FILE_SYNCFS];
+
+	return syncfs_routine(file, wait, do_children);
 }
+
+/* file get storage info */
+
+typedef kern_return_t (*file_get_storage_info_type)(file_t,
+		portarray_t *,
+		mach_msg_type_name_t *,
+		mach_msg_type_number_t *,
+		intarray_t *,
+		mach_msg_type_number_t *,
+		off_array_t *,
+		mach_msg_type_number_t *,
+		data_t *,
+		mach_msg_type_number_t *);
 
 kern_return_t
 lisp_file_get_storage_info(file_t file,
@@ -231,24 +351,64 @@ lisp_file_get_storage_info(file_t file,
 		data_t *data,
 		mach_msg_type_number_t *dataCnt)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_GET_STORAGE_INFO] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_get_storage_info_type get_storage_info_routine =
+		routines[FILE_GET_STORAGE_INFO];
+
+	return get_storage_info_routine(file, ports,
+			portsPoly, portsCnt, ints, intsCnt, offsets,
+			offsetsCnt, data, dataCnt);
 }
+
+/* file getlinknode */
+
+typedef kern_return_t (*file_getlinknode_type)(file_t,
+		mach_port_t *, mach_msg_type_name_t *);
 
 kern_return_t
 lisp_file_getlinknode(file_t file,
 		mach_port_t *linknode,
 		mach_msg_type_name_t *linknodePoly)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_GETLINKNODE] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_getlinknode_type getlinknode_routine =
+		routines[FILE_GETLINKNODE];
+
+	return getlinknode_routine(file, linknode, linknodePoly);
 }
+
+/* file getfh */
+
+typedef kern_return_t (*file_getfh_type)(file_t,
+		data_t *, mach_msg_type_number_t *);
 
 kern_return_t
 lisp_file_getfh(file_t file,
 		data_t *filehandle,
 		mach_msg_type_number_t *filehandleCnt)
 {
-	return EOPNOTSUPP;
+	if(routines[FILE_GETFH] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	file_getfh_type getfh_routine = routines[FILE_GETFH];
+
+	return getfh_routine(file, filehandle, filehandleCnt);
 }
+
+/* dir lookup */
+
+typedef kern_return_t (*dir_lookup_type)(file_t,
+		string_t, int,
+		mode_t, retry_type *,
+		string_t, mach_port_t *,
+		mach_msg_type_name_t *);
 
 kern_return_t
 lisp_dir_lookup(file_t startdir,
@@ -260,8 +420,24 @@ lisp_dir_lookup(file_t startdir,
 		mach_port_t *result,
 		mach_msg_type_name_t *resultPoly)
 {
-	return EOPNOTSUPP;
+	if(routines[DIR_LOOKUP] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	dir_lookup_type lookup_routine = routines[DIR_LOOKUP];
+
+	return lookup_routine(startdir, filename,
+			flags, mode, do_retry, retry_name,
+			result, resultPoly);
 }
+
+/* dir readdir */
+
+typedef kern_return_t (*dir_readdir_type)(file_t,
+		data_t *, mach_msg_type_number_t *,
+		boolean_t *, int,
+		int, vm_size_t,
+		int *);
 
 kern_return_t
 lisp_dir_readdir(file_t dir,
@@ -273,22 +449,50 @@ lisp_dir_readdir(file_t dir,
 		vm_size_t bufsiz,
 		int *amount)
 {
-	return EOPNOTSUPP;
+	if(routines[DIR_READDIR] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	dir_readdir_type readdir_routine = routines[DIR_READDIR];
+
+	return readdir_routine(dir, data, dataCnt,
+			dataDealloc, entry, nentries, bufsiz, amount);
 }
+
+/* dir mkdir */
+
+typedef kern_return_t (*dir_mkdir_type)(file_t,
+		string_t, mode_t);
 
 kern_return_t
 lisp_dir_mkdir(file_t directory,
 		string_t name,
 		mode_t mode)
 {
-	return EOPNOTSUPP;
+	if(routines[DIR_MKDIR] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	dir_mkdir_type mkdir_routine = routines[DIR_MKDIR];
+
+	return mkdir_routine(directory, name, mode);
 }
+
+/* dir rmdir */
+
+typedef kern_return_t (*dir_rmdir_type)(file_t, string_t);
 
 kern_return_t
 lisp_dir_rmdir(file_t directory,
 		string_t name)
 {
-	return EOPNOTSUPP;
+	if(routines[DIR_RMDIR] == NULL) {
+		return EOPNOTSUPP;
+	}
+
+	dir_rmdir_type rmdir_routine = routines[DIR_RMDIR];
+
+	return rmdir_routine(directory, name);
 }
 
 kern_return_t
