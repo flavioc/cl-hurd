@@ -20,39 +20,18 @@
 #include <sys/utsname.h>
 #include <hurd/hurd_types.h>
 
-/* routines that can be set by the middle level */
-typedef enum {
-	IO_WRITE,
-	IO_READ,
-	IO_SEEK,
-	IO_READABLE,
-	IO_SET_ALL_OPENMODES,
-	IO_GET_OPENMODES,
-	IO_CLEAR_OPENMODES,
-	IO_ASYNC,
-	IO_MOD_OWNER,
-	IO_GET_OWNER,
-	IO_GET_ICKY_ASYNC_ID,
-	IO_SELECT,
-	IO_STAT,
-	IO_REAUTHENTICATE,
-	IO_RESTRICT_AUTH,
-	IO_DUPLICATE,
-	IO_SERVER_VERSION,
-	IO_MAP,
-	IO_MAP_CNTL,
-	IO_RELEASE_CONCH,
-	IO_EOFNOTIFY,
-	IO_PRENOTIFY,
-	IO_POSTNOTIFY,
-	IO_READSLEEP,
-	IO_SIGIO,
-	IO_PATHCONF,
-	IO_IDENTITY,
-	IO_REVOKE
-} IoRoutine;
+#include "io_wrapper.h"
+
+/* this is NULL initialized */
+static void* routines[_NUMBER_OF_ROUTINES];
 
 /* function wrappers follows... */
+
+/* io write */
+
+typedef kern_return_t (*io_write_type)(io_t,
+		data_t, mach_msg_type_number_t,
+		loff_t, vm_size_t *);
 
 kern_return_t
 lisp_io_write(io_t io_object,
@@ -294,4 +273,10 @@ kern_return_t
 lisp_io_revoke(io_t io_object)
 {
 	return EOPNOTSUPP;
+}
+
+void
+set_io_routine(const IoRoutine what, void *fun)
+{
+	routines[what] = fun;
 }
