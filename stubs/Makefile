@@ -63,5 +63,7 @@ $(GENERATED_FSYS_SERVER).o: $(GENERATED_FSYS_SERVER).c
 $(GENERATED_FSYS_SERVER).c: $(FSYS_DEFS)
 	$(MIG) $(GENERATED_FSYS_SERVER).c $(FSYS_DEFS)
 
+fsys_wrapper.o: fsys_wrapper.c fsys_wrapper.h
+
 clean:
 	rm -f *.so *.o $(GENERATED_FS_SERVER).c
