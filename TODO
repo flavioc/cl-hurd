@@ -1,4 +1,4 @@
-TODO list for the week (02-06 07-06)
+TODO list for the week:
 
-- Create table functions
 - Access them in lisp.
+- Bind port_info.
