@@ -9,11 +9,8 @@
 		   :define-helper-library
 		   :define-stub-library
 		   :string->integer
-		   :error->string))
-
-(defpackage :cl-hurd.error
-  (:nicknames :hurd-error)
-  (:use :cl :cffi :hurd-common))
+		   :error->string
+		   :err))
 
 (defpackage :cl-mach
   (:nicknames :mach)
