@@ -24,3 +24,6 @@
   (:nicknames :hurd)
   (:use :cl :cffi :mach :hurd-common))
 
+(defpackage :cl-hurd.translator
+  (:nicknames :hurd-translator)
+  (:use :cl :cffi :mach :hurd-common :hurd))
