@@ -7,6 +7,7 @@
   (:export :largest-representable-number
 		   :num-bits
 		   :define-helper-library
+		   :define-stub-library
 		   :string->integer
 		   :error->string))
 
