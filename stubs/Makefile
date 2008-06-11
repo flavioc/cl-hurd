@@ -26,7 +26,7 @@ all: $(TARGETS)
 
 io_stubs.so: $(IO_OBJECTS)
 	$(CC) -shared -Wl \
-		-o io_stubs.o $(IO_OBJECTS) $(LDFLAGS)
+		-o io_stubs.so $(IO_OBJECTS) $(LDFLAGS)
 
 $(GENERATED_IO_SERVER).o: $(GENERATED_IO_SERVER).c
 
