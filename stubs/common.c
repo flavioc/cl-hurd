@@ -7,6 +7,9 @@ _set_routine(const unsigned what, void *fun)
 	if(routines[what] != NULL) {
 		fprintf(stderr, "Warning: redefining routine %s\n",
 				routine_to_str(what));
+	} else {
+		fprintf(stdout, "Information: defining routine %s\n",
+				routine_to_str(what));
 	}
 
 	routines[what] = fun;
