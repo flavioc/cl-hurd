@@ -20,6 +20,8 @@
 #include <sys/utsname.h>
 #include <hurd/hurd_types.h>
 
+#include <stdio.h>
+
 #include "fsys_wrapper.h"
 
 /* this is NULL initialized */
@@ -286,3 +288,6 @@ set_fsys_routine(const FsysRoutine what, void *fun)
 {
 	routines[what] = fun;
 }
+
+#define MODULE_NAME fsys
+#include "debug.c"

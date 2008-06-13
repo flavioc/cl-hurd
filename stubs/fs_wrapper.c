@@ -20,6 +20,8 @@
 #include <sys/utsname.h>
 #include <hurd/hurd_types.h>
 
+#include <stdio.h>
+
 #include "fs_wrapper.h"
 
 /* this is NULL initialized */
@@ -713,3 +715,6 @@ set_fs_routine(const FsRoutine what, void *fun)
 {
 	routines[what] = fun;
 }
+
+#define MODULE_NAME fs
+#include "debug.c"

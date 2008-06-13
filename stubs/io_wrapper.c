@@ -650,17 +650,5 @@ set_io_routine(const IoRoutine what, void *fun)
 	routines[what] = fun;
 }
 
-void
-get_io_info(void)
-{
-	int i;
-	for(i = 0; i != _NUMBER_OF_ROUTINES; ++i) {
-		printf("Routine #%x: ", i);
-		if(routines[i] == NULL) {
-			printf("not set");
-		} else {
-			printf("set to address %x", (vm_size_t)routines[i]);
-		}
-		printf("\n");
-	}
-}
+#define MODULE_NAME io
+#include "debug.c"
