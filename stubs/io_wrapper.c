@@ -21,6 +21,7 @@
 #include <hurd/hurd_types.h>
 
 #include <stdio.h>
+#include <assert.h>
 
 #include "io_wrapper.h"
 
@@ -644,11 +645,49 @@ lisp_io_revoke(io_t io_object)
 	return revoke_routine(io_object);
 }
 
-void
-set_io_routine(const IoRoutine what, void *fun)
+static const char*
+routine_to_str(const IoRoutine rot)
 {
-	routines[what] = fun;
+#define RET(val) case val: return #val ;
+	switch(rot) {
+		RET(IO_WRITE)
+		RET(IO_READ)
+		RET(IO_SEEK)
+		RET(IO_READABLE)
+		RET(IO_SET_ALL_OPENMODES)
+		RET(IO_GET_OPENMODES)
+		RET(IO_CLEAR_SOME_OPENMODES)
+		RET(IO_ASYNC)
+		RET(IO_MOD_OWNER)
+		RET(IO_GET_OWNER)
+		RET(IO_GET_ICKY_ASYNC_ID)
+		RET(IO_SELECT)
+		RET(IO_STAT)
+		RET(IO_REAUTHENTICATE)
+		RET(IO_RESTRICT_AUTH)
+		RET(IO_DUPLICATE)
+		RET(IO_SERVER_VERSION)
+		RET(IO_MAP)
+		RET(IO_MAP_CNTL)
+		RET(IO_GET_CONCH)
+		RET(IO_RELEASE_CONCH)
+		RET(IO_EOFNOTIFY)
+		RET(IO_PRENOTIFY)
+		RET(IO_POSTNOTIFY)
+		RET(IO_READNOTIFY)
+		RET(IO_READSLEEP)
+		RET(IO_SIGIO)
+		RET(IO_PATHCONF)
+		RET(IO_IDENTITY)
+		RET(IO_REVOKE)
+		case _NUMBER_OF_ROUTINES:
+		default:
+			return "";
+	}
+
+#undef RET
 }
 
-#include "debug.c"
-DEBUG_INFO(io);
+#include "common.c"
+
+COMMON_FUNCTIONS(io);

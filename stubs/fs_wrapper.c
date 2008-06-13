@@ -21,6 +21,7 @@
 #include <hurd/hurd_types.h>
 
 #include <stdio.h>
+#include <assert.h>
 
 #include "fs_wrapper.h"
 
@@ -710,11 +711,52 @@ lisp_file_reparent(file_t file,
 	return reparent_routine(file, parent, newfile, new_filePoly);
 }
 
-void
-set_fs_routine(const FsRoutine what, void *fun)
+static const char*
+routine_to_str(const FsRoutine rot)
 {
-	routines[what] = fun;
+#define RET(val) case val: return #val ;
+	switch(rot) {
+		RET(FILE_EXEC)
+		RET(FILE_CHOWN)
+		RET(FILE_CHAUTHOR)
+		RET(FILE_CHMOD)
+		RET(FILE_CHFLAGS)
+		RET(FILE_UTIMES)
+		RET(FILE_SET_SIZE)
+		RET(FILE_LOCK)
+		RET(FILE_LOCK_STAT)
+		RET(FILE_CHECK_ACCESS)
+		RET(FILE_NOTICE_CHANGES)
+		RET(FILE_GETCONTROL)
+		RET(FILE_STATFS)
+		RET(FILE_SYNC)
+		RET(FILE_SYNCFS)
+		RET(FILE_GET_STORAGE_INFO)
+		RET(FILE_GETLINKNODE)
+		RET(FILE_GETFH)
+		RET(DIR_LOOKUP)
+		RET(DIR_READDIR)
+		RET(DIR_MKDIR)
+		RET(DIR_RMDIR)
+		RET(DIR_UNLINK)
+		RET(DIR_LINK)
+		RET(DIR_RENAME)
+		RET(DIR_MKFILE)
+		RET(DIR_NOTICE_CHANGES)
+		RET(FILE_SET_TRANSLATOR)
+		RET(FILE_GET_TRANSLATOR)
+		RET(FILE_GET_TRANSLATOR_CNTL)
+		RET(FILE_GET_FS_OPTIONS)
+		RET(FILE_REPARENT)
+		case _NUMBER_OF_ROUTINES:
+		default:
+			return "";
+	}
+
+#undef RET
 }
 
-#include "debug.c"
-DEBUG_INFO(fs);
+#include "common.c"
+
+COMMON_FUNCTIONS(fs);
+

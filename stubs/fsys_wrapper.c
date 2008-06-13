@@ -21,6 +21,7 @@
 #include <hurd/hurd_types.h>
 
 #include <stdio.h>
+#include <assert.h>
 
 #include "fsys_wrapper.h"
 
@@ -283,11 +284,30 @@ lisp_fsys_get_options(fsys_t server,
 	return get_options_routine(server, options, optionsCnt);
 }
 
-void
-set_fsys_routine(const FsysRoutine what, void *fun)
+
+static const char*
+routine_to_str(const FsysRoutine rot)
 {
-	routines[what] = fun;
+#define RET(val) case val: return #val ;
+	switch(rot) {
+		RET(FSYS_STARTUP)
+		RET(FSYS_GOAWAY)
+		RET(FSYS_GETROOT)
+		RET(FSYS_GETFILE)
+		RET(FSYS_SYNCFS)
+		RET(FSYS_SET_OPTIONS)
+		RET(FSYS_GETPRIV)
+		RET(FSYS_INIT)
+		RET(FSYS_FORWARD)
+		RET(FSYS_GET_OPTIONS)
+		case _NUMBER_OF_ROUTINES:
+		default:
+			return "";
+	}
+
+#undef RET
 }
 
-#include "debug.c"
-DEBUG_INFO(fsys);
+#include "common.c"
+
+COMMON_FUNCTIONS(fsys);
