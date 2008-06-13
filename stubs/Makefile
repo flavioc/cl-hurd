@@ -33,7 +33,7 @@ $(GENERATED_IO_SERVER).o: $(GENERATED_IO_SERVER).c
 $(GENERATED_IO_SERVER).c: $(IO_DEFS)
 	$(MIG) $(GENERATED_IO_SERVER).c $(IO_DEFS)
 
-io_wrapper.o: io_wrapper.c io_wrapper.h
+io_wrapper.o: io_wrapper.c io_wrapper.h debug.c
 
 #
 # fs stubs start here
@@ -48,7 +48,7 @@ $(GENERATED_FS_SERVER).o: $(GENERATED_FS_SERVER).c
 $(GENERATED_FS_SERVER).c: $(FS_DEFS)
 	$(MIG) $(GENERATED_FS_SERVER).c $(FS_DEFS)
 
-fs_wrapper.o: fs_wrapper.c fs_wrapper.h
+fs_wrapper.o: fs_wrapper.c fs_wrapper.h debug.c
 
 #
 # and fsys right here
@@ -63,7 +63,14 @@ $(GENERATED_FSYS_SERVER).o: $(GENERATED_FSYS_SERVER).c
 $(GENERATED_FSYS_SERVER).c: $(FSYS_DEFS)
 	$(MIG) $(GENERATED_FSYS_SERVER).c $(FSYS_DEFS)
 
-fsys_wrapper.o: fsys_wrapper.c fsys_wrapper.h
+fsys_wrapper.o: fsys_wrapper.c fsys_wrapper.h debug.c
+
+
+#
+# misc stuff
+#
+
+clean.c:
 
 clean:
 	rm -f *.so *.o $(GENERATED_FS_SERVER).c
