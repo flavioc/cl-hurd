@@ -289,5 +289,5 @@ set_fsys_routine(const FsysRoutine what, void *fun)
 	routines[what] = fun;
 }
 
-#define MODULE_NAME fsys
 #include "debug.c"
+DEBUG_INFO(fsys);

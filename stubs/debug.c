@@ -1,8 +1,6 @@
 
-#define FUNCTION_NAME get_ ## MODULE_NAME ##_info
-
-void
-FUNCTION_NAME(void)
+static void
+_get_module_info(void)
 {
 	int i;
 	for(i = 0; i != _NUMBER_OF_ROUTINES; ++i) {
@@ -15,3 +13,8 @@ FUNCTION_NAME(void)
 		printf("\n");
 	}
 }
+
+#define DEBUG_INFO(module) \
+	void get_ ## module ## _info(void) { \
+		_get_module_info(); \
+	}

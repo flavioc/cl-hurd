@@ -650,5 +650,5 @@ set_io_routine(const IoRoutine what, void *fun)
 	routines[what] = fun;
 }
 
-#define MODULE_NAME io
 #include "debug.c"
+DEBUG_INFO(io);

@@ -716,5 +716,5 @@ set_fs_routine(const FsRoutine what, void *fun)
 	routines[what] = fun;
 }
 
-#define MODULE_NAME fs
 #include "debug.c"
+DEBUG_INFO(fs);
