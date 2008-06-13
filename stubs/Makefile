@@ -73,4 +73,7 @@ fsys_wrapper.o: fsys_wrapper.c fsys_wrapper.h debug.c
 clean.c:
 
 clean:
-	rm -f *.so *.o $(GENERATED_FS_SERVER).c
+	rm -f *.so *.o \
+		$(GENERATED_FS_SERVER).c \
+		$(GENERATED_IO_SERVER).c \
+		$(GENERATED_FSYS_SERVER).c
