@@ -48,6 +48,12 @@
 ; for debugging pruposes
 (defcfun ("get_io_info" %get-io-info) :void)
 
+(defcfun ("lisp_io_server" %lisp-io-server) :boolean
+  (in :pointer)
+  (out :pointer))
+
+;;;;;;;;;;;;;;;;;;
+
 (defcallback %my-test err ((io-obj :unsigned-int))
 	t)
 

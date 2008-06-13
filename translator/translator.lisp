@@ -6,4 +6,7 @@
 (load "translator/fsys_wrapper")
 (load "translator/macros")
 (load "translator/debug")
+(load "translator/class")
+(load "translator/node")
+(load "translator/dir")
 
