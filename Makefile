@@ -8,5 +8,5 @@ all:
 
 clean:
 	for dir in $(TARGET_DIRS); do \
-		$(MAKE) -C dir clean; \
+		$(MAKE) -C $$dir clean; \
 	done
