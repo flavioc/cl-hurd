@@ -244,10 +244,10 @@
 		 (otherwise 
 		   (error 'unrecognized-error-code :code ,var))))))
 
-(defmethod translate-from-foreign (value (type error-type))
+(defmethod translate-from-foreign (value (type (eql 'err)))
   "Translates an error value to a symbol"
   (error-id-to-symbol value))
 
-(defmethod translate-to-foreign (value (type error-type))
+(defmethod translate-to-foreign (value (type (eql 'err)))
   "Translates a lisp error code to a foreign one (ints)"
   (error-symbol-to-id value))
