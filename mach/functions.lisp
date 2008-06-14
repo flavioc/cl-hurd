@@ -16,6 +16,7 @@
 		 (name port))
 
 (defun port-deallocate (name &optional (task (task-self)))
+  "Deallocates a port in a task ipc namespace"
   (%mach-port-deallocate task name))
 
 (defmacro with-port ((port-name creation &key (task 'self)) &body body)
@@ -23,3 +24,20 @@
 	 (when (port-valid ,port-name)
 	   ,@body
 	   (port-deallocate ,port-name ,@(unless (eq task 'self) (list task))))))
+
+(defcfun ("task_get_special_port" %task-get-special-port)
+		 err
+		 (task task)
+		 (what :int)
+		 (port :pointer))
+
+; task_get_bootstrap_port appears to be a macro
+; that uses task_get_special_port with TASK_BOOTSTRAP_PORT
+; as the 'what' argument
+; this is defined at mach/task_special_ports.h
+(defconstant +task-bootstrap-port+ 4)
+
+(defun get-bootstrap-port (&key (task (task-self)))
+  (with-foreign-object (bootstrap 'port)
+    (%task-get-special-port task +task-bootstrap-port+ bootstrap)
+	(translate-from-foreign (mem-ref bootstrap 'port) 'port)))
