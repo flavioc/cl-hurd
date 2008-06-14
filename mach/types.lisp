@@ -15,19 +15,19 @@
 (defconstant +port-dead+ (largest-representable-number
 						   (num-bits (foreign-type-size 'port))))
 
-(defmethod translate-from-foreign (value (type port-type))
+(defmethod translate-from-foreign (value (type (eql 'port)))
   "Translates a port value to a more lispy one"
-  (case value
-	((+port-null+) nil)
-	((+port-dead+) :dead)
+  (cond
+	((eq +port-null+ value) nil)
+	((eq +port-dead+ value) :dead)
 	(t
 	  value)))
 
-(defmethod translate-to-foreign (value (type port-type))
+(defmethod translate-to-foreign (value (type (eql 'port)))
   "Translates a lispy port value to a foreign one"
-  (case value
-	((nil) +port-null+)
-	((:dead) +port-dead+)
+  (cond
+	((null value) +port-null+)
+	((eq value :dead) +port-null)
 	(t
 	  value)))
 
