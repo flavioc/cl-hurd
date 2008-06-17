@@ -1,5 +1,7 @@
 
-CFLAGS = -Wall -Wextra -D_GNU_SOURCE -DNDEBUG
+include ../defs.mk
+
+CFLAGS += -DNDEBUG
 
 TARGET = run-lisp-trans
 
