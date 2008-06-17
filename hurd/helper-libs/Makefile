@@ -1,7 +1,8 @@
 
+include ../../defs.mk
+
 TARGETS = error.so
 
-CFLAGS = -Wall -Wextra -D_GNU_SOURCE=1
 LDFLAGS =
 
 all: $(TARGETS)
