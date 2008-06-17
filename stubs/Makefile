@@ -1,5 +1,5 @@
 
-include defs.mk
+include ../defs.mk
 
 TARGETS = fs_stubs.so io_stubs.so fsys_stubs.so
 
