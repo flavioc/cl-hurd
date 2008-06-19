@@ -208,43 +208,36 @@
 			   (2508 :hardware-no-memory)
 			   (2509 :hardware-device-readonly)))
 
+;; group all the above error codes
+(defconstant +recognized-error-codes+
+	     (append +recognized-kernel-codes+
+		     +recognized-mig-codes+
+		     +recognized-device-codes+
+		     +recognized-message-codes+
+		     (mapcar (lambda (item)
+			       (list (%get-hurd-error-code (first item))
+				     (second item)))
+			       +recognized-standard-codes+)))
+
 (define-condition unrecognized-error-code (error)
   ((code :initarg :code :reader code)))
 
-(defmacro error-id-to-symbol (var)
-  `(case ,var
-	 ,@(loop for (id name) in +recognized-standard-codes+
-			 collect (list (%get-hurd-error-code id) name))
-	 ,@(loop for (id name) in (append +recognized-kernel-codes+
-									  +recognized-mig-codes+
-									  +recognized-device-codes+
-									  +recognized-message-codes+)
-			 collect (list id name))
-	 (0 t) ; success
-	 (otherwise
-	   (warn "Identifier ~a not recognized" ,var)
-	   nil)))
-
-(defmacro error-symbol-to-id (var)
-  `(cond
-	 ((eq ,var t) 0)
-	 (t
-	   (case ,var
-		 ,@(loop for (id name) in +recognized-standard-codes+
-				 collect (list name (%get-hurd-error-code id)))
-		 ,@(loop for (id name) in (append +recognized-kernel-codes+
-										  +recognized-mig-codes+
-										  +recognized-device-codes+
-										  +recognized-message-codes+)
-				 collect (list name id))
-		 (otherwise 
-		   (error 'unrecognized-error-code :code ,var))))))
-
 (defmethod translate-from-foreign (value (type (eql 'err)))
   "Translates an error value to a symbol"
-  (error-id-to-symbol value))
+  (cond
+    ((zerop value) t) ; success!
+    (t
+      (let ((item (find value +recognized-error-codes+ :key #'first)))
+	(if item
+	  (second item)
+	  (warn "Identifier ~a not recognized" value))))))
 
 (defmethod translate-to-foreign (value (type (eql 'err)))
   "Translates a lisp error code to a foreign one (ints)"
-  (error-symbol-to-id value))
-
+  (cond
+    ((eq value t) 0) ; success!
+    (t
+      (let ((item (find value +recognized-error-codes+ :key #'second)))
+	(if item
+	  (first item)
+	  (error 'unrecognized-error-code :code value))))))
