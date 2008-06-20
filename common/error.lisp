@@ -222,22 +222,18 @@
 (define-condition unrecognized-error-code (error)
   ((code :initarg :code :reader code)))
 
-(defmethod translate-from-foreign (value (type (eql 'err)))
+(defmethod translate-from-foreign (value (type error-type))
   "Translates an error value to a symbol"
   (cond
     ((zerop value) t) ; success!
     (t
-      (let ((item (find value +recognized-error-codes+ :key #'first)))
-	(if item
-	  (second item)
-	  (warn "Identifier ~a not recognized" value))))))
+      (unless-return (translate-foreign-list value +recognized-error-codes+ 'from)
+	  (warn "Identifier ~a not recognized" value)))))
 
-(defmethod translate-to-foreign (value (type (eql 'err)))
+(defmethod translate-to-foreign (value (type error-type))
   "Translates a lisp error code to a foreign one (ints)"
   (cond
     ((eq value t) 0) ; success!
     (t
-      (let ((item (find value +recognized-error-codes+ :key #'second)))
-	(if item
-	  (first item)
-	  (error 'unrecognized-error-code :code value))))))
+      (unless-return (translate-foreign-list value +recognized-error-codes+ 'to)
+	(error 'unrecognized-error-code :code value)))))
