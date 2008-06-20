@@ -57,3 +57,27 @@
 			  (incf e)
 			  (+ accum (* (char->value current) (expt base e))))
 			str :from-end t :initial-value 0)))
+
+(defmacro unless-return (call &body body)
+  (with-gensyms (ret)
+    `(let ((,ret ,call))
+       (cond
+	 (,ret ,ret)
+	 (t
+	   ,@body)))))
+
+(defun translate-foreign-list (value ls &optional (order 'from))
+  (let ((item (find value ls :key (if (eq order 'from)
+				    #'first
+				    #'second))))
+    (when item
+      (if (eq order 'from)
+	(second item)
+	(first item)))))
+
+(defmacro select-error (error-code result)
+  `(cond
+	 ((eq ,error-code t)
+	  ,result)
+	 (t
+	   (values nil ,error-code))))
