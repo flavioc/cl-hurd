@@ -2,6 +2,9 @@
 ; load cffi
 (asdf:oos 'asdf:load-op 'cffi)
 
+; load trivial garbage
+(asdf:oos 'asdf:load-op 'trivial-garbage)
+
 ; define used packages
 (load "packages")
 
