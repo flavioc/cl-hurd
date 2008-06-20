@@ -1,9 +1,5 @@
-TODO list for the week:
+TODO list:
 
-- Add port class and port bucket to translator class.
-- Allocate class and bucket at startup (add method)
-- Create *auth-server* (getauth())
-- Identity port to translator.
 - Server loop (method!).
 - Server shutdown (method!)
 - Demuxer (3 servers).
@@ -11,5 +7,6 @@ TODO list for the week:
 - Class to abstract openstat.
 - Class to abstract mode_t.
 - Class to abstract stat_t.
+- Slot for the exec server port.
 
 - transbox?
