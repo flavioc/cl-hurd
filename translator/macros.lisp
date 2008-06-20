@@ -29,3 +29,9 @@
 (defmacro def-fsys-interface (name params &body body)
   `(define-interface fsys-routine ,name ,params
 					 ,@body))
+
+;; stacking servers for a demuxer
+
+(defmacro stack-servers (in out &body ls)
+  `(or ,@(mapcar (lambda (fun) `(,fun ,in ,out)) ls)))
+
