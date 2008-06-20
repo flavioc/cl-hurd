@@ -52,7 +52,9 @@ parse_opt(int key, char *arg, struct argp_state *state)
 			arguments->new_stdin = arg;
 			break;
 		case ARGP_KEY_ARG:
-			arguments->file = arg;
+			if(arguments->file == NULL) {
+				arguments->file = arg;
+			}
 			break;
 		case ARGP_KEY_END:
 			if(state->arg_num == 0) {
@@ -153,11 +155,19 @@ main(int argc, char **argv)
 
 	argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
+	/* verify that all the needed arguments were
+	 * given by the user
+	 */
+	if(arguments.file == NULL) {
+		error(EXIT_FAILURE, 0, "A lisp file must be supplied");
+	}
+
 	/* first we check that we are really running as a translator.
 	 * we don't wanna be opening files and executing
 	 * clisp when it's not really needed.
 	 */
 	if(!running_as_translator()) {
+		argp_help(&argp, stderr, ARGP_HELP_USAGE, NULL);
 		error(EXIT_FAILURE, 0, "Must be started as a translator");
 	}
 
