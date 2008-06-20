@@ -24,3 +24,13 @@
 (defsetf fsys-routine set-fsys-routine)
 
 (defcfun ("get_fsys_info" %get-fsys-info) :void)
+
+;; server routine
+
+(defcfun ("lisp_fsys_server" %lisp-fsys-server)
+		 :boolean
+		 (in :pointer)
+		 (out :pointer))
+
+(defun fsys-server (in out)
+  (%lisp-fsys-server in out))

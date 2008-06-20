@@ -52,7 +52,11 @@
   (in :pointer)
   (out :pointer))
 
+(defun io-server (in out)
+  (%lisp-io-server in out))
+
 ;;;;;;;;;;;;;;;;;;
+;;; test stuff
 
 (defcallback %my-test err ((io-obj :unsigned-int))
 	t)

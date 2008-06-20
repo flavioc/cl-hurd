@@ -47,3 +47,12 @@
 
 (defcfun ("get_fs_info" %get-fs-info) :void)
 
+;; server routine
+
+(defcfun ("lisp_fs_server" %lisp-fs-server)
+		 :boolean
+		 (in :pointer)
+		 (out :pointer))
+
+(defun fs-server (in out)
+  (%lisp-fs-server in out))
