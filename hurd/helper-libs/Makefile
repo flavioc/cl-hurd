@@ -1,7 +1,7 @@
 
 include ../../defs.mk
 
-TARGETS = error.so
+TARGETS = error.so create-port.so
 
 LDFLAGS =
 
