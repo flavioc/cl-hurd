@@ -37,6 +37,7 @@
 		   :ports-create-bucket
 		   :create-port
 		   :get-send-right
+		   :with-port-info
 		   ))
 
 (defpackage :cl-hurd.translator
