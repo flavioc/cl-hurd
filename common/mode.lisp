@@ -73,6 +73,17 @@
 (define-is-type-meth is-lnk-p +iflnk+)
 (define-is-type-meth is-sock-p +ifsock+)
 
+(defmethod get-type ((mode mode))
+  (cond
+    ((is-dir-p mode) 'dir)
+    ((is-chr-p mode) 'chr)
+    ((is-reg-p mode) 'reg)
+    ((is-blk-p mode) 'blk)
+    ((is-lnk-p mode) 'lnk)
+    ((is-sock-p mode) 'sock)
+    (t
+      (error "Could not get type for mode ~a~%" mode))))
+
 (defun get-type-bits (type)
   (case type
 	(dir +ifdir+)
@@ -188,3 +199,54 @@
 	(set-nocache obj nocache)
 	(set-useunk obj useunk)
 	obj))
+
+(defun perm-char (type)
+  (case type
+    (read #\r)
+    (write #\w)
+    (write #\x)
+    (otherwise #\-)))
+
+(defun type-char (type)
+  (case type
+    (dir #\d)
+    (chr #\c)
+    (blk #\b)
+    (reg #\-)
+    (lnk #\l)
+    (sock #\s)
+    (otherwise #\-)))
+
+
+(defmethod print-object ((mode mode) stream)
+  (format stream "#<Mode ~c" (type-char (get-type mode)))
+  (flet ((show-perm-bits (user-type)
+	 (mapcar (lambda (perm-type)
+		   (format stream "~c"
+			     (cond
+			       ((and (eq perm-type 'exec)
+				     (eq user-type 'owner)
+				     (is-uid-p mode))
+				#\s)
+			       ((and (eq perm-type 'exec)
+				     (eq user-type 'group)
+				     (is-gid-p mode))
+				#\s)
+			       ((has-perms mode perm-type user-type)
+				 (perm-char perm-type))
+			       (t
+				 #\-))
+			     #\-))
+		   '(read write exec))))
+    (mapcar #'show-perm-bits '(owner group others)))
+  (if (is-vtx-p mode)
+    (format stream " vtx"))
+  (if (is-mmap-p mode)
+    (format stream " mmap"))
+  (if (is-nocache-p mode)
+    (format stream " nocache"))
+  (if (is-useunk-p mode)
+    (format stream " useunk"))
+  (format stream ">"))
+
+(defvar *a* (create-mode))
