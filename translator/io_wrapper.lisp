@@ -54,15 +54,3 @@
 
 (defun io-server (in out)
   (%lisp-io-server in out))
-
-;;;;;;;;;;;;;;;;;;
-;;; test stuff
-
-(defcallback %my-test err ((io-obj :unsigned-int))
-	t)
-
-(defcfun ("lisp_io_revoke" %lisp-io-revoke) err
-		 (io-obj :unsigned-int))
-
-(setf (io-routine :io-revoke) (callback %my-test))
-
