@@ -62,9 +62,9 @@
   (with-gensyms (ret)
     `(let ((,ret ,call))
        (cond
-	 (,ret ,ret)
-	 (t
-	   ,@body)))))
+		 (,ret ,ret)
+		 (t
+		   ,@body)))))
 
 (defun translate-foreign-list (value ls &optional (order 'from))
   (let ((item (find value ls :key (if (eq order 'from)
@@ -77,7 +77,12 @@
 
 (defmacro select-error (error-code result)
   `(cond
-	 ((eq ,error-code t)
-	  ,result)
-	 (t
-	   (values nil ,error-code))))
+     ((eq ,error-code t)
+      ,result)
+     (t
+       (values nil ,error-code))))
+
+(defmacro with-cleanup (cleanup &body body)
+  `(let ((result (progn ,@body)))
+     ,cleanup
+     result))
