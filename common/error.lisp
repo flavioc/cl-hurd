@@ -228,7 +228,7 @@
     ((zerop value) t) ; success!
     (t
       (unless-return (translate-foreign-list value +recognized-error-codes+ 'from)
-	  (warn "Identifier ~a not recognized" value)))))
+					 (warn "Identifier ~a not recognized" value)))))
 
 (defmethod translate-to-foreign (value (type error-type))
   "Translates a lisp error code to a foreign one (ints)"
@@ -236,4 +236,4 @@
     ((eq value t) 0) ; success!
     (t
       (unless-return (translate-foreign-list value +recognized-error-codes+ 'to)
-	(error 'unrecognized-error-code :code value)))))
+					 (error 'unrecognized-error-code :code value)))))
