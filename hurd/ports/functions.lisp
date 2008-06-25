@@ -27,9 +27,6 @@
 (defun ports-create-bucket ()
   (%ports-create-bucket))
 
-(defvar *class* (ports-create-class))
-(defvar *bucket* (ports-create-bucket))
-
 (define-helper-library create-port)
 
 (defcfun ("create_port" %create-port)
@@ -49,4 +46,32 @@
 		   (translated-error (mem-ref error-code 'err)))
 	  (select-error translated-error new-port))))
 
+(defmacro with-port-info ((name bucket class) &body body)
+  `(let ((,name (create-port ,bucket ,class)))
+     (with-cleanup (ports-port-deref (pointer ,name))
+	,@body)))
+
+(defcfun ("ports_manage_port_operations_one_thread" %ports-manage-port-operations-one-thread)
+	 :void
+	 (bucket ports-bucket-t)
+	 (demuxer :pointer)
+	 (timeout :int))
+
+(defmacro anonymous-callback (ret-type args &body body)
+  (with-gensyms (name)
+    `(defcallback ,name ,ret-type
+		  ,args
+	,@body)))
+
+(defmacro ports-manage-operations-one-thread (bucket demuxer &optional (timeout 0))
+  (with-gensyms (name)
+		`(progn
+		   (defcallback ,name :boolean
+				((in :pointer) (out :pointer))
+				(funcall ,demuxer in out))
+		   (%ports-manage-port-operations-one-thread
+		     ,bucket (callback ,name) ,timeout))))
+
+(defvar *class* (ports-create-class))
+(defvar *bucket* (ports-create-bucket))
 (defvar *port* (create-port *bucket* *class*))
