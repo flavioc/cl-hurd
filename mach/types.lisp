@@ -87,3 +87,24 @@
 ;; mach_msg_seqno_t
 
 (defctype msg-seqno :unsigned-int)
+
+;; mach_msg_type_name_t
+
+(define-foreign-type msg-type-name-type ()
+  ()
+  (:actual-type :unsigned-int)
+  (:simple-parser msg-type-name))
+
+(defconstant +msg-type-name-codes+
+	     '((16 :move-receive)
+	       (17 :move-send)
+	       (18 :move-send-once)
+	       (19 :copy-send)
+	       (20 :make-send)
+	       (21 :make-send-once)))
+
+(defmethod translate-from-foreign (value (type msg-type-name-type))
+  (translate-foreign-list value +msg-type-name-codes+ 'from))
+
+(defmethod translate-to-foreign (value (type msg-type-name-type))
+  (translate-foreign-list value +msg-type-name-codes+ 'to))
