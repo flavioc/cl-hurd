@@ -24,10 +24,16 @@
 		 :void
 		 (port :pointer))
 
+(defun ports-port-deref (port)
+  (format t "ports-port-deref ~a~%" port)
+  (%ports-port-deref port))
+
 (defun create-port-info (pointer)
   (let ((info (make-instance 'port-info :pointer pointer)))
-	(with-accessors ((ptr pointer)) info
-	  (finalize info (lambda () (%ports-port-deref ptr))))))
+	info))
+	;(when do-finalization
+	 ; (with-accessors ((ptr pointer)) info
+	;	(finalize info (lambda () (ports-port-deref ptr)))))))
 
 (defmethod translate-from-foreign (value (type port-info-type))
   (unless (null-pointer-p value)
