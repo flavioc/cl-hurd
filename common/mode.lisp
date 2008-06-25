@@ -217,8 +217,7 @@
     (sock #\s)
     (otherwise #\-)))
 
-
-(defmethod print-object ((mode mode) stream)
+(define-mode-meth print-object (stream)
   (format stream "#<Mode ~c" (type-char (get-type mode)))
   (flet ((show-perm-bits (user-type)
 	 (mapcar (lambda (perm-type)
