@@ -34,11 +34,10 @@
 					 &body body)
   `(let ((,port-name ,creation))
 	 (when (port-valid ,port-name)
-	   ,@body
-	   (port-deallocate ,port-name
-						,(if (null task)
-						   `(task-self)
-						   task)))))
+	   (with-cleanup (port-deallocate ,port-name ,(if (null task)
+							`(task-self)
+							task))
+	     ,@body))))
 
 ;; get-bootstrap-port
 
