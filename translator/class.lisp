@@ -17,7 +17,7 @@
    (protid-class :initform (create-protid-class)
 				 :accessor protid-class)
    (control-class :initform (create-control-class)
-				  :accessor control-class)
+			  :accessor control-class)
    (port-bucket :initform (ports-create-bucket)
 				:accessor port-bucket)
    (name :initform "cl-translator"
@@ -30,27 +30,34 @@
     (with-accessors ((id-port identity-port)) translator
       ; destroy identity port when translator goes away
       (finalize translator (lambda () (port-destroy id-port))))
-      ;; some extra error checking goes here
-      translator))
+	;; some extra error checking goes here
+	translator))
 
-(defmethod setup ((trans translator))
+(defmethod setup ((trans translator) &optional (flags nil))
   (with-port (bootstrap (get-bootstrap-port))
 	(with-accessors ((bucket port-bucket)
 					 (control control-class)) trans
-	  (let ((port (create-port bucket control)))
+	  (with-port-info (port bucket control)
 		(with-port (send-right (get-send-right port))
-	   	  (print "success!")
-		  ;; fsys-startup stuff
-		 )))))
-			
-(defvar *translator* (create-translator))
+		  (fsys-startup bootstrap flags send-right :copy-send))))))
 
-(if (null *translator*)
-  (error "NULL!?"))
+(defmethod run ((trans translator))
+  (with-accessors ((bucket port-bucket)) trans
+    (ports-manage-operations-one-thread bucket
+					#'translator-demuxer)))
 
-(setup *translator*)
+(defparameter *translator* (create-translator))
+
+(def-fs-interface :file-statfs ((file :int) (buf :pointer))
+		  (print "statfs")
+		  :operation-not-supported)
+
+
+(if (numberp (setup *translator*))
+  (run *translator*))
 
 ;; example:
 ;; (defclass zip-translator ()
 ;;   ((name :initform "zip-translator")
 ;;    (version :initform "1")))
+
