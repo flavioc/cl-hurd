@@ -13,7 +13,9 @@
 		   :unless-return
 		   :translate-foreign-list
 		   :with-gensyms
-		   :select-error))
+		   :select-error
+		   :open-flags
+		   :with-cleanup))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -21,13 +23,15 @@
   (:export :task-self
 	   :with-port
 	   :port
+	   :port-pointer
 	   :port-valid
 	   :port-allocate
 	   :port-deallocate
 	   :port-destroy
 	   :port-mscount
 	   :msg-seqno
-	   :get-bootstrap-port))
+	   :get-bootstrap-port
+	   :msg-type-name))
 
 (defpackage :cl-hurd
   (:nicknames :hurd)
@@ -35,11 +39,14 @@
   (:export :getauth
 		   :ports-create-class
 		   :ports-create-bucket
+		   :ports-manage-operations-one-thread
 		   :create-port
 		   :get-send-right
 		   :with-port-info
+		   :fsys-startup
 		   ))
 
 (defpackage :cl-hurd.translator
   (:nicknames :hurd-translator)
   (:use :cl :cffi :mach :hurd-common :hurd :tg))
+
