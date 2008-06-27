@@ -2,7 +2,7 @@
 (defcfun ("fsys_startup" %fsys-startup)
 		 err
 		 (bootstrap port)
-		 (flags open-flags)
+		 (flags open-flags-t)
 		 (control-port port)
 		 (control-poly msg-type-name)
 		 (realnode port-pointer))
