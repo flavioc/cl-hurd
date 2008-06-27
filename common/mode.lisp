@@ -53,13 +53,19 @@
 ;  ; unknown XXX
 ;  (:iunknown #x000007000000))
 
-(defclass mode ()
-  ((value :initform 0
-		  :accessor value)))
+(defgeneric mode-bits (mode))
+(defgeneric (setf mode-bits) (val obj))
+
+(defclass base-mode ()
+  ())
+
+(defclass mode (base-mode)
+  ((mode-bits :initform 0
+	      :accessor mode-bits)))
 
 (defmacro define-mode-meth (name extra-args &body body)
-  `(defmethod ,name ((mode mode) ,@(unless (null extra-args) extra-args))
-	 (with-accessors ((val value)) mode
+  `(defmethod ,name ((mode base-mode) ,@(unless (null extra-args) extra-args))
+	 (with-accessors ((val mode-bits)) mode
 	   ,@body)))
 
 (defmacro define-is-type-meth (name bits)
@@ -73,7 +79,7 @@
 (define-is-type-meth is-lnk-p +iflnk+)
 (define-is-type-meth is-sock-p +ifsock+)
 
-(defmethod get-type ((mode mode))
+(define-mode-meth get-type nil
   (cond
     ((is-dir-p mode) 'dir)
     ((is-chr-p mode) 'chr)
@@ -86,22 +92,22 @@
 
 (defun get-type-bits (type)
   (case type
-	(dir +ifdir+)
-	(chr +ifchr+)
-	(reg +ifreg+)
-	(chr +ifchr+)
-	(blk +ifblk+)
-	(lnk +iflnk+)
-	(sock +ifsock+)
-	(otherwise
-	  +ifmt+))) ; FIXME
+    (dir +ifdir+)
+    (chr +ifchr+)
+    (reg +ifreg+)
+    (chr +ifchr+)
+    (blk +ifblk+)
+    (lnk +iflnk+)
+    (sock +ifsock+)
+    (otherwise
+      +ifmt+))) ; FIXME
 
 (define-mode-meth set-type (new-type)
-  (setf (value mode)
-		(boole boole-ior
-			   (boole boole-andc2 val +ifmt+)
-			   (get-type-bits new-type)))
-  new-type)
+		  (setf (mode-bits mode)
+			(boole boole-ior
+			       (boole boole-andc2 val +ifmt+)
+			       (get-type-bits new-type)))
+		  new-type)
 
 ;; user-type:
 ;; owner
@@ -115,32 +121,32 @@
 
 (defun get-perm-bits (perm-type user-type)
   (case user-type
-	(owner
-	  (case perm-type
-		(read +irusr+)
-		(write +iwusr+)
-		(exec +ixusr+)
-		(otherwise 0)))
-	(group
-	  (case perm-type
-		(read +irgrp+)
-		(write +iwgrp+)
-		(exec +ixgrp+)
-		(otherwise 0)))
-	(others
-	  (case perm-type
-		(read +iroth+)
-		(write +iwoth+)
-		(exec +ixoth+)
-		(otherwise 0)))
+    (owner
+      (case perm-type
+	(read +irusr+)
+	(write +iwusr+)
+	(exec +ixusr+)
 	(otherwise 0)))
+    (group
+      (case perm-type
+	(read +irgrp+)
+	(write +iwgrp+)
+	(exec +ixgrp+)
+	(otherwise 0)))
+    (others
+      (case perm-type
+	(read +iroth+)
+	(write +iwoth+)
+	(exec +ixoth+)
+	(otherwise 0)))
+    (otherwise 0)))
 
 (define-mode-meth has-perms (perm-type user-type)
   (not (zerop (boole boole-and val
 					 (get-perm-bits perm-type user-type)))))
 
 (define-mode-meth set-perms (perm-type user-type)
-  (setf (value mode)
+  (setf (mode-bits mode)
 		(boole boole-ior
 			   val
 			   (get-perm-bits perm-type user-type)))
@@ -162,7 +168,7 @@
 
 (defmacro define-mode-switcher-meth (name bits)
   `(define-mode-meth ,name (&optional (yes t))
-     (setf (value mode)
+     (setf (mode-bits mode)
 		   (if yes
 			 (boole boole-ior val ,bits)
 			 (boole boole-andc2 val ,bits)))
@@ -175,30 +181,30 @@
 (define-mode-switcher-meth set-nocache +inocache+)
 (define-mode-switcher-meth set-useunk +iuseunk+)
 
-(defun create-mode (&key (type 'reg)
-						 (perms '((owner read write) (group read)))
-						 (uid nil)
-						 (gid nil)
-						 (vtx nil)
-						 (mmap nil)
-						 (nocache nil)
-						 (useunk nil))
+(defun make-mode (&key (type 'reg)
+			 (perms '((owner read write) (group read)))
+			 (uid nil)
+			 (gid nil)
+			 (vtx nil)
+			 (mmap nil)
+			 (nocache nil)
+			 (useunk nil))
   (let ((obj (make-instance 'mode)))
-	(set-type obj type)
-	(mapcar (lambda (owner-list)
-			  (let ((owner-type (first owner-list))
-					(perm-list (rest owner-list)))
-				(mapcar (lambda (perm-type)
-						  (set-perms obj perm-type owner-type))
-						owner-list)))
-			perms)
-	(set-uid obj uid)
-	(set-gid obj gid)
-	(set-vtx obj vtx)
-	(set-mmap obj mmap)
-	(set-nocache obj nocache)
-	(set-useunk obj useunk)
-	obj))
+    (set-type obj type)
+    (mapcar (lambda (owner-list)
+	      (let ((owner-type (first owner-list))
+		    (perm-list (rest owner-list)))
+		(mapcar (lambda (perm-type)
+			  (set-perms obj perm-type owner-type))
+			owner-list)))
+	    perms)
+    (set-uid obj uid)
+    (set-gid obj gid)
+    (set-vtx obj vtx)
+    (set-mmap obj mmap)
+    (set-nocache obj nocache)
+    (set-useunk obj useunk)
+    obj))
 
 (defun perm-char (type)
   (case type
@@ -222,21 +228,21 @@
   (flet ((show-perm-bits (user-type)
 	 (mapcar (lambda (perm-type)
 		   (format stream "~c"
-			     (cond
-			       ((and (eq perm-type 'exec)
-				     (eq user-type 'owner)
-				     (is-uid-p mode))
-				#\s)
-			       ((and (eq perm-type 'exec)
-				     (eq user-type 'group)
-				     (is-gid-p mode))
-				#\s)
-			       ((has-perms mode perm-type user-type)
-				 (perm-char perm-type))
-			       (t
-				 #\-))
-			     #\-))
-		   '(read write exec))))
+			   (cond
+			     ((and (eq perm-type 'exec)
+				   (eq user-type 'owner)
+				   (is-uid-p mode))
+			      #\s)
+			     ((and (eq perm-type 'exec)
+				   (eq user-type 'group)
+				   (is-gid-p mode))
+			      #\s)
+			     ((has-perms mode perm-type user-type)
+			      (perm-char perm-type))
+			     (t
+			       #\-))
+			   #\-))
+		 '(read write exec))))
     (mapcar #'show-perm-bits '(owner group others)))
   (if (is-vtx-p mode)
     (format stream " vtx"))
@@ -248,4 +254,15 @@
     (format stream " useunk"))
   (format stream ">"))
 
-(defvar *a* (create-mode))
+(define-foreign-type mode-type ()
+		     ()
+		     (:actual-type :unsigned-int)
+		     (:simple-parser mode-t))
+
+(defmethod translate-to-foreign (mode (type mode-type))
+  (if (null mode)
+    0
+    (mode-bits mode)))
+
+(defmethod translate-from-foreign (value (type mode-type))
+  (make-instance 'mode :mode-bits value))
