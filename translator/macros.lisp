@@ -4,13 +4,13 @@
 ;;
 (defmacro define-interface (what name params &body body)
   (let ((callback-fun-name (intern
-							(concatenate 'string "%lisp-"
-										 (symbol-name name))))
+			     (concatenate 'string "%lisp-"
+					  (symbol-name name))))
 		(keyword-name (intern (string name) "KEYWORD")))
 	`(progn
 	   (defcallback ,callback-fun-name err ,params
-					(when *translator*
-					  ,@body))
+		(when *translator*
+		  ,@body))
 	   (setf (,what ,keyword-name) (callback ,callback-fun-name)))))
 
 ;; specialize define-interface for the various stub modules
