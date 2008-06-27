@@ -5,56 +5,51 @@
       (error "Invalid fsys identity port")
       port)))
 
-(defun create-control-class ()
-  (ports-create-class))
-
-(defun create-protid-class ()
-  (ports-create-class))
-
 (defclass translator ()
   ((identity-port :initform (get-identity-port)
 		  :accessor identity-port)
-   (protid-class :initform (create-protid-class)
-				 :accessor protid-class)
-   (control-class :initform (create-control-class)
-			  :accessor control-class)
-   (port-bucket :initform (ports-create-bucket)
-				:accessor port-bucket)
+   (port-bucket :initform (make-bucket)
+		:accessor port-bucket)
+   (underlying-node :initform nil)
    (name :initform "cl-translator"
-		 :accessor name)
-   (version :initform 1
-			:accessor version)))
+	 :accessor name)
+   (version :initform (list 1 0 0)
+	    :accessor version)))
 
 (defun create-translator (&optional (base-class 'translator))
   (let ((translator (make-instance base-class)))
     (with-accessors ((id-port identity-port)) translator
       ; destroy identity port when translator goes away
       (finalize translator (lambda () (port-destroy id-port))))
-	;; some extra error checking goes here
-	translator))
+    translator))
 
 (defmethod setup ((trans translator) &optional (flags nil))
-  (with-port (bootstrap (get-bootstrap-port))
-	(with-accessors ((bucket port-bucket)
-					 (control control-class)) trans
-	  (with-port-info (port bucket control)
-		(with-port (send-right (get-send-right port))
-		  (fsys-startup bootstrap flags send-right :copy-send))))))
+  (with-port-deallocate (bootstrap (get-bootstrap-port))
+    (let ((port (add-port (port-bucket trans))))
+      (with-port-deallocate (right (get-send-right port))
+        (let ((file (fsys-startup bootstrap flags right :copy-send)))
+	  (warn "file ~a~%" file)
+          (setf (slot-value trans 'underlying-node) file)
+	  t)))))
 
 (defmethod run ((trans translator))
-  (with-accessors ((bucket port-bucket)) trans
-    (ports-manage-operations-one-thread bucket
-					#'translator-demuxer)))
+  (let ((*translator* trans))
+    (run-server (lambda (port in out)
+		  (if (has-port (port-bucket trans) port)
+		    (warn "port found~%")
+		    (warn "port not found~%"))
+		  (translator-demuxer in out))
+		(port-bucket trans))))
 
-(defparameter *translator* (create-translator))
 
 (def-fs-interface :file-statfs ((file :int) (buf :pointer))
 		  (print "statfs")
 		  :operation-not-supported)
 
+(defparameter *mytranslator* (create-translator))
 
-(if (numberp (setup *translator*))
-  (run *translator*))
+(when (setup *mytranslator*)
+  (run *mytranslator*))
 
 ;; example:
 ;; (defclass zip-translator ()
