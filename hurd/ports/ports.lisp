@@ -1,3 +1,5 @@
-(load "hurd/ports/types")
-(load "hurd/ports/info")
-(load "hurd/ports/functions")
+(load "hurd/ports/port")
+(load "hurd/ports/bucket")
+(load "hurd/ports/demuxer")
+(load "hurd/ports/server")
+(load "hurd/ports/utils")
