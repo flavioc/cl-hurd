@@ -29,15 +29,14 @@
 (defconstant +o-cloexec+ #x00400000)
 
 (defclass open-flags ()
-  ((value :initform 0
-	  :documentation "General it field for flags used for: file access, translation, IO operating modes, syynchronization, blocking, etc"
-	  :accessor value
-	  :initarg :value)))
+  ((value-bits :documentation "General it field for flags used for: file access, translation, IO operating modes, syynchronization, blocking, etc"
+	  :accessor value-bits
+	  :initarg :value-bits)))
 
 (defmacro define-flags-meth (name extra-args &body body)
   `(defmethod ,name ((flags open-flags)
 		     ,@(unless (null extra-args) extra-args))
-     (with-accessors ((val value)) flags
+     (with-accessors ((val value-bits)) flags
        ,@body)))
 
 (define-flags-meth is (flag)
@@ -48,7 +47,7 @@
 
 (defun create-flag (ls)
   (make-instance 'open-flags
-		 :value (list-to-flags ls)))
+		 :value-bits (list-to-flags ls)))
 
 (defun disable-flags (val flags)
   (boole boole-andc2
@@ -64,20 +63,20 @@
 	     flags))))
 
 (define-flags-meth enable (new-flags)
-  (setf (value flags)
+  (setf (value-bits flags)
 	(enable-flags val new-flags))
   new-flags)
 
 (define-flags-meth enabled (new-flags)
   (make-instance 'open-flags
-		 :value (enable-flags val new-flags)))
+		 :value-bits (enable-flags val new-flags)))
 
 (define-flags-meth disabled (old-flags)
   (make-instance 'open-flags
-		 :value (disable-flags val old-flags)))
+		 :value-bits (disable-flags val old-flags)))
 
 (define-flags-meth disable (old-flags)
- (setf (value flags)
+ (setf (value-bits flags)
        (disable-flags val old-flags))
  old-flags)
 
@@ -135,10 +134,13 @@
 (define-foreign-type open-flags-type ()
 		     ()
 		     (:actual-type :int)
-		     (simple-parser open-flags-t))
+		     (:simple-parser open-flags-t))
 
 (defmethod translate-to-foreign (flags (type open-flags-type))
-  (value flags))
+  (if (or (null flags)
+	  (listp flags))
+    (value-bits (create-flag flags))
+    (value-bits flags)))
 
 (defmethod translate-from-foreign (value (type open-flags-type))
-  (make-instance 'open-flags :value value))
+  (make-instance 'open-flags :value-bits value))
