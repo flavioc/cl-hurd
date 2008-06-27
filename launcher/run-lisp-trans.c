@@ -125,7 +125,7 @@ run_translator(struct arguments *arguments)
 #endif
 
 	/* time for stdout! */
-	stdout_handle = open(get_file_path(arguments->new_stdout), O_WRONLY | O_APPEND | O_CREAT);
+	stdout_handle = open(get_file_path(arguments->new_stdout), O_WRONLY | O_APPEND | O_CREAT, 0644);
 
 	if(stdout_handle == -1) {
 		error(EXIT_FAILURE, errno, "Could not open stdout file %s",
