@@ -8,8 +8,11 @@
 
 (load "hurd/types")
 (load "hurd/functions")
+(load "hurd/macros")
 (load "hurd/ports/ports")
 (load "hurd/fsys/fsys")
 (load "hurd/io/io")
 (load "hurd/iohelp/iohelp")
+(load "hurd/fshelp/fshelp")
 (load "hurd/paths")
+(load "hurd/retry")
