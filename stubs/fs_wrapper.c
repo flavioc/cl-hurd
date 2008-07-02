@@ -150,7 +150,7 @@ lisp_file_chflags(file_t chflags_file,
 /* file utimes */
 
 typedef kern_return_t (*file_utimes_type)(file_t,
-		time_value_t, time_value_t);
+		time_value_t *, time_value_t *);
 
 kern_return_t
 lisp_file_utimes(file_t utimes_file,
@@ -163,7 +163,8 @@ lisp_file_utimes(file_t utimes_file,
 
 	file_utimes_type utimes_routine = routines[FILE_UTIMES];
 
-	return utimes_routine(utimes_file, new_atime, new_mtime);
+	// easier in lisp to just pass pointers
+	return utimes_routine(utimes_file, &new_atime, &new_mtime);
 }
 
 /* file set size */
@@ -284,6 +285,7 @@ kern_return_t
 lisp_file_statfs(file_t file,
 		fsys_statfsbuf_t *info)
 {
+	printf("STATING\n");
 	if(routines[FILE_STATFS] == NULL) {
 		return EOPNOTSUPP;
 	}
@@ -423,6 +425,7 @@ lisp_dir_lookup(file_t startdir,
 		mach_port_t *result,
 		mach_msg_type_name_t *resultPoly)
 {
+	printf("DIR LOOKUP %s\n", filename);
 	if(routines[DIR_LOOKUP] == NULL) {
 		return EOPNOTSUPP;
 	}
@@ -452,6 +455,8 @@ lisp_dir_readdir(file_t dir,
 		vm_size_t bufsiz,
 		int *amount)
 {
+//	fprintf(stderr, "IN READDIR\n");
+
 	if(routines[DIR_READDIR] == NULL) {
 		return EOPNOTSUPP;
 	}
