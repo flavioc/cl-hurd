@@ -1,19 +1,19 @@
 ;; filetype
 ;;
-(defconstant +ifmt+ #x0170000)
-(defconstant +ifdir+ #x0040000)
-(defconstant +ifchr+ #x0020000)
-(defconstant +ifblk+ #x0060000)
-(defconstant +ifreg+ #x0100000)
-(defconstant +iflnk+ #x0120000)
-(defconstant +ifsock+ #x0140000)
+(defconstant +ifmt+ #o0170000)
+(defconstant +ifdir+ #o0040000)
+(defconstant +ifchr+ #o0020000)
+(defconstant +ifblk+ #o0060000)
+(defconstant +ifreg+ #o0100000)
+(defconstant +iflnk+ #o0120000)
+(defconstant +ifsock+ #o0140000)
 
 ;; permission bits
 ;;
 ; owner
-(defconstant +irusr+ #x0400)
-(defconstant +iwusr+ #x0200)
-(defconstant +ixusr+ #x0100)
+(defconstant +irusr+ #o0400)
+(defconstant +iwusr+ #o0200)
+(defconstant +ixusr+ #o0100)
 
 ; group
 (defconstant +irgrp+ (ash +irusr+ -3))
@@ -25,33 +25,48 @@
 (defconstant +iwoth+ (ash +iwusr+ -6))
 (defconstant +ixoth+ (ash +ixusr+ -6))
 
+; unknown
+(defconstant +irunk+ (ash +irusr+ 12))
+(defconstant +iwunk+ (ash +iwusr+ 12))
+(defconstant +ixunk+ (ash +ixusr+ 12))
+
 ;; read-only bits
 ; translators
-(defconstant +iptrans+ #x000010000000)
-(defconstant +iatrans+ #x000020000000)
-(defconstant +iroot+ #x000040000000)
+(defconstant +iptrans+ #o000010000000)
+(defconstant +iatrans+ #o000020000000)
+(defconstant +iroot+ #o000040000000)
+(defconstant +itrans+ #o000070000000)
 
 ;; isuid
-(defconstant +isuid+ #x04000)
+(defconstant +isuid+ #o04000)
 
 ;; isgid
-(defconstant +isgid+ #x02000)
+(defconstant +isgid+ #o02000)
 
 ;; isvtx
-(defconstant +isvtx+ #x01000)
+(defconstant +isvtx+ #o01000)
 
 ;; mmap bits
-(defconstant +immap0+ #x000100000000)
+(defconstant +immap0+ #o000100000000)
 
 ;; nocache bits
-(defconstant +inocache+ #x000000200000)
+(defconstant +inocache+ #o000000200000)
 
 ;; unknown bits
-(defconstant +iuseunk+ #x000000400000)
+(defconstant +iuseunk+ #o000000400000)
+(defconstant +iunknown+ #o000007000000)
 
-;(defbitfield mode-flags
-;  ; unknown XXX
-;  (:iunknown #x000007000000))
+;; spare bits
+(defconstant +ispare+ (boole boole-andc2
+							 #xffffffff
+							 (chained-bit-op boole-ior
+									  +ifmt+
+									  +itrans+
+									  +inocache+
+									  +immap0+
+									  +iuseunk+
+									  +iunknown+
+									  #o7777)))
 
 (defgeneric mode-bits (mode))
 (defgeneric (setf mode-bits) (val obj))
@@ -61,7 +76,8 @@
 
 (defclass mode (base-mode)
   ((mode-bits :initform 0
-	      :accessor mode-bits)))
+			  :accessor mode-bits
+			  :initarg :mode-bits)))
 
 (defmacro define-mode-meth (name extra-args &body body)
   `(defmethod ,name ((mode base-mode) ,@(unless (null extra-args) extra-args))
@@ -88,12 +104,12 @@
     ((is-lnk-p mode) 'lnk)
     ((is-sock-p mode) 'sock)
     (t
-      (error "Could not get type for mode ~a~%" mode))))
+      (warn "Could not get type for mode~%")
+      'reg)))
 
 (defun get-type-bits (type)
   (case type
     (dir +ifdir+)
-    (chr +ifchr+)
     (reg +ifreg+)
     (chr +ifchr+)
     (blk +ifblk+)
@@ -103,11 +119,11 @@
       +ifmt+))) ; FIXME
 
 (define-mode-meth set-type (new-type)
-		  (setf (mode-bits mode)
-			(boole boole-ior
-			       (boole boole-andc2 val +ifmt+)
-			       (get-type-bits new-type)))
-		  new-type)
+  (setf (mode-bits mode)
+	(boole boole-ior
+	       (boole boole-andc2 val +ifmt+)
+	       (get-type-bits new-type)))
+  new-type)
 
 ;; user-type:
 ;; owner
@@ -121,36 +137,57 @@
 
 (defun get-perm-bits (perm-type user-type)
   (case user-type
-    (owner
-      (case perm-type
-	(read +irusr+)
-	(write +iwusr+)
-	(exec +ixusr+)
+	(owner
+	  (case perm-type
+		(read +irusr+)
+		(write +iwusr+)
+		(exec +ixusr+)
+		(otherwise 0)))
+	(group
+	  (case perm-type
+		(read +irgrp+)
+		(write +iwgrp+)
+		(exec +ixgrp+)
+		(otherwise 0)))
+	(others
+	  (case perm-type
+		(read +iroth+)
+		(write +iwoth+)
+		(exec +ixoth+)
+		(otherwise 0)))
+	(unknown
+	  (case perm-type
+		(read +irunk+)
+		(write +iwunk+)
+		(exec +ixunk+)
+		(otherwise 0)))
 	(otherwise 0)))
-    (group
-      (case perm-type
-	(read +irgrp+)
-	(write +iwgrp+)
-	(exec +ixgrp+)
-	(otherwise 0)))
-    (others
-      (case perm-type
-	(read +iroth+)
-	(write +iwoth+)
-	(exec +ixoth+)
-	(otherwise 0)))
-    (otherwise 0)))
 
 (define-mode-meth has-perms (perm-type user-type)
-  (not (zerop (boole boole-and val
-					 (get-perm-bits perm-type user-type)))))
+				  (if (and (eq user-type 'unknown)
+	   (not (is-useunk-p mode)))
+    nil
+    (not (zerop (boole boole-and val
+		       (get-perm-bits perm-type user-type))))))
 
 (define-mode-meth set-perms (perm-type user-type)
   (setf (mode-bits mode)
-		(boole boole-ior
-			   val
-			   (get-perm-bits perm-type user-type)))
+	(boole boole-ior
+	       val
+	       (get-perm-bits perm-type user-type)))
   t)
+
+(define-mode-meth clear-perms (perm-type user-type)
+  (setf (mode-bits mode)
+		(boole boole-andc2
+		       val
+		       (get-perm-bits perm-type user-type)))
+  t)
+
+(define-mode-meth set-perms-if (perm-type user-type condit)
+  (if condit
+	(set-perms mode perm-type user-type)
+	(clear-perms mode perm-type user-type)))
 
 (defmacro define-mode-query-meth (name bits)
   `(define-mode-meth ,name nil
@@ -180,6 +217,15 @@
 (define-mode-switcher-meth set-mmap +immap0+)
 (define-mode-switcher-meth set-nocache +inocache+)
 (define-mode-switcher-meth set-useunk +iuseunk+)
+(define-mode-switcher-meth set-active-trans +iatrans+)
+(define-mode-switcher-meth set-passive-trans +iptrans+)
+(define-mode-switcher-meth set-trans +itrans+)
+(define-mode-switcher-meth set-root +iroot+)
+(define-mode-switcher-meth set-types +ifmt+)
+(define-mode-switcher-meth set-spare +ispare+)
+
+(defun make-mode-clone (bits)
+  (make-instance 'mode :mode-bits bits))
 
 (defun make-mode (&key (type 'reg)
 			 (perms '((owner read write) (group read)))
