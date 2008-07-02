@@ -20,7 +20,7 @@
   (with-gensyms (callback-name)
      `(progn
 	(defcallback ,callback-name
-		     err
+		     :boolean
 		     ((port port)
 		      (in :pointer)
 		      (out :pointer))
