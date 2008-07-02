@@ -10,4 +10,7 @@
 (load "mach/types")
 (load "mach/functions")
 (load "mach/macros")
-
+(load "mach/maptime")
+(load "mach/mmap")
+(load "mach/round-page")
+(load "mach/vm-allocate")
