@@ -220,7 +220,10 @@
 			       +recognized-standard-codes+)))
 
 (define-condition unrecognized-error-code (error)
-  ((code :initarg :code :reader code)))
+  ((code :initarg :code :reader code))
+  (:report (lambda (condition stream)
+			 (format stream "Error code ~a not recognized."
+					 (code condition)))))
 
 (defmethod translate-from-foreign (value (type error-type))
   "Translates an error value to a symbol"
