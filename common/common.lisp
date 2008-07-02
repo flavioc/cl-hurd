@@ -2,7 +2,11 @@
 
 (load "common/utils")
 (load "common/error")
+(load "common/types")
+(load "common/ids")
 (load "common/functions")
 (load "common/mode")
 (load "common/flags")
 (load "common/stat")
+(load "common/pathconf")
+(load "common/dirent")
