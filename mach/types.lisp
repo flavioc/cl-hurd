@@ -121,6 +121,10 @@
 
 (defctype port-delta :int)
 
+;; mach_msg_type_number_t
+
+(defctype msg-type-number :unsigned-int)
+
 ;; mach_port_type
 
 (defun %mach-port-type-get (code)
@@ -213,3 +217,12 @@
 
 (defmethod translate-to-foreign (value (type msg-id-type))
   (translate-foreign-list value +msg-id-codes+ 'to))
+
+;; vm-size
+(defctype vm-size :unsigned-int)
+
+;; vm-offset
+(defctype vm-offset :unsigned-int)
+
+;; vm-address
+(defctype vm-address :unsigned-int)
