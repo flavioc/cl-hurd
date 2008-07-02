@@ -45,7 +45,7 @@
 		(flag-to-bits flag)
 		val))))
 
-(defun create-flag (ls)
+(defun make-flag (ls)
   (make-instance 'open-flags
 		 :value-bits (list-to-flags ls)))
 
@@ -57,10 +57,7 @@
 (defun enable-flags (val flags)
   (boole boole-ior
 	 val
-	 (list-to-flags
-	   (if (symbolp flags)
-	     (list flags)
-	     flags))))
+	 (list-to-flags flags)))
 
 (define-flags-meth enable (new-flags)
   (setf (value-bits flags)
@@ -79,6 +76,10 @@
  (setf (value-bits flags)
        (disable-flags val old-flags))
  old-flags)
+
+(define-flags-meth only (only-flags)
+  (setf (value-bits flags)
+		(boole boole-and val (list-to-flags only-flags))))
 
 (defconstant +flags-list+
 	     (list
@@ -105,7 +106,12 @@
 	       (list 'nonblock +o-nonblock+)
 	       (list 'hurd +o-hurd+)
 	       (list 'trunc +o-trunc+)
-	       (list 'cloexec +o-cloexec+)))
+	       (list 'cloexec +o-cloexec+)
+		   (list 'non-open-modes (chained-bit-op boole-ior
+												 +o-creat+
+												 +o-excl+
+												 +o-nolink+
+												 +o-notrans+))))
 
 (defun flag-to-bits (flag)
   (let ((result (find flag +flags-list+ :key #'first)))
@@ -117,11 +123,15 @@
 	0))))
 
 (defun list-to-flags (ls)
-  (if (null ls)
-    0
-    (boole boole-ior
-	    (flag-to-bits (first ls))
-	    (list-to-flags (rest ls)))))
+  (cond
+	((null ls)
+	 0)
+	((symbolp ls)
+	 (flag-to-bits ls))
+	(t
+	  (boole boole-ior
+			 (flag-to-bits (first ls))
+			 (list-to-flags (rest ls))))))
 
 (define-flags-meth print-object (stream)
   (format stream "#<open-flags")
@@ -139,7 +149,7 @@
 (defmethod translate-to-foreign (flags (type open-flags-type))
   (if (or (null flags)
 	  (listp flags))
-    (value-bits (create-flag flags))
+    (value-bits (make-flag flags))
     (value-bits flags)))
 
 (defmethod translate-from-foreign (value (type open-flags-type))
