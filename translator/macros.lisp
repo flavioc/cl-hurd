@@ -3,15 +3,14 @@
 ;; and then sets it on the routines table
 ;;
 (defmacro define-interface (what name params &body body)
-  (let ((callback-fun-name (intern
-			     (concatenate 'string "%lisp-"
-					  (symbol-name name))))
-		(keyword-name (intern (string name) "KEYWORD")))
-	`(progn
-	   (defcallback ,callback-fun-name err ,params
-		(when *translator*
-		  ,@body))
-	   (setf (,what ,keyword-name) (callback ,callback-fun-name)))))
+  (with-gensyms (result)
+	  `(define-hurd-interface ,what ,name ,params
+		  ;(warn "enter at ~s ~s~%" (quote ,what) (quote ,name))
+		  (let ((,result (when *translator*
+						   ,@body)))
+			(if (null ,result)
+			  :operation-not-supported
+			  ,result)))))
 
 ;; specialize define-interface for the various stub modules
 
@@ -35,3 +34,9 @@
 (defmacro stack-servers (in out &body ls)
   `(or ,@(mapcar (lambda (fun) `(,fun ,in ,out)) ls)))
 
+;; lookup port on a rpc
+
+(defmacro with-lookup (name port &body body)
+  `(let ((,name (lookup-port (port-bucket *translator*)
+							 ,port)))
+	 ,@body))
