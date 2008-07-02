@@ -83,6 +83,52 @@
        (values nil ,error-code))))
 
 (defmacro with-cleanup (cleanup &body body)
-  `(let ((result (progn ,@body)))
-     ,cleanup
-     result))
+  `(unwind-protect (progn ,@body)
+	 ,cleanup))
+
+;; memcpy
+
+(defcfun ("memcpy" %memcpy)
+		 :void
+		 (dest :pointer)
+		 (src :pointer)
+		 (size :unsigned-int))
+
+(defun memcpy (dest src size)
+  (%memcpy dest src size))
+
+(defmacro chained-bit-op (op &body ls)
+  (if (null ls)
+	0
+	`(boole ,op
+			,(first ls)
+			(chained-bit-op ,op ,@(rest ls)))))
+
+(defun %find-different (str len chr pos)
+  (loop for i from pos below len
+		for ch = (char str i)
+		when (not (eql ch chr))
+		return i))
+
+(defun split-path (str)
+  (let ((len (length str)))
+	(loop for i = (%find-different str len #\/ 0)
+		  then (%find-different str len #\/ (1+ j))
+		  as j = (if (null i) nil
+				   (position #\/ str :start i))
+		  collect (progn
+					(cond
+					  ((and (null j)
+							(null i))
+					   "")
+					  ((null j)
+					   (subseq str i len))
+					  (t
+						(subseq str i j))))
+		  while j)))
+
+(defun join-path (ls)
+  (string-left-trim "/" (reduce (lambda (all x)
+								  (concatenate 'string all "/" x))
+								ls
+								:initial-value "")))
