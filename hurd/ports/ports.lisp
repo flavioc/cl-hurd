@@ -3,3 +3,5 @@
 (load "hurd/ports/demuxer")
 (load "hurd/ports/server")
 (load "hurd/ports/utils")
+(load "hurd/ports/notify")
+(load "hurd/ports/no-senders")
