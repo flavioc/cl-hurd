@@ -33,11 +33,14 @@ static void* routines[_NUMBER_OF_ROUTINES];
 /* fsys startup */
 
 typedef kern_return_t (*fsys_startup_type)(mach_port_t,
+		mach_port_t, mach_msg_type_name_t,
 		int, mach_port_t,
 		mach_port_t *, mach_msg_type_name_t *);
 
 kern_return_t
 lisp_fsys_startup(mach_port_t bootstrap,
+		mach_port_t reply,
+		mach_msg_type_name_t replyPoly,
 		int openflags,
 		mach_port_t control_port,
 		mach_port_t *realnode,
@@ -50,16 +53,19 @@ lisp_fsys_startup(mach_port_t bootstrap,
 	fsys_startup_type startup_routine =
 		routines[FSYS_STARTUP];
 
-	return startup_routine(bootstrap, openflags,
+	return startup_routine(bootstrap, reply, replyPoly, openflags,
 			control_port, realnode, realnodePoly);
 }
 
 /* fsys goaway */
 
-typedef kern_return_t (*fsys_goaway_type)(fsys_t, int);
+typedef kern_return_t (*fsys_goaway_type)(fsys_t, mach_port_t,
+		mach_msg_type_name_t, int);
 
 kern_return_t
-lisp_fsys_goaway(fsys_t fsys, int flags)
+lisp_fsys_goaway(fsys_t fsys, mach_port_t reply,
+		mach_msg_type_name_t replyPoly,
+		int flags)
 {
 	if(routines[FSYS_GOAWAY] == NULL) {
 		return EOPNOTSUPP;
@@ -67,12 +73,14 @@ lisp_fsys_goaway(fsys_t fsys, int flags)
 
 	fsys_goaway_type goaway_routine = routines[FSYS_GOAWAY];
 
-	return goaway_routine(fsys, flags);
+	return goaway_routine(fsys, reply, replyPoly, flags);
 }
 
 /* fsys getroot */
 
 typedef kern_return_t (*fsys_getroot_type)(fsys_t,
+		mach_port_t,
+		mach_msg_type_name_t,
 		mach_port_t,
 		idarray_t,
 		mach_msg_type_number_t,
@@ -85,6 +93,8 @@ typedef kern_return_t (*fsys_getroot_type)(fsys_t,
 
 kern_return_t
 lisp_fsys_getroot(fsys_t fsys,
+		mach_port_t reply,
+		mach_msg_type_name_t replyPoly,
 		mach_port_t dotdot_node,
 		idarray_t gen_uids,
 		mach_msg_type_number_t gen_uidsCnt,
@@ -96,6 +106,8 @@ lisp_fsys_getroot(fsys_t fsys,
 		mach_port_t *file,
 		mach_msg_type_name_t *filePoly)
 {
+//	fprintf(stderr, "Got in getroot %d\n", fsys);
+
 	if(routines[FSYS_GETROOT] == NULL) {
 		return EOPNOTSUPP;
 	}
@@ -103,7 +115,8 @@ lisp_fsys_getroot(fsys_t fsys,
 	fsys_getroot_type getroot_routine =
 		routines[FSYS_GETROOT];
 
-	return getroot_routine(fsys, dotdot_node,
+	return getroot_routine(fsys, reply, replyPoly,
+			dotdot_node,
 			gen_uids, gen_uidsCnt,
 			gen_gids, gen_gidsCnt,
 			flags, do_retry,
@@ -114,6 +127,8 @@ lisp_fsys_getroot(fsys_t fsys,
 /* fsys getfile */
 
 typedef kern_return_t (*fsys_getfile_type)(fsys_t,
+		mach_port_t,
+		mach_msg_type_name_t,
 		idarray_t,
 		mach_msg_type_number_t,
 		idarray_t,
@@ -125,6 +140,8 @@ typedef kern_return_t (*fsys_getfile_type)(fsys_t,
 
 kern_return_t
 lisp_fsys_getfile(fsys_t fsys,
+		mach_port_t reply,
+		mach_msg_type_name_t replyPoly,
 		idarray_t gen_uids,
 		mach_msg_type_number_t gen_uidsCnt,
 		idarray_t gen_gids,
@@ -141,7 +158,8 @@ lisp_fsys_getfile(fsys_t fsys,
 	fsys_getfile_type getfile_routine =
 		routines[FSYS_GETFILE];
 
-	return getfile_routine(fsys, gen_uids, gen_uidsCnt,
+	return getfile_routine(fsys, reply, replyPoly,
+			gen_uids, gen_uidsCnt,
 			gen_gids, gen_gidsCnt,
 			filehandle, filehandleCnt,
 			file, filePoly);
@@ -150,10 +168,13 @@ lisp_fsys_getfile(fsys_t fsys,
 /* fsys syncfs */
 
 typedef kern_return_t (*fsys_syncfs_type)(fsys_t,
+		mach_port_t, mach_msg_type_name_t,
 		int, int);
 
 kern_return_t
 lisp_fsys_syncfs(fsys_t fsys,
+		mach_port_t reply,
+		mach_msg_type_name_t replyPoly,
 		int wait,
 		int do_children)
 {
@@ -163,16 +184,19 @@ lisp_fsys_syncfs(fsys_t fsys,
 
 	fsys_syncfs_type syncfs_routine = routines[FSYS_SYNCFS];
 
-	return syncfs_routine(fsys, wait, do_children);
+	return syncfs_routine(fsys, reply, replyPoly, wait, do_children);
 }
 
 /* fsys set options */
 
 typedef kern_return_t (*fsys_set_options_type)(fsys_t,
+		mach_port_t, mach_msg_type_name_t,
 		data_t, mach_msg_type_number_t, int);
 
 kern_return_t
 lisp_fsys_set_options(fsys_t fsys,
+		mach_port_t reply,
+		mach_msg_type_name_t replyPoly,
 		data_t options,
 		mach_msg_type_number_t optionsCnt,
 		int do_children)
@@ -184,13 +208,15 @@ lisp_fsys_set_options(fsys_t fsys,
 	fsys_set_options_type set_options_routine =
 		routines[FSYS_SET_OPTIONS];
 
-	return set_options_routine(fsys, options,
-			optionsCnt, do_children);
+	return set_options_routine(fsys, reply, replyPoly,
+			options, optionsCnt, do_children);
 }
 
 /* fsys getpriv */
 
 typedef kern_return_t (*fsys_getpriv_type)(fsys_t,
+		mach_port_t,
+		mach_msg_type_name_t,
 		mach_port_t *,
 		mach_msg_type_name_t *,
 		mach_port_t *,
@@ -200,6 +226,8 @@ typedef kern_return_t (*fsys_getpriv_type)(fsys_t,
 
 kern_return_t
 lisp_fsys_getpriv(fsys_t fsys,
+		mach_port_t reply,
+		mach_msg_type_name_t replyPoly,
 		mach_port_t *host_priv,
 		mach_msg_type_name_t *host_privPoly,
 		mach_port_t *device_master,
@@ -214,7 +242,8 @@ lisp_fsys_getpriv(fsys_t fsys,
 	fsys_getpriv_type getpriv_routine =
 		routines[FSYS_GETPRIV];
 
-	return getpriv_routine(fsys, host_priv,
+	return getpriv_routine(fsys, reply, replyPoly,
+			host_priv,
 			host_privPoly, device_master,
 			device_masterPoly, fstask,
 			fstaskPoly);
@@ -246,11 +275,14 @@ lisp_fsys_init(fsys_t fsys,
 /* fsys forward */
 
 typedef kern_return_t (*fsys_forward_type)(mach_port_t,
+		mach_port_t, mach_msg_type_name_t,
 		mach_port_t, data_t,
 		mach_msg_type_number_t);
 
 kern_return_t
 lisp_fsys_forward(mach_port_t server,
+		mach_port_t reply,
+		mach_msg_type_name_t replyPoly,
 		mach_port_t requestor,
 		data_t argv,
 		mach_msg_type_number_t argvCnt)
@@ -261,16 +293,19 @@ lisp_fsys_forward(mach_port_t server,
 
 	fsys_forward_type forward_routine = routines[FSYS_FORWARD];
 
-	return forward_routine(server, requestor, argv, argvCnt);
+	return forward_routine(server, reply, replyPoly, requestor, argv, argvCnt);
 }
 
 /* fsys get options */
 
 typedef kern_return_t (*fsys_get_options_type)(fsys_t,
+		mach_port_t, mach_msg_type_name_t,
 		data_t *, mach_msg_type_number_t *);
 
 kern_return_t
 lisp_fsys_get_options(fsys_t server,
+		mach_port_t reply,
+		mach_msg_type_name_t replyPoly,
 		data_t *options,
 		mach_msg_type_number_t *optionsCnt)
 {
@@ -281,7 +316,7 @@ lisp_fsys_get_options(fsys_t server,
 	fsys_get_options_type get_options_routine =
 		routines[FSYS_GET_OPTIONS];
 
-	return get_options_routine(server, options, optionsCnt);
+	return get_options_routine(server, reply, replyPoly, options, optionsCnt);
 }
 
 
