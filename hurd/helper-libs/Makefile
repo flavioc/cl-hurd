@@ -1,7 +1,9 @@
 
 include ../../defs.mk
 
-TARGETS = error.so create-port.so
+TARGETS = error.so portset-demuxer.so \
+		  fetch-root.so \
+		  round-page.so 
 
 LDFLAGS =
 
@@ -12,4 +14,4 @@ all: $(TARGETS)
 		-o $*.so $*.o $(LDFLAGS)
 
 clean:
-	rm -f $(TARGETS) *.o
+	rm -f *.so *.o
