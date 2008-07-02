@@ -5,6 +5,8 @@
 ; load trivial garbage
 (asdf:oos 'asdf:load-op 'trivial-garbage)
 
+(asdf:oos 'asdf:load-op 'zip)
+
 ; define used packages
 (load "packages")
 
