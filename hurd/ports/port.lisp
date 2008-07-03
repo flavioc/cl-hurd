@@ -34,5 +34,4 @@
 (defmethod port-cleanup ((port port-info))
   (if (has-send-rights port)
     (error 'port-still-has-send-righs :port port))
-  (with-accessors ((right port-right)) port
-    (port-mod-refs right :right-receive -1)))
+  (port-destroy (port-right port)))
