@@ -6,6 +6,8 @@
 (asdf:oos 'asdf:load-op 'trivial-garbage)
 
 (asdf:oos 'asdf:load-op 'zip)
+;(asdf:oos 'asdf:load-op 'cl-containers)
+(asdf:oos 'asdf:load-op 'flexi-streams)
 
 ; define used packages
 (load "packages")
@@ -28,3 +30,5 @@
 (load "mach/mach")
 (load "hurd/hurd")
 (load "translator/translator")
+(load "tree-translator/tree-translator")
+(load "examples/examples")
