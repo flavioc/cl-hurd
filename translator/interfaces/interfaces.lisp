@@ -13,3 +13,5 @@
 (load "translator/interfaces/dir-mkdir")
 (load "translator/interfaces/dir-unlink")
 (load "translator/interfaces/dir-rmdir")
+(load "translator/interfaces/io-read")
+(load "translator/interfaces/file-sync")
