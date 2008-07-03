@@ -6,7 +6,7 @@
 						   flags
 						   newnode-p)))
 	(when allow
-	   (disable flags 'non-open-modes)
+	   (disable flags 'open-modes)
 	   (let* ((new-user (make-iouser :old user))
 			  (new-protid (new-protid *translator* new-user
 									  (make-open-node node
@@ -20,7 +20,7 @@
 				 :make-send)))))
 
 (defun %dir-lookup (open-node user node path-ls flags mode)
-  (warn "now looking in node ~s" (name node))
+  ;(warn "now looking in node ~s" node)
   (let ((this-path (first path-ls))
 		(rest-path (rest path-ls)))
   (when (string= this-path "") ; this is last path
@@ -72,7 +72,7 @@
 			((not found-node)
 			 :no-such-file)
 			(t
-			  (warn "continue lookup in ~s" (name node))
+			  ;(warn "continue lookup in ~s" node)
 			  ;; continue lookup
 			  (%dir-lookup open-node user found-node rest-path flags mode)))))))))
 
@@ -85,7 +85,7 @@
 							   (retry-port port-pointer)
 							   (retry-port-type :pointer))
   (with-lookup dir-protid dir-port
-	(warn "filename to lookup in ~s: ~a~%" (name (get-node dir-protid)) filename)
+	;(warn "filename to lookup in ~s: ~a~%" (get-node dir-protid) filename)
 	(multiple-value-bind (ret-do-retry
 						   ret-retry-name
 						   ret-retry-port
