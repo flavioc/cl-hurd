@@ -75,9 +75,9 @@
 			(return-from outer-block nil))
 		  (unless (allow-open *translator* root-node user flags t)
 			(return-from outer-block :not-permitted))
-		  (disable flags 'non-open-modes)
+		  (disable flags 'open-modes)
 		  (let ((new (new-protid *translator* user
-								 (make-open-node (root *translator*)
+					 (make-open-node (root *translator*)
 												 flags
 												 :root-parent dotdot))))
 			(port-deallocate dotdot)
