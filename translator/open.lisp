@@ -2,7 +2,8 @@
 (defclass open-node ()
   ((node :initarg :refers
 		 :accessor refers)
-   (file-pos :initform 0)
+   (file-pos :initform 0
+			 :accessor file-offset)
    (lock-status :initform 'unlock) ; /usr/include/sys/file.h
    (openstat :initform nil
 			 :initarg :flags
