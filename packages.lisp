@@ -108,7 +108,7 @@
 	   :set-root
 	   :copy-stat-struct
 	   :only
-	   :non-open-modes
+	   :open-modes
 	   :set-types
 	   :set-spare
 	   :gid-t
@@ -231,5 +231,50 @@
 
 (defpackage :cl-hurd.translator
   (:nicknames :hurd-translator)
-  (:use :cl :cffi :mach :hurd-common :hurd :tg :zip))
+  (:use :cl :cffi :mach :hurd-common :hurd :tg :flexi-streams)
+  (:export :translator
+		   :make-root-node
+		   :pathconf
+		   :allow-open
+		   :node
+		   :get-translator
+		   :file-chmod
+		   :file-chown
+		   :file-utimes
+		   :dir-lookup
+		   :create-file
+		   :number-of-entries
+		   :number-of-entries
+		   :get-entries
+		   :allow-author-change
+		   :create-directory
+		   :remove-entry
+		   :read-file
+		   :run-translator
+		   :define-callback
+		   :create-translator
+		   :make-dirent
+		   :propagate-read-to-execute
+		   :file-sync
+		   :name))
 
+(defpackage :cl-hurd.translator.tree
+  (:nicknames :hurd-tree-translator)
+  (:use :cl :hurd-common :mach :hurd :hurd-translator) ;:cl-containers)
+  (:export :fill-root-node
+		   :tree-translator
+		   :dir-entry
+		   :entry
+		   :add-entry
+		   :make-dir
+		   :make-entry
+		   :get-entry
+		   :setup-entry))
+
+(defpackage :cl-hurd.translator.examples
+  (:nicknames :hurd-example-translators)
+  (:use :cl :hurd-common :mach
+		:hurd :hurd-translator
+		:hurd-tree-translator
+		:zip
+		:flexi-streams))
