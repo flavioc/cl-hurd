@@ -1,12 +1,6 @@
 TODO list:
 
-- Server loop (method!).
-- Server shutdown (method!)
-- Demuxer (3 servers).
-- Class to abstract iouser.
-- Class to abstract openstat.
-- Class to abstract mode_t.
-- Class to abstract stat_t.
-- Slot for the exec server port.
+- io_write
+- count node references
 
-- transbox?
+- Server shutdown (method!)
