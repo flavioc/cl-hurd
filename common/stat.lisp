@@ -61,20 +61,6 @@
 (defmethod (setf mode-bits) (new-value (stat stat))
   (setf (foreign-slot-value (ptr stat) 'stat-struct 'mode) new-value))
 
-(defun make-stat (&optional (extra nil))
-  (let* ((mem (foreign-alloc 'stat-struct))
-	 (obj (make-instance 'stat :ptr mem)))
-    (finalize obj (lambda ()
-		    (foreign-free mem)))
-    (unless (null extra)
-	  (case (type-of extra)
-		(mode (setf (stat-get obj 'mode)
-					(mode-bits mode)))
-		(stat (memcpy mem (ptr extra) +stat-size+))
-		(t
-		  nil)))
-    obj))
-
 (defun copy-stat-struct (stat-dest stat-src)
   (memcpy (ptr stat-dest) (ptr stat-src) +stat-size+))
 
@@ -126,6 +112,21 @@
 		(setf (foreign-slot-value ptr 'stat-struct what) new-value)))))
 
 (defsetf stat-get stat-set)
+
+(defun make-stat (&optional (extra nil) &key (size 0))
+  (let* ((mem (foreign-alloc 'stat-struct))
+	 (obj (make-instance 'stat :ptr mem)))
+    (finalize obj (lambda ()
+		    (foreign-free mem)))
+    (unless (null extra)
+	  (case (type-of extra)
+		(mode (setf (stat-get obj 'mode)
+					(mode-bits mode)))
+		(stat (memcpy mem (ptr extra) +stat-size+))
+		(t
+		  nil)))
+	(setf (stat-get obj 'size) size)
+    obj))
 
 (defmethod print-object ((stat stat) stream)
   (format stream "#<stat: ")
