@@ -10,7 +10,6 @@
 (load "translator/node")
 (load "translator/open")
 (load "translator/protid")
-(load "translator/dir")
 (load "translator/utils")
 (load "translator/class")
 (load "translator/api")
