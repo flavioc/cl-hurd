@@ -107,11 +107,11 @@
 	       (list 'hurd +o-hurd+)
 	       (list 'trunc +o-trunc+)
 	       (list 'cloexec +o-cloexec+)
-		   (list 'non-open-modes (chained-bit-op boole-ior
-												 +o-creat+
-												 +o-excl+
-												 +o-nolink+
-												 +o-notrans+))))
+	       (list 'open-modes (chained-bit-op boole-ior
+						 +o-creat+
+						 +o-excl+
+						 +o-nolink+
+						 +o-notrans+))))
 
 (defun flag-to-bits (flag)
   (let ((result (find flag +flags-list+ :key #'first)))
