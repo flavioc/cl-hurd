@@ -151,6 +151,7 @@
 	   :sock
 	   :wht
 	   :off-t
+	   :loff-t
 	   :ino-t
 	   :pid-t))
 
@@ -250,7 +251,8 @@
 		   :allow-author-change
 		   :create-directory
 		   :remove-entry
-		   :read-file
+		   :file-read
+		   :file-write
 		   :run-translator
 		   :define-callback
 		   :create-translator
