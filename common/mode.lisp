@@ -1,12 +1,13 @@
 ;; filetype
 ;;
-(defconstant +ifmt+ #o0170000)
-(defconstant +ifdir+ #o0040000)
-(defconstant +ifchr+ #o0020000)
-(defconstant +ifblk+ #o0060000)
+(defconstant +ifmt+ #o170000)
+(defconstant +ifdir+ #o040000)
+(defconstant +ifchr+ #o020000)
+(defconstant +ifblk+ #o060000)
 (defconstant +ifreg+ #o0100000)
-(defconstant +iflnk+ #o0120000)
-(defconstant +ifsock+ #o0140000)
+(defconstant +iflnk+ #o120000)
+(defconstant +ifsock+ #o140000)
+(defconstant +ififo+ #o10000)
 
 ;; permission bits
 ;;
@@ -86,7 +87,7 @@
 
 (defmacro define-is-type-meth (name bits)
   `(define-mode-meth ,name nil
-	 (not (zerop (boole boole-and val ,bits)))))
+	 (eq (boole boole-and val +ifmt+) ,bits)))
 
 (define-is-type-meth is-dir-p +ifdir+)
 (define-is-type-meth is-chr-p +ifchr+)
@@ -94,6 +95,7 @@
 (define-is-type-meth is-blk-p +ifblk+)
 (define-is-type-meth is-lnk-p +iflnk+)
 (define-is-type-meth is-sock-p +ifsock+)
+(define-is-type-meth is-fifo-p +ififo+)
 
 (define-mode-meth get-type nil
   (cond
@@ -115,7 +117,9 @@
     (blk +ifblk+)
     (lnk +iflnk+)
     (sock +ifsock+)
+	(fifo +ififo+)
     (otherwise
+	  (warn "invalid type at get-type-bits")
       +ifmt+))) ; FIXME
 
 (define-mode-meth set-type (new-type)
