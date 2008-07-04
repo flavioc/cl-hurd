@@ -11,13 +11,17 @@
 
 (define-callback allow-open zip-translator (node user flags is-new-p) t)
 
-(define-callback read-file zip-translator
+(define-callback file-read zip-translator
 				 (node user start amount stream)
  (if (> start (stat-get (stat node) 'size))
    nil
    (progn
 	 (write-sequence (string-to-octets "ola") stream)
 	 t)))
+
+(define-callback file-write zip-translator
+				 (node user offset stream)
+  t)
 
 (defun create-zip-file (name parent entry)
   (let ((obj (make-instance 'zip-entry
