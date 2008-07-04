@@ -1,5 +1,4 @@
 
-(defun %is-minus-one-p (val) (= val #xffffffff))
 (defun %use-current-offset-p (offset) (%is-minus-one-p offset))
 
 (defun %io-read (open-node node user amount offset)
@@ -9,11 +8,13 @@
 				  (file-offset open-node)
 				  offset)))
 	(let* ((out-stream (make-in-memory-output-stream))
-		   (ret-read (read-file *translator* node user start (if any-amount-p nil amount) out-stream)))
+		   (ret-read (file-read *translator*
+								node user start
+								(if any-amount-p nil amount) out-stream)))
 	  (with-cleanup (close out-stream)
 		 (when ret-read
 		   (let* ((data-read (get-output-stream-sequence out-stream))
-				  (total-read (1+ (length data-read))))
+				  (total-read (1+ (output-stream-sequence-length out-stream))))
 			 (if current-offset-p
 			   (incf (file-offset open-node) total-read))
 			 (values data-read total-read)))))))
