@@ -15,3 +15,12 @@
 (load "translator/interfaces/dir-rmdir")
 (load "translator/interfaces/io-read")
 (load "translator/interfaces/file-sync")
+(load "translator/interfaces/io-get-openmodes")
+(load "translator/interfaces/io-get-owner")
+(load "translator/interfaces/io-set-some-openmodes")
+(load "translator/interfaces/io-set-all-openmodes")
+(load "translator/interfaces/file-getlinknode")
+(load "translator/interfaces/file-syncfs")
+(load "translator/interfaces/io-duplicate")
+(load "translator/interfaces/io-clear-some-openmodes")
+
