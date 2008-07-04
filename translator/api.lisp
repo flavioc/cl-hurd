@@ -36,9 +36,10 @@
 (%add-callback allow-author-change (node user author))
 (%add-callback create-directory (node user name mode))
 (%add-callback remove-entry (node user name directory-p))
-(%add-callback read-file (node user start amount stream))
+(%add-callback file-read (node user start amount stream))
 (%add-callback file-sync (node user wait-p omit-metadata-p))
 (%add-callback file-syncfs (user wait-p do-children-p))
+(%add-callback file-write (node user offset stream))
 
 (defmacro define-callback (name trans-type args &body body)
   `(defmethod ,name ((translator ,trans-type) ,@args)

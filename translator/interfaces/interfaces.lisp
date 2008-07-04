@@ -1,4 +1,6 @@
 
+(load "translator/interfaces/common")
+
 (load "translator/interfaces/fsys-getroot")
 (load "translator/interfaces/io-stat")
 (load "translator/interfaces/file-chmod")
@@ -24,4 +26,5 @@
 (load "translator/interfaces/io-duplicate")
 (load "translator/interfaces/io-clear-some-openmodes")
 (load "translator/interfaces/io-readable")
+(load "translator/interfaces/io-write")
 
