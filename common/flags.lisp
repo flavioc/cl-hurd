@@ -47,17 +47,17 @@
 
 (defun make-flag (ls)
   (make-instance 'open-flags
-		 :value-bits (list-to-flags ls)))
+		 :value-bits (get-flag-bits ls)))
 
 (defun disable-flags (val flags)
   (boole boole-andc2
 	 val
-	 (list-to-flags flags)))
+	 (get-flag-bits flags)))
 
 (defun enable-flags (val flags)
   (boole boole-ior
 	 val
-	 (list-to-flags flags)))
+	 (get-flag-bits flags)))
 
 (define-flags-meth enable (new-flags)
   (setf (value-bits flags)
@@ -79,7 +79,7 @@
 
 (define-flags-meth only (only-flags)
   (setf (value-bits flags)
-		(boole boole-and val (list-to-flags only-flags))))
+		(boole boole-and val (get-flag-bits only-flags))))
 
 (defconstant +flags-list+
 	     (list
@@ -122,16 +122,18 @@
 	(warn "Flag ~s not recognized" flag)
 	0))))
 
-(defun list-to-flags (ls)
+(defun get-flag-bits (ls)
   (cond
 	((null ls)
 	 0)
 	((symbolp ls)
 	 (flag-to-bits ls))
+	((typep ls 'open-flags)
+	 (value-bits ls))
 	(t
 	  (boole boole-ior
 			 (flag-to-bits (first ls))
-			 (list-to-flags (rest ls))))))
+			 (get-flag-bits (rest ls))))))
 
 (define-flags-meth print-object (stream)
   (format stream "#<open-flags")
