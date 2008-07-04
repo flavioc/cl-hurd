@@ -101,6 +101,7 @@
 	   :is-chr-p
 	   :is-blk-p
 	   :is-sock-p
+	   :is-fifo-p
 	   :has-passive-trans-p
 	   :memcpy
 	   :set-active-trans
@@ -256,6 +257,7 @@
 		   :make-dirent
 		   :propagate-read-to-execute
 		   :file-sync
+		   :file-syncfs
 		   :name))
 
 (defpackage :cl-hurd.translator.tree
