@@ -48,6 +48,6 @@
 				 (node user name directory-p)
   (remove-dir-entry node name))
 
-(define-callback read-file tree-translator
+(define-callback file-read tree-translator
 				 (node user start amount stream)
 				 nil)
