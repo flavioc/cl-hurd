@@ -2,15 +2,7 @@
 (in-package :mach)
 
 (define-foreign-library libmachuser
-	(:unix (:or "libmachuser-2.7.so" "libmachuser.so.1"))
-	(t (:default "libmachuser")))
+  (:unix (:or "libmachuser-2.7.so" "libmachuser.so.1"))
+  (t (:default "libmachuser")))
 
 (use-foreign-library libmachuser)
-	
-(load "mach/types")
-(load "mach/functions")
-(load "mach/macros")
-(load "mach/maptime")
-(load "mach/mmap")
-(load "mach/round-page")
-(load "mach/vm-allocate")
