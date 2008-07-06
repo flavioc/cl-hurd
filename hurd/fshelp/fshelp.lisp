@@ -1,8 +1,11 @@
 
-(load "hurd/fshelp/touch")
-(load "hurd/fshelp/isowner")
-(load "hurd/fshelp/iscontroller")
-(load "hurd/fshelp/access")
-(load "hurd/fshelp/checkdirmod")
-(load "hurd/fshelp/fetch-root")
-(load "hurd/fshelp/transbox")
+(in-package :hurd)
+
+;; Load libfshelp library.
+
+(define-foreign-library libfshelp
+	(:unix (:or "libfshelp.so.0.3"))
+	(t (:default "libfshelp")))
+
+(use-foreign-library libfshelp)
+
