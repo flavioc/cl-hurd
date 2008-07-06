@@ -1,103 +1,127 @@
-;; filetype
+
+(in-package :hurd-common)
+
 ;;
-(defconstant +ifmt+ #o170000)
-(defconstant +ifdir+ #o040000)
-(defconstant +ifchr+ #o020000)
-(defconstant +ifblk+ #o060000)
-(defconstant +ifreg+ #o0100000)
-(defconstant +iflnk+ #o120000)
-(defconstant +ifsock+ #o140000)
-(defconstant +ififo+ #o10000)
-
-;; permission bits
+;; In this file we implement an abstraction to the mode_t type.
+;; mode_t is a byte field with information about permissions, types, etc of a node
 ;;
-; owner
-(defconstant +irusr+ #o0400)
-(defconstant +iwusr+ #o0200)
-(defconstant +ixusr+ #o0100)
 
-; group
-(defconstant +irgrp+ (ash +irusr+ -3))
-(defconstant +iwgrp+ (ash +iwusr+ -3))
-(defconstant +ixgrp+ (ash +ixusr+ -3))
+;;
+;; Bits for file types.
+;;
 
-; others
-(defconstant +iroth+ (ash +irusr+ -6))
-(defconstant +iwoth+ (ash +iwusr+ -6))
-(defconstant +ixoth+ (ash +ixusr+ -6))
+(defconstant +ifmt+ #o170000 "Bits for types")
+(defconstant +ifdir+ #o040000 "Is a directory")
+(defconstant +ifchr+ #o020000 "Is a character device")
+(defconstant +ifblk+ #o060000 "Is a block device")
+(defconstant +ifreg+ #o0100000 "Regular file")
+(defconstant +iflnk+ #o120000 "Link")
+(defconstant +ifsock+ #o140000 "Socket")
+(defconstant +ififo+ #o10000 "Fifo")
 
-; unknown
-(defconstant +irunk+ (ash +irusr+ 12))
-(defconstant +iwunk+ (ash +iwusr+ 12))
-(defconstant +ixunk+ (ash +ixusr+ 12))
+;;
+;; Bits for permissions.
+;; 4 groups:
+;; owner, group, others and unknown.
+;; Each one has bits for reading, writing, and exec'ing.
+;;
 
-;; read-only bits
-; translators
-(defconstant +iptrans+ #o000010000000)
-(defconstant +iatrans+ #o000020000000)
-(defconstant +iroot+ #o000040000000)
-(defconstant +itrans+ #o000070000000)
+;; owner
+(defconstant +irusr+ #o0400 "Read for owner")
+(defconstant +iwusr+ #o0200 "Write for owner")
+(defconstant +ixusr+ #o0100 "Execute for owner")
 
-;; isuid
-(defconstant +isuid+ #o04000)
+;; group
+(defconstant +irgrp+ (ash +irusr+ -3) "Read for group")
+(defconstant +iwgrp+ (ash +iwusr+ -3) "Write for group")
+(defconstant +ixgrp+ (ash +ixusr+ -3) "Execute for group")
 
-;; isgid
-(defconstant +isgid+ #o02000)
+;; others
+(defconstant +iroth+ (ash +irusr+ -6) "Read for others")
+(defconstant +iwoth+ (ash +iwusr+ -6) "Write for others")
+(defconstant +ixoth+ (ash +ixusr+ -6) "Execute for others")
 
-;; isvtx
-(defconstant +isvtx+ #o01000)
+;; unknown
+(defconstant +irunk+ (ash +irusr+ 12) "Read for unknown")
+(defconstant +iwunk+ (ash +iwusr+ 12) "Write for unknown")
+(defconstant +ixunk+ (ash +ixusr+ 12) "Execute for unknown")
 
-;; mmap bits
-(defconstant +immap0+ #o000100000000)
+;;
+;; These are read-only bits.
+;;
 
-;; nocache bits
-(defconstant +inocache+ #o000000200000)
+;; Translator related bits.
+(defconstant +iptrans+ #o000010000000 "Has a passive translator")
+(defconstant +iatrans+ #o000020000000 "Has an active translator")
+(defconstant +iroot+ #o000040000000 "Is a translator root")
+(defconstant +itrans+ #o000070000000 "All the above bits")
 
-;; unknown bits
-(defconstant +iuseunk+ #o000000400000)
-(defconstant +iunknown+ #o000007000000)
+(defconstant +immap0+ #o000100000000 "No mmaps to this")
 
-;; spare bits
+(defconstant +isuid+ #o04000 "Set user ID on execution")
+
+(defconstant +isgid+ #o02000 "Set group ID on execution")
+
+(defconstant +isvtx+ #o01000 "Save swapped text after use (sticky).")
+
+(defconstant +inocache+ #o000000200000 "Don't cache contents for this file")
+
+(defconstant +iuseunk+ #o000000400000 "Use unknown bits")
+
+(defconstant +iunknown+ #o000007000000 "Mask for unknown permissions")
+
+;; Unused bits.
 (defconstant +ispare+ (boole boole-andc2
-							 #xffffffff
-							 (chained-bit-op boole-ior
-									  +ifmt+
-									  +itrans+
-									  +inocache+
-									  +immap0+
-									  +iuseunk+
-									  +iunknown+
-									  #o7777)))
+                             #xffffffff
+                             (chained-bit-op boole-ior
+                                             +ifmt+
+                                             +itrans+
+                                             +inocache+
+                                             +immap0+
+                                             +iuseunk+
+                                             +iunknown+
+                                             #o7777)))
+
+;; Define generic functions for accessing and setfing the mode-bits
+;; We use them here and in the stat file.
 
 (defgeneric mode-bits (mode))
+
 (defgeneric (setf mode-bits) (val obj))
 
-(defclass base-mode ()
-  ())
+;; Base classe for mode and stat.
+(defclass base-mode () ())
 
 (defclass mode (base-mode)
   ((mode-bits :initform 0
-			  :accessor mode-bits
-			  :initarg :mode-bits)))
+              :accessor mode-bits
+              :initarg :mode-bits))
+  (:documentation "Mode class for saving a mode_t bitfield"))
 
-(defmacro define-mode-meth (name extra-args &body body)
+(defmacro define-mode-meth (name extra-args doc &body body)
+  "Define a new base-mode method with arguments the base-mode object and extra-args.
+'val' is accessible, representing the mode bitfield."
   `(defmethod ,name ((mode base-mode) ,@(unless (null extra-args) extra-args))
-	 (with-accessors ((val mode-bits)) mode
-	   ,@body)))
+     ,doc
+     (with-accessors ((val mode-bits)) mode
+       ,@body)))
 
-(defmacro define-is-type-meth (name bits)
+(defmacro define-is-type-meth (name bits doc)
+  "Defines a new is type method."
   `(define-mode-meth ,name nil
-	 (eq (boole boole-and val +ifmt+) ,bits)))
+     ,doc
+     (eq (boole boole-and val +ifmt+) ,bits)))
 
-(define-is-type-meth is-dir-p +ifdir+)
-(define-is-type-meth is-chr-p +ifchr+)
-(define-is-type-meth is-reg-p +ifreg+)
-(define-is-type-meth is-blk-p +ifblk+)
-(define-is-type-meth is-lnk-p +iflnk+)
-(define-is-type-meth is-sock-p +ifsock+)
-(define-is-type-meth is-fifo-p +ififo+)
+(define-is-type-meth is-dir-p +ifdir+ "Is a directory?")
+(define-is-type-meth is-chr-p +ifchr+ "Is a character device?")
+(define-is-type-meth is-reg-p +ifreg+ "Is a regular device?")
+(define-is-type-meth is-blk-p +ifblk+ "Is a block device?")
+(define-is-type-meth is-lnk-p +iflnk+ "Is a link?")
+(define-is-type-meth is-sock-p +ifsock+ "Is a socket?")
+(define-is-type-meth is-fifo-p +ififo+ "Is a fifo?")
 
 (define-mode-meth get-type nil
+  "Returns type of mode."
   (cond
     ((is-dir-p mode) 'dir)
     ((is-chr-p mode) 'chr)
@@ -109,7 +133,8 @@
       (warn "Could not get type for mode~%")
       'reg)))
 
-(defun get-type-bits (type)
+(defun %get-type-bits (type)
+  "Returns the bits that must be activated from a certain type."
   (case type
     (dir +ifdir+)
     (reg +ifreg+)
@@ -117,29 +142,27 @@
     (blk +ifblk+)
     (lnk +iflnk+)
     (sock +ifsock+)
-	(fifo +ififo+)
+    (fifo +ififo+)
     (otherwise
-	  (warn "invalid type at get-type-bits")
+      (warn "invalid type at get-type-bits")
       +ifmt+))) ; FIXME
 
 (define-mode-meth set-type (new-type)
+  "Changes type of mode. Possible values for new-type are:
+dir, reg, chr, blk, lnk, sock."
   (setf (mode-bits mode)
-	(boole boole-ior
-	       (boole boole-andc2 val +ifmt+)
-	       (get-type-bits new-type)))
+        (boole boole-ior
+               (boole boole-andc2 val +ifmt+) ; disable all the other type bits
+               (%get-type-bits new-type)))
   new-type)
 
-;; user-type:
-;; owner
-;; group
-;; others
-;;
-;; perm-type:
-;; read
-;; write
-;; exec
+(defun %get-perm-bits (perm-type user-type)
+  "Returns the permission bytes associated with perm-type and user-type.
+These are the possible combinations:
 
-(defun get-perm-bits (perm-type user-type)
+perm-type: read / write / exec
+user-type: owner / group / others / unknown
+"
   (case user-type
 	(owner
 	  (case perm-type
@@ -158,7 +181,7 @@
 		(read +iroth+)
 		(write +iwoth+)
 		(exec +ixoth+)
-		(otherwise 0)))
+    (otherwise 0)))
 	(unknown
 	  (case perm-type
 		(read +irunk+)
@@ -167,87 +190,101 @@
 		(otherwise 0)))
 	(otherwise 0)))
 
-(define-mode-meth has-perms (perm-type user-type)
-				  (if (and (eq user-type 'unknown)
-	   (not (is-useunk-p mode)))
+(define-mode-meth has-perms-p (perm-type user-type)
+
+  "Predicate telling if the mode bitfield has certain permissions. Same combinations as get-perm-bits."
+  (if (and (eq user-type 'unknown)
+           (not (is-useunk-p mode)))
+    ;; We not using the unknown bits and user-type is unknown
+    ;; Always return nil
     nil
     (not (zerop (boole boole-and val
-		       (get-perm-bits perm-type user-type))))))
+                       (%get-perm-bits perm-type user-type))))))
 
 (define-mode-meth set-perms (perm-type user-type)
+  "Activates permission bits for perm-type/user-type."
   (setf (mode-bits mode)
 	(boole boole-ior
-	       val
-	       (get-perm-bits perm-type user-type)))
+         val
+         (%get-perm-bits perm-type user-type)))
   t)
 
 (define-mode-meth clear-perms (perm-type user-type)
+  "Clears permission bits for perm-type/user-type."
   (setf (mode-bits mode)
-		(boole boole-andc2
-		       val
-		       (get-perm-bits perm-type user-type)))
+        (boole boole-andc2
+               val
+               (%get-perm-bits perm-type user-type)))
   t)
 
 (define-mode-meth set-perms-if (perm-type user-type condit)
+  "Activates or clears permission bits based on the 'condit' value."
   (if condit
-	(set-perms mode perm-type user-type)
-	(clear-perms mode perm-type user-type)))
+    (set-perms mode perm-type user-type)
+    (clear-perms mode perm-type user-type)))
 
-(defmacro define-mode-query-meth (name bits)
+(defmacro define-mode-query-meth (name bits doc)
+  "Defines a new predicate based on 'bits'."
   `(define-mode-meth ,name nil
-	 (not (zerop (boole boole-and val ,bits)))))
+     ,doc
+     (eq ,bits (boole boole-and val ,bits))))
 
-(define-mode-query-meth has-passive-trans-p +iptrans+)
-(define-mode-query-meth has-active-trans-p +iatrans+)
-(define-mode-query-meth is-fs-root-p +iroot+)
-(define-mode-query-meth is-uid-p +isuid+)
-(define-mode-query-meth is-gid-p +isgid+)
-(define-mode-query-meth is-vtx-p +isvtx+)
-(define-mode-query-meth is-mmap-p +immap0+)
-(define-mode-query-meth is-nocache-p +inocache+)
-(define-mode-query-meth is-useunk-p +iuseunk+)
+(define-mode-query-meth has-passive-trans-p +iptrans+ "Has a passive translator?")
+(define-mode-query-meth has-active-trans-p +iatrans+ "Has an active translator?")
+(define-mode-query-meth is-fs-root-p +iroot+ "Is filesystem root?")
+(define-mode-query-meth is-uid-p +isuid+ "Has uid bit?")
+(define-mode-query-meth is-gid-p +isgid+ "Has gid bit?")
+(define-mode-query-meth is-vtx-p +isvtx+ "Has sticky bit?")
+(define-mode-query-meth is-mmap-p +immap0+ "No mmaps on this?")
+(define-mode-query-meth is-nocache-p +inocache+ "Don't use caching?")
+(define-mode-query-meth is-useunk-p +iuseunk+ "Use unknown permission system?")
 
-(defmacro define-mode-switcher-meth (name bits)
+(defmacro define-mode-switcher-meth (name bits doc)
+  "Creates a new switcher function for 'bits'."
   `(define-mode-meth ,name (&optional (yes t))
+     ,doc
      (setf (mode-bits mode)
-		   (if yes
-			 (boole boole-ior val ,bits)
-			 (boole boole-andc2 val ,bits)))
-	 t))
+           (if yes
+             (boole boole-ior val ,bits)
+             (boole boole-andc2 val ,bits)))
+     t))
 
-(define-mode-switcher-meth set-uid +isuid+)
-(define-mode-switcher-meth set-gid +isgid+)
-(define-mode-switcher-meth set-vtx +isvtx+)
-(define-mode-switcher-meth set-mmap +immap0+)
-(define-mode-switcher-meth set-nocache +inocache+)
-(define-mode-switcher-meth set-useunk +iuseunk+)
-(define-mode-switcher-meth set-active-trans +iatrans+)
-(define-mode-switcher-meth set-passive-trans +iptrans+)
-(define-mode-switcher-meth set-trans +itrans+)
-(define-mode-switcher-meth set-root +iroot+)
-(define-mode-switcher-meth set-types +ifmt+)
-(define-mode-switcher-meth set-spare +ispare+)
+(define-mode-switcher-meth set-uid +isuid+ "Sets uid bit")
+(define-mode-switcher-meth set-gid +isgid+ "Sets gid bit")
+(define-mode-switcher-meth set-vtx +isvtx+ "Sets sticky bit")
+(define-mode-switcher-meth set-mmap +immap0+ "Sets decision on using mmaps")
+(define-mode-switcher-meth set-nocache +inocache+ "Sets decision on caching the node")
+(define-mode-switcher-meth set-useunk +iuseunk+ "Uses unknown bits")
+(define-mode-switcher-meth set-active-trans +iatrans+ "Sets active translator bit")
+(define-mode-switcher-meth set-passive-trans +iptrans+ "Sets passive translator bit")
+(define-mode-switcher-meth set-trans +itrans+ "Sets all the translator bits")
+(define-mode-switcher-meth set-root +iroot+ "Sets root bit")
+(define-mode-switcher-meth set-types +ifmt+ "Sets all the type bits")
+(define-mode-switcher-meth set-spare +ispare+ "Sets all the spare bits")
 
 (defun make-mode-clone (bits)
+  "Makes a mode object based on 'bits' bitfield."
   (make-instance 'mode :mode-bits bits))
 
 (defun make-mode (&key (type 'reg)
-			 (perms '((owner read write) (group read)))
-			 (uid nil)
-			 (gid nil)
-			 (vtx nil)
-			 (mmap nil)
-			 (nocache nil)
-			 (useunk nil))
+                       (perms '((owner read write) (group read))) ; starting permissions
+                       (uid nil) ; activate uid bit
+                       (gid nil) ; activate gid bit
+                       (vtx nil) ; activate sticky bit
+                       (mmap nil) ; activate mmap bit
+                       (nocache nil) ; activate nocache bit
+                       (useunk nil)) ; use unknown bits
+  "Creates a new mode object.
+'perms' is a list with the form ((user-type1 perm1 perm2 ...) (user-type2 perm1..))."
   (let ((obj (make-instance 'mode)))
     (set-type obj type)
     (mapcar (lambda (owner-list)
-	      (let ((owner-type (first owner-list))
-		    (perm-list (rest owner-list)))
-		(mapcar (lambda (perm-type)
-			  (set-perms obj perm-type owner-type))
-			owner-list)))
-	    perms)
+              (let ((owner-type (first owner-list))
+                    (perm-list (rest owner-list)))
+                (mapcar (lambda (perm-type)
+                          (set-perms obj perm-type owner-type))
+                        perm-list)))
+            perms)
     (set-uid obj uid)
     (set-gid obj gid)
     (set-vtx obj vtx)
@@ -256,14 +293,16 @@
     (set-useunk obj useunk)
     obj))
 
-(defun perm-char (type)
+(defun %perm-char (type)
+  "Returns the associated character with 'type' permission type."
   (case type
     (read #\r)
     (write #\w)
-    (write #\x)
+    (exec #\x)
     (otherwise #\-)))
 
-(defun type-char (type)
+(defun %type-char (type)
+  "Returns the associated character with 'type' file type."
   (case type
     (dir #\d)
     (chr #\c)
@@ -274,25 +313,26 @@
     (otherwise #\-)))
 
 (define-mode-meth print-object (stream)
-  (format stream "#<Mode ~c" (type-char (get-type mode)))
+  "Prints a mode object."
+  (format stream "#<Mode ~c" (%type-char (get-type mode)))
   (flet ((show-perm-bits (user-type)
-	 (mapcar (lambda (perm-type)
-		   (format stream "~c"
-			   (cond
-			     ((and (eq perm-type 'exec)
-				   (eq user-type 'owner)
-				   (is-uid-p mode))
-			      #\s)
-			     ((and (eq perm-type 'exec)
-				   (eq user-type 'group)
-				   (is-gid-p mode))
-			      #\s)
-			     ((has-perms mode perm-type user-type)
-			      (perm-char perm-type))
-			     (t
-			       #\-))
-			   #\-))
-		 '(read write exec))))
+                         (mapcar (lambda (perm-type)
+                                   (format stream "~c"
+                                           (cond
+                                             ((and (eq perm-type 'exec)
+                                                   (eq user-type 'owner)
+                                                   (is-uid-p mode))
+                                              #\s)
+                                             ((and (eq perm-type 'exec)
+                                                   (eq user-type 'group)
+                                                   (is-gid-p mode))
+                                              #\s)
+                                             ((has-perms-p mode perm-type user-type)
+                                              (%perm-char perm-type))
+                                             (t
+                                               #\-))
+                                           #\-))
+                                 '(read write exec))))
     (mapcar #'show-perm-bits '(owner group others)))
   (if (is-vtx-p mode)
     (format stream " vtx"))
@@ -305,14 +345,17 @@
   (format stream ">"))
 
 (define-foreign-type mode-type ()
-		     ()
-		     (:actual-type :unsigned-int)
-		     (:simple-parser mode-t))
+  ()
+  (:documentation "CFFI mode type.")
+  (:actual-type :unsigned-int)
+  (:simple-parser mode-t))
 
 (defmethod translate-to-foreign (mode (type mode-type))
+  "Translate a mode object to a foreign bit field."
   (if (null mode)
     0
     (mode-bits mode)))
 
 (defmethod translate-from-foreign (value (type mode-type))
+  "Translate a foreign bitfield to a mode object."
   (make-instance 'mode :mode-bits value))
