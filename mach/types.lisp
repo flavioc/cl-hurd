@@ -34,3 +34,6 @@
 
 (defctype port-urefs :unsigned-int "mach_port_urefs_t type")
 
+(defctype port-msgcount :unsigned-int "mach_port_msgcount_t type")
+
+(defctype port-rights :unsigned-int "mach_port_rights_t type")
