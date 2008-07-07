@@ -99,7 +99,7 @@
       ; This is nil. Just return 0.
       (null 0)
       ; This a symbol, which means is only one flag, return its representation.
-      (symbol (flag-to-bits obj))
+      (symbol (%flag-to-bits obj))
       ; This is a list of flags, return all the bits of each flag or-ed.
       (cons (boole boole-ior
                    (%flag-to-bits (first obj))
@@ -128,7 +128,7 @@
 
 (define-flags-meth flag-is-p (flag)
   "Checks if our flag bitfield has a certain flag activated."
-  (let ((flag-bits (flag-to-bits flag)))
+  (let ((flag-bits (%flag-to-bits flag)))
     (eq flag-bits
         (boole boole-and flag-bits val))))
 
