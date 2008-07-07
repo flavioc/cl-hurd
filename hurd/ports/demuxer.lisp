@@ -13,11 +13,6 @@
   (in :pointer)
   (out :pointer))
 
-(defcallback portset-demuxer :int
-             ((in :pointer)
-              (out :pointer))
-  (%portset-demuxer in out))
-
 (defmacro set-demuxer (fun)
   "Defines fun as the internal demuxer for portset-demuxer."
   (with-gensyms (callback-name)
