@@ -1,2 +1,0 @@
-
-(load "hurd/fsys/functions")
