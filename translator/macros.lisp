@@ -1,42 +1,40 @@
 
-;; macro that defines a new interface callback
-;; and then sets it on the routines table
-;;
+(in-package :hurd-translator)
+
 (defmacro define-interface (what name params &body body)
+  "Defines a new interface callback of type 'what' and name 'name'."
   (with-gensyms (result)
 	  `(define-hurd-interface ,what ,name ,params
 		  ;(warn "enter at ~s ~s~%" (quote ,what) (quote ,name))
 		  (let ((,result (when *translator*
-						   ,@body)))
+                       ,@body)))
 			(if (null ,result)
-			  :operation-not-supported
-			  ,result)))))
+        :operation-not-supported
+        ,result)))))
 
-;; specialize define-interface for the various stub modules
+;; Specialize define-interface for the various stub modules.
 
-;; io
 (defmacro def-io-interface (name params &body body)
+  "IO callbacks."
   `(define-interface io-routine ,name ,params
-					 ,@body))
+                     ,@body))
 
-;; fs
 (defmacro def-fs-interface (name params &body body)
+  "FS callbacks."
   `(define-interface fs-routine ,name ,params
-					 ,@body))
+                     ,@body))
 
-;; fsys
 (defmacro def-fsys-interface (name params &body body)
+  "FSYS callbacks."
   `(define-interface fsys-routine ,name ,params
 					 ,@body))
 
-;; stacking servers for a demuxer
-
 (defmacro stack-servers (in out &body ls)
+  "Generates a call to 'or' with arguments from 'ls'."
   `(or ,@(mapcar (lambda (fun) `(,fun ,in ,out)) ls)))
 
-;; lookup port on a rpc
-
 (defmacro with-lookup (name port &body body)
+  "Lookups 'port' on the translator bucket and assigns it to 'name'."
   `(let ((,name (lookup-port (port-bucket *translator*)
-							 ,port)))
-	 ,@body))
+                             ,port)))
+     ,@body))

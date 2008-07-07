@@ -1,8 +1,8 @@
 
-; dynamic variable *translator*
-; this is used to run at the interface level
-; the *translator* methods
-(defvar *translator* nil)
+(in-package :hurd-translator)
+
+(defvar *translator* nil
+  "Variable used to represent the currently used translator.")
 
 ; port of current authentication server
 ;(defconstant +auth-server+ (getauth))
