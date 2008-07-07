@@ -1,53 +1,10 @@
 
 (in-package :mach)
 
-(defcfun ("mach_task_self" %mach-task-self) ipc-space)
-
-(defun task-self ()
-  "Returns a send right associated with the task_self port"
-  (%mach-task-self))
-
 (defun port-valid (p)
   "Checks if port code is a valid port."
   (and (numberp p)
        (> p 0)))
-
-
-(defcfun ("mach_port_deallocate" %mach-port-deallocate)
-		 err
-		 (task ipc-space)
-		 (name port))
-
-(defun port-deallocate (name &optional (task (task-self)))
-  "Deallocates a port in a task ipc namespace"
-  (%mach-port-deallocate task name))
-
-
-(defcfun ("task_get_special_port" %task-get-special-port)
-		 err
-		 (task task)
-		 (what special-port-type)
-		 (port port-pointer))
-
-(defun task-get-special-port (what &optional (task (task-self)))
-  "Return a send write to the indicated special port."
-  (with-foreign-object (port 'port)
-    (let ((return-code (%task-get-special-port task what port)))
-      (select-error return-code (mem-ref port 'port)))))
-
-(defun task-get-bootstrap-port (&optional (task (task-self)))
-  "Return a send write to the bootstrap port."
-  (task-get-special-port :task-bootstrap-port task))
-
-
-(defcfun ("mach_port_destroy" %mach-port-destroy)
-  err
-  (task ipc-space)
-  (port-name port))
-
-(defun port-destroy (port-name &optional (task (task-self)))
-  "Deallocates all rights denoted by a name. The name becomes immediately available for reuse."
-  (%mach-port-destroy task port-name))
 
 
 (defcfun ("mach_port_mod_refs" %mach-port-mod-refs)
@@ -91,20 +48,6 @@
                            port
                            right
                            right-type))
-
-
-(defcfun ("mach_port_type" %mach-port-type)
-  err
-  (task ipc-space)
-  (name port)
-  (ptype :pointer))
-
-(defun port-type (port &optional (task (task-self)))
-  "Return the characteristics of the target port name."
-  (with-foreign-object (ptype 'port-type-t)
-    (let ((return-code
-            (%mach-port-type task port ptype)))
-      (select-error return-code (mem-ref ptype 'port-type-t)))))
 
 
 (defcfun ("mach_msg_server_timeout" %mach-msg-server-timeout)
