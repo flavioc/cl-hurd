@@ -1,2 +1,0 @@
-
-(load "hurd/io/functions")
