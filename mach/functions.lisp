@@ -40,20 +40,6 @@
   (task-get-special-port :task-bootstrap-port task))
 
 
-(defcfun ("mach_port_allocate" %mach-port-allocate)
-  err
-  (task ipc-space)
-  (right port-right)
-  (ret-port port-pointer))
-
-(defun port-allocate (right &optional (task (task-self)))
-  "Creates a new right in the specified task."
-  (with-foreign-object (port-name 'port)
-    (let ((return-code
-            (%mach-port-allocate task right port-name)))
-      (select-error return-code (mem-ref port-name 'port)))))
-
-
 (defcfun ("mach_port_destroy" %mach-port-destroy)
   err
   (task ipc-space)
