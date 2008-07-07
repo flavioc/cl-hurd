@@ -185,6 +185,7 @@
            :msg-type-name
            :msg-type-number
            :msg-server-timeout
+           :msg-server
            :maptime-map
            :maptime-seconds
            :maptime-microseconds
@@ -203,6 +204,8 @@
            :munmap
            :round-page
            :vm-allocate
+           :vm-deallocate
+           :vm-task
            :vm-address
            :right-send
            :right-receive
@@ -243,6 +246,23 @@
            :rcv-interrupt
            :rcv-large
            :msg-option
+           :reply-port
+           :port-allocate-name
+           :port-names
+           :port-rename
+           :port-get-refs
+           :port-extract-right
+           :port-status-get
+           :port-status-has-send-rights-p
+           :port-status-has-port-deleted-notification-p
+           :port-status-has-no-senders-notification-p
+           :port-set-mscount
+           :port-set-qlimit
+           :+qlimit-default+
+           :+qlimit-min+
+           :+qlimit-max+
+           :port-set-seqno
+           :port-get-set-status
            ))
 
 (defpackage :cl-hurd
