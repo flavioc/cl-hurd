@@ -6,18 +6,6 @@
   (and (numberp p)
        (> p 0)))
 
-(defcfun ("mach_port_move_member" %mach-port-move-member)
-  err
-  (task ipc-space)
-  (before port)
-  (after port))
-
-(defun port-move-member (before after
-                                &optional (task (task-self)))
-  "Move the specified receive right into or out of the specified port set."
-  (%mach-port-move-member task before after))
-
-
 (defcfun ("mach_msg_server_timeout" %mach-msg-server-timeout)
   err
   (demuxer :pointer)
