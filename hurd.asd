@@ -56,8 +56,48 @@
                                                          "msg-id"
                                                          "msg-option"
                                                          "task-special-ports"))
-                                     (:file "functions"
+                                     (:file "port-creation"
                                             :depends-on ("types"))
+                                     (:file "port-destruction"
+                                            :depends-on ("types"))
+                                     (:file "task"
+                                            :depends-on ("types"))
+                                     (:file "port-names"
+                                            :depends-on ("types"
+                                                         "mmap"
+                                                         "task"))
+                                     (:file "port-rights"
+                                            :depends-on ("types"
+                                                         "task"))
+                                     (:file "port-move"
+                                            :depends-on ("types"
+                                                         "task"))
+                                     (:file "port-status"
+                                            :depends-on ("types"))
+                                     (:file "port-receive-rights"
+                                            :depends-on ("types"
+                                                         "port-status"
+                                                         "task"))
+                                     (:file "port-sets"
+                                            :depends-on ("types"
+                                                         "task"))
+                                     (:file "port-request-notifications"
+                                            :depends-on ("types"
+                                                         "task"))
+                                     (:file "msg-server"
+                                            :depends-on ("types"
+                                                         "task"))
+                                     (:file "functions"
+                                            :depends-on ("types"
+                                                         "port-creation"
+                                                         "port-destruction"
+                                                         "port-rights"
+                                                         "port-move"
+                                                         "port-sets"
+                                                         "port-request-notifications"
+                                                         "msg-server"
+                                                         "port-receive-rights"
+                                                         "port-names"))
                                      (:file "macros"
                                             :depends-on ("functions"))
                                      (:file "maptime"
