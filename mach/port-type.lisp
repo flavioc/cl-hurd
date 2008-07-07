@@ -71,7 +71,7 @@
   (let ((val (value ptype))
         (bits (find flag +port-type-codes+ :key #'second)))
     (when bits
-      (eq bits (boole boole-and val (first bits))))))
+      (eq (first bits) (boole boole-and val (first bits))))))
 
 (define-foreign-type port-type-type ()
   ()
