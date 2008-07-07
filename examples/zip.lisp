@@ -8,12 +8,11 @@
 
 (defvar *zip* (open-zipfile "tmp.zip") "The zip handle.")
 
-(defvar *zip-translator* (make-translator 'zip-translator) "The translator.")
-
 (defclass zip-translator (tree-translator)
   ((name :initform "zip-translator"
          :documentation "Translator name"))
   (:documentation "Zip translator."))
+
 
 (defclass zip-entry (entry)
   ((zip-entry :initarg :zip
@@ -77,6 +76,8 @@
   "Add all entries found on the zip file."
   (do-zipfile-entries (name entry *zip*)
                       (add-zip-file node (split-path name) entry)))
+
+(defvar *zip-translator* (make-translator 'zip-translator) "The translator.")
 
 ;; Startup the translator.
 (run-translator *zip-translator*)
