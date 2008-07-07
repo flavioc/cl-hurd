@@ -5,10 +5,10 @@ _set_routine(const unsigned what, void *fun)
 	assert(what < _NUMBER_OF_ROUTINES);
 
 	if(routines[what] != NULL) {
-		fprintf(stderr, "Warning: redefining routine %s\n",
+		fprintf(stderr, "\nWarning: redefining routine %s\n",
 				routine_to_str(what));
 	} else {
-		fprintf(stdout, "Information: defining routine %s\n",
+		fprintf(stderr, "\nInformation: defining routine %s\n",
 				routine_to_str(what));
 	}
 
