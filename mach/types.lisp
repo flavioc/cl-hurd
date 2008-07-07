@@ -29,3 +29,5 @@
 (defctype msg-size :unsigned-int "mach_msg_size_t type")
 
 (defctype msg-timeout :unsigned-int "mach_msg_timeout_t type")
+
+(defctype vm-task port "vm_task_t type")
