@@ -31,3 +31,6 @@
 (defctype msg-timeout :unsigned-int "mach_msg_timeout_t type")
 
 (defctype vm-task port "vm_task_t type")
+
+(defctype port-urefs :unsigned-int "mach_port_urefs_t type")
+
