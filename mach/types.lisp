@@ -14,6 +14,8 @@
 
 (defctype port-mscount :unsigned-int "mach_port_msgcount_t type")
 
+(defctype port-seqno :unsigned-int "mach_port_seqno_t type")
+
 (defctype msg-seqno :unsigned-int "mach_msg_seqno_t type")
 
 (defctype port-delta :int "mach_port_delta_t type")
@@ -37,3 +39,4 @@
 (defctype port-msgcount :unsigned-int "mach_port_msgcount_t type")
 
 (defctype port-rights :unsigned-int "mach_port_rights_t type")
+
