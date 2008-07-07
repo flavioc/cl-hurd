@@ -5,7 +5,7 @@
 ;; This file defines the mach_msg_option_t foreign type.
 ;;
 
-(defcenum msg-option
+(defbitfield msg-option
   (:msg-option-none 0)
   (:send-msg #x01)
   (:rcv-msg #x02)
