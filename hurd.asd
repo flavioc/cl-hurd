@@ -222,7 +222,9 @@
                                               :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
-                        :components ((:file "dir")
+                        :components ((:file "sorted-container")
+                                     (:file "dir"
+                                            :depends-on ("sorted-container"))
                                      (:file "class"
                                             :depends-on ("dir")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd" "translator"))
