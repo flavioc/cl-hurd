@@ -82,6 +82,7 @@
            :has-perms-p
            :set-perms
            :set-perms-if
+           :clear-perms
            :read
            :write
            :exec
@@ -155,7 +156,9 @@
            :off-t
            :loff-t
            :ino-t
-           :pid-t))
+           :pid-t
+           :get-type
+           :type))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -364,7 +367,8 @@
            :name
            :inc-refs
            :dec-refs
-           :drop-node))
+           :drop-node
+           :make-node-dirent))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)
