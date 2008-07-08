@@ -84,6 +84,11 @@ please see common/pathconf.lisp."
 (%add-callback file-write (node user offset stream)
   "The user wants to write the bytes in the input stream 'stream' starting at 'offset'.")
 
+(%add-callback drop-node (node)
+  "The 'node' has no more references, drop it."
+  (warn "Dropped node ~s" node)
+  nil)
+
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
   `(defmethod ,name ((translator ,trans-type) ,@args)

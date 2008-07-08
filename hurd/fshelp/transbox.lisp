@@ -46,3 +46,9 @@
 (defmethod box-starting-p ((box transbox))
   "Returns the 'starting' field."
   (slot-value box 'starting))
+
+(defmethod transbox-drop ((box transbox))
+  "Drops a transbox."
+  (when (active box)
+    (port-deallocate (active box))
+    (setf (active box) nil)))

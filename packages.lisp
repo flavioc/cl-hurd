@@ -329,6 +329,7 @@
            :can-modify-dir-p
            :can-modify-file-in-dir-p
            :is-owner-p
+           :transbox-drop
            ))
 
 (defpackage :cl-hurd.translator
@@ -360,7 +361,10 @@
            :propagate-read-to-execute
            :file-sync
            :file-syncfs
-           :name))
+           :name
+           :inc-refs
+           :dec-refs
+           :drop-node))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)

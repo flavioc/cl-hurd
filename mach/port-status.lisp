@@ -1,8 +1,6 @@
 
 (in-package :mach)
 
-(use-package :trivial-garbage)
-
 ;; This structure contains some status information about a port, which can be queried with port-get-receive-status.
 ;;
 (defcstruct port-status-struct

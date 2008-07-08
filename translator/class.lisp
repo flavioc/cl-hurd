@@ -39,9 +39,13 @@
 (defmethod initialize-instance :after ((translator translator) &key)
   "Sets up the translator bucket with a port cleanup function."
   (setf (port-bucket translator)
-        (make-bucket (lambda (protid) nil)
-                     ;(warn "protid release")))))
-                     )))
+        (make-bucket (lambda (protid)
+                       (let ((node (get-node protid)))
+                         (dec-refs node)
+                         (when (no-refs-p node)
+                           (pre-drop-node node)
+                           (drop-node translator node))
+                         t)))))
 
 (defmethod insert-temporary-data ((trans translator) key value)
   "Inserts temporary data on the temporary bucket."
@@ -58,6 +62,7 @@
 
 (defmethod new-protid ((trans translator) user (open-node open-node))
   "Creates a new protid and inserts it into the translator bucket."
+  (inc-refs (refers open-node)) ; Increment references to this node
   (add-port (port-bucket trans)
             (make-protid user open-node)))
 
@@ -65,7 +70,7 @@
   "Creates a new translator with class 'base-class'."
   (let ((translator (make-instance base-class)))
     (with-accessors ((id-port identity-port)) translator
-      ; destroy identity port when translator goes away
+      ; Destroy identity port when translator goes away
       (finalize translator (lambda () (port-destroy id-port))))
     translator))
 
