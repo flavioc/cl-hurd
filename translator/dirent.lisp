@@ -11,11 +11,20 @@
   ((name :initarg :name
          :accessor name
          :documentation "Entry name")
-   (node :initarg :node
-         :accessor node
-         :documentation "Node this entry refers to."))
+   (ino :initarg :ino
+        :accessor ino
+        :documentation "Ino value of this entry.")
+   (filetype :initarg :file-type
+             :accessor file-type
+             :documentation "Mode type of this entry."))
   (:documentation "Dirent class with name + node."))
 
-(defun make-dirent (name node)
+(defun make-dirent (name ino file-type)
   "Creates a new dirent object."
-  (make-instance 'dirent :name name :node node))
+  (make-instance 'dirent :name name :ino ino :file-type file-type))
+
+(defun make-node-dirent (name node)
+  "Creates a new dirent object based on a standard node."
+  (make-dirent name
+               (stat-get (stat node) 'ino)
+               (stat-get (stat node) 'type)))
