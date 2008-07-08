@@ -19,7 +19,7 @@
                  (underlying-stat)
   (when (not (is-dir-p underlying-stat))
     (propagate-read-to-execute underlying-stat))
-  (set-type underlying-stat 'dir)
+  (set-type underlying-stat :dir)
   (set-trans underlying-stat nil)
   (let ((obj (make-dir "root" underlying-stat)))
     (fill-root-node translator obj)
@@ -46,11 +46,18 @@ root node."
 
 (define-callback get-entries tree-translator
 				(node user start end)
-  (let* ((all (loop for value being the hash-values of (entries node)
-                    using (hash-key key)
-                    collect (make-dirent key value)))
-         (sorted (sort all (lambda (a b) (string< (name a) (name b))))))
-    (subseq sorted start (1+ end))))
+  (let* ((return-list nil)
+         (real-start (max 0 (- start 2))))
+    (when (= start 0)
+      (push (make-node-dirent "." node) return-list))
+    (when (and (<= start 1) (>= end 1))
+      (push (make-dirent ".." 1 :dir) return-list))
+    (append return-list
+            (mapcar (lambda (node)
+                      (make-node-dirent (name node) node))
+                    (get-dir-entries node
+                                     real-start
+                                     (- (1- end) real-start))))))
 
 (define-callback create-directory tree-translator
 				 (node user name mode)

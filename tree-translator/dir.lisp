@@ -25,7 +25,7 @@
   (format stream ">"))
 
 (defclass dir-entry (entry)
-  ((entries :initform (make-hash-table :test 'equal)
+  ((entries :initform (make-sorted-container #'string< #'name)
             :accessor entries
             :documentation "The directory entries."))
   (:documentation "A special entry: the directory entry."))
@@ -36,20 +36,29 @@
 
 (defun make-dir (name stat &optional (parent nil))
   "Creates a new directory node."
-  (set-type stat 'dir)
-  (%new-ino-val stat)
-  (setf (stat-get stat 'nlink) 1)
-  (make-instance 'dir-entry :stat stat :name name :parent parent))
+  (let ((obj (make-instance 'dir-entry :stat stat
+                            :name name
+                            :parent parent)))
+    (setup-entry obj)
+    obj))
 
 (defmethod add-entry ((dir dir-entry) (entry entry))
   "Adds a new entry to the directory node 'dir'."
-  (setf (gethash (name entry) (entries dir)) entry))
+  (incf (stat-get (stat dir) 'nlink)) ; New entry.
+  (insert-element (entries dir) entry))
 
 (defmethod setup-entry ((entry entry))
   "Changes some node information to sane defaults."
-  (set-type (stat entry) 'reg)
+  (set-type (stat entry) :reg)
   (%new-ino-val (stat entry))
   (setf (stat-get (stat entry) 'nlink) 1))
+
+(defmethod setup-entry ((entry dir-entry))
+  "Changes some node information to sane defaults on directories."
+  (set-type (stat entry) :dir)
+  (%new-ino-val (stat entry))
+  ; nlink represents number of objects in a directory
+  (setf (stat-get (stat entry) 'nlink) 2))
 
 (defun make-entry (name stat &optional (parent nil))
   "Creates a new entry."
@@ -59,12 +68,16 @@
 
 (defmethod dir-size ((dir dir-entry))
   "Returns number of entries in a directory."
-  (hash-table-count (entries dir)))
+  (+ 2 ; Entries "." and "..".
+     (count-elements (entries dir))))
 
 (defmethod get-entry ((dir dir-entry) (entry string))
   "Gets an entry from a directory based on the filename 'entry'."
-  (gethash entry (entries dir)))
+  (get-element (entries dir) entry))
 
 (defmethod remove-dir-entry ((dir dir-entry) (entry string))
   "Removes a directory entry with name 'entry'."
-  (remhash entry (entries dir)))
+  (remove-element (entries dir) entry))
+
+(defmethod get-dir-entries ((dir dir-entry) start n)
+  (elements-from (entries dir) start n))
