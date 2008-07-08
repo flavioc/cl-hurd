@@ -72,6 +72,8 @@ uid, gid, size, atim, mtim, ctim, blksize, blocks, author, flags."
       (atime (%stat-time-get ptr 'atim))
       (mtime (%stat-time-get ptr 'mtim))
       (ctime (%stat-time-get ptr 'ctim))
+      ; Get type from the mode bits.
+      (type (get-type stat))
       ; 'dev' is an alias to 'fsid'.
       (dev (foreign-slot-value ptr 'stat-struct 'fsid))
       ; we return a mode object here
@@ -165,18 +167,17 @@ size: initial size for the size field.
     ; Don't leak memory.
     (finalize obj (lambda ()
                     (foreign-free mem)))
-    ; Optional/Key parameters go here:
-    (setf (stat-get obj 'size) size)
     (unless (null extra)
       (case (type-of extra)
         (mode
-          ; Copy it to the mode field
+          ; Copy it to the mode field.
           (setf (stat-get obj 'mode)
                 (mode-bits extra)))
         (stat
-          ; Copy the whole thing
-          ; The key arguments will make no sense now!
+          ; Copy the whole thing.
           (memcpy mem (ptr extra) +stat-size+))))
+    ; Optional/Key parameters go here:
+    (setf (stat-get obj 'size) size)
     ; Return the new object
     obj))
 
