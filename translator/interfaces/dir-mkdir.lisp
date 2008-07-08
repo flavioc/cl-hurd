@@ -15,7 +15,7 @@
         (t
           (set-spare mode nil)
           (set-vtx mode nil)
-          (set-type mode 'dir)
+          (set-type mode :dir)
           (let ((result (create-directory *translator*
                                           (get-node protid)
                                           (get-user protid)
