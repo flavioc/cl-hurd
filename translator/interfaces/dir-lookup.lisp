@@ -57,7 +57,7 @@
                     (null rest-path))
                (set-vtx mode nil)
                (set-spare mode nil)
-               (set-type mode 'reg)
+               (set-type mode :reg)
                (let ((new-node (create-file *translator*
                                             node
                                             user
@@ -88,6 +88,7 @@
                                (retry-name :pointer)
                                (retry-port port-pointer)
                                (retry-port-type :pointer))
+;  (warn "dir-lookup ~s" filename)
   (with-lookup dir-protid dir-port
     ;(warn "filename to lookup in ~s: ~a~%" (get-node dir-protid) filename)
     (multiple-value-bind (ret-do-retry
