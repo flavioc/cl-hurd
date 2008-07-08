@@ -19,7 +19,7 @@
       (with-cleanup (close out-stream)
         (when ret-read
           (let* ((data-read (get-output-stream-sequence out-stream))
-                 (total-read (1+ (output-stream-sequence-length out-stream))))
+                 (total-read (length data-read)))
             (if current-offset-p
               (incf (file-offset open-node) total-read))
             (values data-read total-read)))))))
