@@ -25,12 +25,10 @@
 
 (defmethod inc-refs ((node node) &optional (cnt 1))
   "Increments 'node' references."
-  (warn "inc-refs ~s" node)
   (incf (references node) cnt))
 
 (defmethod dec-refs ((node node) &optional (cnt 1))
   "Decrements 'node' references."
-  (warn "dec-refs ~s" node)
   (decf (references node) cnt))
 
 (defmethod no-refs-p ((node node))
