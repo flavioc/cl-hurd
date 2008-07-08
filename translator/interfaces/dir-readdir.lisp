@@ -3,18 +3,6 @@
 
 (defconstant +chunk-size+ (* 8 1024))
 
-(defun %get-dirent-type (stat)
-  "Converts the stat type into a valid dirent type."
-  (cond
-    ((is-reg-p stat) :reg)
-    ((is-dir-p stat) :dir)
-    ((is-blk-p stat) :blk)
-    ((is-lnk-p stat) :lnk)
-    ((is-sock-p stat) :sock)
-    ((is-fifo-p stat) :fifo)
-    (t
-      :unknown)))
-
 (defcstruct dirent-struct
   (ino ino-t)
   (reclen :unsigned-short)
@@ -33,8 +21,7 @@
           for cnt = 0 then (1+ cnt)
           do (let* ((dirent-name (name dirent))
                     (namelen (1+ (length dirent-name)))
-                    (this-size (+ +name-offset+ namelen))
-                    (node (node dirent)))
+                    (this-size (+ +name-offset+ namelen)))
                (when (> (+ this-size
                            (- (pointer-address ptr)
                               (pointer-address data)))
@@ -52,10 +39,10 @@
                (with-foreign-pointer (dirent-ptr this-size)
                  ; (warn "name-offset: ~s node is ~s size: ~s ; this-size ~s~%"
                  ;	   +name-offset+ dirent-name (+ +name-offset+ namelen) this-size)
-                 (setf (foreign-slot-value dirent-ptr 'dirent-struct 'ino) (stat-get (stat node) 'ino))
+                 (setf (foreign-slot-value dirent-ptr 'dirent-struct 'ino) (ino dirent))
                  (setf (foreign-slot-value dirent-ptr 'dirent-struct 'reclen) this-size)
                  (setf (foreign-slot-value dirent-ptr 'dirent-struct 'type)
-                       (foreign-enum-value 'dirent-type (%get-dirent-type (stat node))))
+                       (foreign-enum-value 'dirent-type (file-type dirent)))
                  (setf (foreign-slot-value dirent-ptr 'dirent-struct 'namlen) namelen)
                  (lisp-string-to-foreign dirent-name
                                          (inc-pointer dirent-ptr +name-offset+)
