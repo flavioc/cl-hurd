@@ -123,29 +123,29 @@
 (define-mode-meth get-type nil
   "Returns type of mode."
   (cond
-    ((is-dir-p mode) 'dir)
-    ((is-chr-p mode) 'chr)
-    ((is-reg-p mode) 'reg)
-    ((is-blk-p mode) 'blk)
-    ((is-lnk-p mode) 'lnk)
-    ((is-sock-p mode) 'sock)
+    ((is-dir-p mode) :dir)
+    ((is-chr-p mode) :chr)
+    ((is-reg-p mode) :reg)
+    ((is-blk-p mode) :blk)
+    ((is-lnk-p mode) :lnk)
+    ((is-sock-p mode) :sock)
     (t
       (warn "Could not get type for mode~%")
-      'reg)))
+      :unknown)))
 
 (defun %get-type-bits (type)
   "Returns the bits that must be activated from a certain type."
   (case type
-    (dir +ifdir+)
-    (reg +ifreg+)
-    (chr +ifchr+)
-    (blk +ifblk+)
-    (lnk +iflnk+)
-    (sock +ifsock+)
-    (fifo +ififo+)
+    (:dir +ifdir+)
+    (:reg +ifreg+)
+    (:chr +ifchr+)
+    (:blk +ifblk+)
+    (:lnk +iflnk+)
+    (:sock +ifsock+)
+    (:fifo +ififo+)
     (otherwise
       (warn "invalid type at get-type-bits")
-      +ifmt+))) ; FIXME
+      #o000000)))
 
 (define-mode-meth set-type (new-type)
   "Changes type of mode. Possible values for new-type are:
@@ -156,39 +156,63 @@ dir, reg, chr, blk, lnk, sock."
                (%get-type-bits new-type)))
   new-type)
 
-(defun %get-perm-bits (perm-type user-type)
+(defun %get-perm-bits (perm-type &optional user-type)
   "Returns the permission bytes associated with perm-type and user-type.
 These are the possible combinations:
 
 perm-type: read / write / exec
 user-type: owner / group / others / unknown
+
+You can also ignore user-type and the bits will be for all the user types.
 "
+  (if (null user-type)
+    (case perm-type
+      (read
+        (chained-bit-op boole-ior
+                        +irusr+
+                        +irgrp+
+                        +iroth+
+                        +irunk+))
+      (write
+        (chained-bit-op boole-ior
+                        +iwusr+
+                        +iwgrp+
+                        +iwoth+
+                        +iwunk+))
+      (exec
+        (chained-bit-op boole-ior
+                        +ixusr+
+                        +ixgrp+
+                        +ixoth+
+                        +ixunk+))
+      (otherwise
+        0))
   (case user-type
-	(owner
-	  (case perm-type
-		(read +irusr+)
-		(write +iwusr+)
-		(exec +ixusr+)
-		(otherwise 0)))
-	(group
-	  (case perm-type
-		(read +irgrp+)
-		(write +iwgrp+)
-		(exec +ixgrp+)
-		(otherwise 0)))
-	(others
-	  (case perm-type
-		(read +iroth+)
-		(write +iwoth+)
-		(exec +ixoth+)
-    (otherwise 0)))
-	(unknown
-	  (case perm-type
-		(read +irunk+)
-		(write +iwunk+)
-		(exec +ixunk+)
-		(otherwise 0)))
-	(otherwise 0)))
+    (owner
+      (case perm-type
+        (read +irusr+)
+        (write +iwusr+)
+        (exec +ixusr+)
+        (otherwise 0)))
+    (group
+      (case perm-type
+        (read +irgrp+)
+        (write +iwgrp+)
+        (exec +ixgrp+)
+        (otherwise 0)))
+    (others
+      (case perm-type
+        (read +iroth+)
+        (write +iwoth+)
+        (exec +ixoth+)
+        (otherwise 0)))
+    (unknown
+      (case perm-type
+        (read +irunk+)
+        (write +iwunk+)
+        (exec +ixunk+)
+        (otherwise 0)))
+    (otherwise 0))))
 
 (define-mode-meth has-perms-p (perm-type user-type)
 
@@ -198,10 +222,11 @@ user-type: owner / group / others / unknown
     ;; We not using the unknown bits and user-type is unknown
     ;; Always return nil
     nil
-    (not (zerop (boole boole-and val
-                       (%get-perm-bits perm-type user-type))))))
+    (let ((bits (%get-perm-bits perm-type user-type)))
+      (eq bits
+          (boole boole-and val bits)))))
 
-(define-mode-meth set-perms (perm-type user-type)
+(define-mode-meth set-perms (perm-type &optional user-type)
   "Activates permission bits for perm-type/user-type."
   (setf (mode-bits mode)
 	(boole boole-ior
@@ -209,7 +234,7 @@ user-type: owner / group / others / unknown
          (%get-perm-bits perm-type user-type)))
   t)
 
-(define-mode-meth clear-perms (perm-type user-type)
+(define-mode-meth clear-perms (perm-type &optional user-type)
   "Clears permission bits for perm-type/user-type."
   (setf (mode-bits mode)
         (boole boole-andc2
@@ -217,7 +242,7 @@ user-type: owner / group / others / unknown
                (%get-perm-bits perm-type user-type)))
   t)
 
-(define-mode-meth set-perms-if (perm-type user-type condit)
+(define-mode-meth set-perms-if (condit perm-type &optional user-type)
   "Activates or clears permission bits based on the 'condit' value."
   (if condit
     (set-perms mode perm-type user-type)
