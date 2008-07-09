@@ -158,7 +158,9 @@
            :ino-t
            :pid-t
            :get-type
-           :type))
+           :type
+           :from
+           :to))
 
 (defpackage :cl-mach
   (:nicknames :mach)
