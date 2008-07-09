@@ -21,10 +21,17 @@
     (20 :make-send)
     (21 :make-send-once)))
 
+(defun translate-msg-type-name-foreign (value)
+  (translate-foreign-list value +msg-type-name-codes+ 'from))
+
 (defmethod translate-from-foreign (value (type msg-type-name-type))
   "Translate a foreign message type name into a lisp symbol."
-  (translate-foreign-list value +msg-type-name-codes+ 'from))
+  (translate-msg-type-name-foreign value))
+
+(defun translate-msg-type-name-symbol (value)
+  (translate-foreign-list value +msg-type-name-codes+ 'to))
 
 (defmethod translate-to-foreign (value (type msg-type-name-type))
   "Translate a msg-type-name symbol into a foreign value."
-  (translate-foreign-list value +msg-type-name-codes+ 'to))
+  (translate-msg-type-name-symbol value))
+
