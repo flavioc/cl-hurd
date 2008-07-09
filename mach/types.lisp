@@ -40,3 +40,6 @@
 
 (defctype port-rights :unsigned-int "mach_port_rights_t type")
 
+(defctype msg-bits :unsigned-int "mach_msg_bits_t type")
+
+(defctype msg-id :int "mach_msg_id_t type")
