@@ -93,13 +93,15 @@
                                                          "task"))
                                      (:file "message"
                                             :depends-on ("types"
-                                                         "msg-header"))
+                                                         "msg-header"
+                                                         "port-creation"))
                                      (:file "functions"
                                             :depends-on ("types"
                                                          "port-creation"
                                                          "port-destruction"
                                                          "port-rights"
                                                          "port-move"
+                                                         "message"
                                                          "port-sets"
                                                          "port-request-notifications"
                                                          "msg-server"
