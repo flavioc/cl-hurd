@@ -2,7 +2,7 @@
 (in-package :mach)
 
 ;;
-;; This file defines the mach_msg_id_t foreign type.
+;; This file defines the msg notify foreign codes.
 ;;
 
 ;; Possible codes follow...
@@ -12,22 +12,22 @@
 (defconstant +notify-no-senders+ (+ +notify-first+ #o6))
 
 ;; Everything into a single list...
-(defconstant +msg-id-codes+
+(defconstant +msg-notify-codes+
   `((,+notify-port-destroyed+ :notify-port-destroyed)
     (,+notify-dead-name+ :notify-dead-name)
     (,+notify-no-senders+ :notify-no-senders)))
 
-(define-foreign-type msg-id-type ()
+(define-foreign-type msg-notify-type ()
   ()
-  (:documentation "CFFI type for mach_msg_id_t.")
+  (:documentation "CFFI type for notification codes.")
   (:actual-type :int)
-  (:simple-parser msg-id))
+  (:simple-parser msg-notify))
 
-(defmethod translate-from-foreign (value (type msg-id-type))
+(defmethod translate-from-foreign (value (type msg-notify-type))
   "Translate a foreign value into a symbol."
-  (translate-foreign-list value +msg-id-codes+ 'from))
+  (translate-foreign-list value +msg-notify-codes+ 'from))
 
-(defmethod translate-to-foreign (value (type msg-id-type))
+(defmethod translate-to-foreign (value (type msg-notify-type))
   "Translate a symbol into a foreign value."
-  (translate-foreign-list value +msg-id-codes+ 'to))
+  (translate-foreign-list value +msg-notify-codes+ 'to))
 
