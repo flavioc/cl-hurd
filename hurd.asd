@@ -45,17 +45,21 @@
                                      (:file "port-type"
                                             :depends-on ("port-right"))
                                      (:file "port")
-                                     (:file "msg-id")
+                                     (:file "msg-notify")
                                      (:file "msg-option")
+                                     (:file "msg-type")
                                      (:file "types"
                                             :depends-on ("mach"
                                                          "port-type"
                                                          "msg-type-name"
                                                          "port-right"
                                                          "port"
-                                                         "msg-id"
+                                                         "msg-notify"
                                                          "msg-option"
+                                                         "msg-type"
                                                          "task-special-ports"))
+                                     (:file "msg-header"
+                                            :depends-on ("types"))
                                      (:file "port-creation"
                                             :depends-on ("types"))
                                      (:file "port-destruction"
@@ -87,6 +91,9 @@
                                      (:file "msg-server"
                                             :depends-on ("types"
                                                          "task"))
+                                     (:file "message"
+                                            :depends-on ("types"
+                                                         "msg-header"))
                                      (:file "functions"
                                             :depends-on ("types"
                                                          "port-creation"
