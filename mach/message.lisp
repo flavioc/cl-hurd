@@ -12,68 +12,67 @@
   (notify port))
 
 (defgeneric msg-type-exists-p (obj))
-(defmethod msg-type-exists ((obj t)) nil)
-(defmethod msg-type-exists-p ((obj (eql :integer))) t)
-(defmethod msg-type-exists-p ((obj (eql :char))) t)
-(defmethod msg-type-exists-p ((obj (eql :real))) t)
-(defmethod msg-type-exists-p ((obj (eql :string))) t)
-
 (defgeneric msg-type-size (obj))
-(defmethod msg-type-size ((obj t)) 0)
-(defmethod msg-type-size ((obj (eql :integer))) 4)
-(defmethod msg-type-size ((obj (eql :char))) 4)
-(defmethod msg-type-size ((obj (eql :real)))
-  (foreign-type-size :double))
-(defmethod msg-type-size ((obj (eql :string))) 1)
-
 (defgeneric msg-type-number (type))
-(defmethod msg-type-number ((type t)) 0)
-(defmethod msg-type-number ((type (eql :integer))) 1)
-(defmethod msg-type-number ((type (eql :char))) 1)
-(defmethod msg-type-number ((type (eql :real))) 1)
-(defmethod msg-type-number ((type (eql :string))) 1024)
-
 (defgeneric msg-type-data-p (obj data))
-(defmethod msg-type-data-p ((obj t) data) nil)
-(defmethod msg-type-data-p ((obj (eql :integer)) data) (numberp data))
-(defmethod msg-type-data-p ((obj (eql :char)) data)
-  (characterp data))
-(defmethod msg-type-data-p ((obj (eql :real)) data)
-  (numberp data))
-(defmethod msg-type-data-p ((obj (eql :string)) data)
-  (and (stringp data)
-       (<= (length data) 1024)))
-
 (defgeneric msg-type-to-msg-type (obj))
-(defmethod msg-type-to-msg-type ((obj t)) nil)
-(defmethod msg-type-to-msg-type ((obj (eql :integer))) :type-integer-32)
-(defmethod msg-type-to-msg-type ((obj (eql :char))) :type-char)
-(defmethod msg-type-to-msg-type ((obj (eql :real))) :type-integer-64)
-(defmethod msg-type-to-msg-type ((obj (eql :string))) :type-string)
-
 (defgeneric msg-type-set-data (type ptr data))
-(defmethod msg-type-set-data ((type t) ptr data) nil)
-(defmethod msg-type-set-data ((type (eql :integer)) ptr data)
-  (setf (mem-ref ptr :int) data))
-(defmethod msg-type-set-data ((type (eql :char)) ptr data)
-  (setf (mem-ref ptr :char) (char-code data)))
-(defmethod msg-type-set-data ((type (eql :real)) ptr data)
-  (setf (mem-ref ptr :float) data))
-(defmethod msg-type-set-data ((type (eql :string)) ptr data)
-  (lisp-string-to-foreign data
-                          ptr
-                          (1+ (length data))))
-
 (defgeneric msg-type-get-data (type ptr))
+
+(defmethod msg-type-exists-p ((obj t)) nil)
+(defmethod msg-type-size ((obj t)) 0)
+(defmethod msg-type-number ((type t)) 0)
+(defmethod msg-type-data-p ((obj t) data) nil)
+(defmethod msg-type-to-msg-type ((obj t)) nil)
+(defmethod msg-type-set-data ((type t) ptr data) nil)
 (defmethod msg-type-get-data ((type t) ptr) nil)
-(defmethod msg-type-get-data ((type (eql :integer)) ptr)
-  (mem-ref ptr :int))
-(defmethod msg-type-get-data ((type (eql :char)) ptr)
-  (code-char (mem-ref ptr :char)))
-(defmethod msg-type-get-data ((type (eql :real)) ptr)
-  (mem-ref ptr :float))
-(defmethod msg-type-get-data ((type (eql :string)) ptr)
-  (foreign-string-to-lisp ptr))
+
+(defmacro msg-add-type (type-name &key size number test
+                                  msg-type
+                                  set
+                                  get)
+  `(progn
+     (defmethod msg-type-exists-p ((obj (eql ,type-name))) t)
+     (defmethod msg-type-size ((obj (eql ,type-name))) ,size)
+     (defmethod msg-type-number ((obj (eql ,type-name))) ,number)
+     (defmethod msg-type-data-p ((obj (eql ,type-name)) data) ,test)
+     (defmethod msg-type-to-msg-type ((obj (eql ,type-name))) ,msg-type)
+     (defmethod msg-type-set-data ((type (eql ,type-name)) ptr data) ,set)
+     (defmethod msg-type-get-data ((type (eql ,type-name)) ptr) ,get)))
+
+(msg-add-type :integer
+              :size 4
+              :number 1
+              :test (numberp data)
+              :msg-type :type-integer-32
+              :set (setf (mem-ref ptr :int) data)
+              :get (mem-ref ptr :int))
+
+(msg-add-type :char
+              :size 4
+              :number 1
+              :test (characterp data)
+              :msg-type :type-char
+              :set (setf (mem-ref ptr :char) (char-code data))
+              :get (code-char (mem-ref ptr :char)))
+
+(msg-add-type :real
+              :size (foreign-type-size :double)
+              :number 1
+              :test (numberp data)
+              :msg-type :type-integer-64
+              :set (setf (mem-ref ptr :float) data)
+              :get (mem-ref ptr :float))
+
+(msg-add-type :string
+              :size 1
+              :number 1024
+              :test (and (stringp data) (<= (length data) 1024))
+              :msg-type :type-string
+              :set (lisp-string-to-foreign data
+                                           ptr
+                                           (1+ (length data)))
+              :get (foreign-string-to-lisp ptr))
 
 (defclass message-spec ()
   ((fields :initform nil
