@@ -61,6 +61,20 @@
     (,+type-dnrequest+ :type-dnrequest)
     (,+type-compat+ :type-compat)))
 
+(define-foreign-type port-type-single-type ()
+  ()
+  (:documentation "CFFI type for simple port types.")
+  (:actual-type :unsigned-int)
+  (:simple-parser port-type-single-t))
+
+(defmethod translate-from-foreign (value (type port-type-single-type))
+  "Translate a foreign value into a symbol."
+  (translate-foreign-list value +port-type-codes+ 'from))
+
+(defmethod translate-to-foreign (value (type port-type-single-type))
+  "Translate a symbol into a foreign value."
+  (translate-foreign-list value +port-type-codes+ 'to))
+
 (defclass port-type-class ()
   ((value :initarg :value
           :accessor value))
@@ -69,9 +83,9 @@
 (defmethod port-type-is-p ((ptype port-type-class) flag)
   "Checks if the port type object as a flag activated in its bitfield."
   (let ((val (value ptype))
-        (bits (find flag +port-type-codes+ :key #'second)))
+        (bits (translate-type-bits flag)))
     (when bits
-      (eq (first bits) (boole boole-and val (first bits))))))
+      (eq bits (boole boole-and val bits)))))
 
 (define-foreign-type port-type-type ()
   ()
