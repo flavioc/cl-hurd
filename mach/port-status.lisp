@@ -41,7 +41,7 @@
   (let ((mem (foreign-alloc 'port-status-struct)))
     (memcpy mem ptr (foreign-type-size 'port-status-struct))
     (let ((obj (make-instance 'port-status :ptr mem)))
-      (finalize obj (lambda ()
+      (tg:finalize obj (lambda ()
                       (foreign-free mem)))
       obj)))
 
