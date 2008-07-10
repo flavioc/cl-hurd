@@ -14,7 +14,9 @@
                     :documentation "If we have given send rights to someone")
    (mscount :initform 0
             :accessor mscount
-            :documentation "Send rights count")))
+            :documentation "Send rights count")
+   (is-control :initform nil
+               :initarg :control)))
 
 (defmethod has-send-rights ((port port-info))
   "Has this port name send rights?"
@@ -53,3 +55,11 @@
   (if (has-send-rights port)
     (error 'port-still-has-send-righs :port port))
   (port-destroy (port-right port)))
+
+(defmethod port-is-control-p ((port port-info))
+  "Tells if this port is a control port."
+  (slot-value port 'is-control))
+
+(defmethod port-is-user-p ((port port-info))
+  "Tells if this port is an user port."
+  (not (port-is-control-p port)))
