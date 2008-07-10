@@ -135,6 +135,8 @@
                                                                   :depends-on ("utils"))))
                                      (:module fsys
                                               :components ((:file "startup")
+                                                           (:file "goaway-flags")
+                                                           (:file "goaway-reply")
                                                            (:file "getroot")))
                                      (:module fshelp
                                               :components ((:file "access")
@@ -227,7 +229,11 @@
                                                            (:file "io-set-all-openmodes")
                                                            (:file "io-set-some-openmodes")
                                                            (:file "io-stat")
-                                                           (:file "io-write"))
+                                                           (:file "io-write")
+                                                           (:file "fsys-goaway")
+                                                           (:file "file-getcontrol")
+                                                           (:file "fsys-syncfs")
+                                                           (:file "file-check-access"))
                                               :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
