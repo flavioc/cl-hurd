@@ -21,8 +21,11 @@
 
 (defmacro define-stub-library (name)
   "Defines a new stub library using CFFI"
-  (let* ((name-string (string-downcase (string name)))
-         (library-name (concatenate 'string name-string "_stubs.so"))
+  (let* ((name-string (string-downcase (substitute #\_ #\-
+                                                   (string name))))
+         (library-name (concatenate 'string
+                                    name-string
+                                    "_stubs.so"))
          (full-name (intern library-name)))
     `(progn
        (define-foreign-library ,full-name
