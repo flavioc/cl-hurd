@@ -38,6 +38,10 @@
     ;(%free-ptr gids-ptr gids-len)
     obj))
 
+(defun make-iouser-root ()
+  "Create the root iouser."
+  (make-iouser :uids '(0) :gids '(0)))
+
 (defmethod contains-uid ((iouser iouser) uid)
   "Does it contain 'uid' in UIDs?"
   (member uid (uids iouser)))
