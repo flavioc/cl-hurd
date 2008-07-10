@@ -43,6 +43,11 @@
                  (node user)
   '(:read))
 
+(define-callback refresh-statfs zip-translator
+                 (user)
+  (setf (statfs-get (get-statfs *translator*) 'bfree) 1)
+  t)
+
 ;; XXX
 (define-callback file-write zip-translator
 				 (node user offset stream)
