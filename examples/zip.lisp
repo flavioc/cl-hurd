@@ -22,7 +22,7 @@
 (define-callback allow-open zip-translator (node user flags is-new-p) t)
 
 (define-callback file-read zip-translator
-				 (node user start amount stream)
+                 (node user start amount stream)
   (let* ((size (stat-get (stat node) 'size))
          (size-res (- size start)))
     (cond
@@ -38,6 +38,10 @@
         (if (eq end size)
           (write-byte #xA0 stream))
         t)))))
+
+(define-callback report-access zip-translator
+                 (node user)
+  '(:read))
 
 ;; XXX
 (define-callback file-write zip-translator
