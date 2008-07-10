@@ -5,7 +5,7 @@
   err
   (task ipc-space)
   (name port)
-  (variant msg-id)
+  (variant msg-notify)
   (sync port-mscount)
   (notify port)
   (notify-type msg-type-name)
