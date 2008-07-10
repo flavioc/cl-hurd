@@ -9,7 +9,7 @@
                            flags
                            newnode-p)))
     (when allow
-      (disable flags 'open-modes)
+      (disable flags :open-modes)
       (let* ((new-user (make-iouser :old user))
              (new-protid
                (new-protid *translator*
@@ -49,11 +49,11 @@
           (let ((found-node (dir-lookup *translator* node user this-path)))
             (cond
               ((and found-node
-                    (flag-is-p flags 'creat)
-                    (flag-is-p flags 'excl))
+                    (flag-is-p flags :creat)
+                    (flag-is-p flags :excl))
                :file-exists)
               ((and (not found-node)
-                    (flag-is-p flags 'creat)
+                    (flag-is-p flags :creat)
                     (null rest-path))
                (set-vtx mode nil)
                (set-spare mode nil)

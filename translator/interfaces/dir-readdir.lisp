@@ -92,7 +92,7 @@
 				(amount :pointer))
   (with-lookup dir-protid port
     (block dir-readdir
-           (unless (flag-is-p (get-open-flags dir-protid) 'read)
+           (unless (flag-is-p (get-open-flags dir-protid) :read)
              (return-from dir-readdir :bad-fd))
            (unless (is-dir-p (get-stat dir-protid))
              (return-from dir-readdir :not-directory))

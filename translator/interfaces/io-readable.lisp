@@ -7,7 +7,7 @@
     (block io-readable
            (let ((open (open-node protid))
                  (node (get-node protid)))
-             (unless (flag-is-p (flags open) 'read)
+             (unless (flag-is-p (flags open) :read)
                (return-from io-readable :invalid-argument))
              (setf (mem-ref amount 'msg-type-number)
                    (max 0

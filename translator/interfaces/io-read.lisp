@@ -35,7 +35,7 @@
            (let ((open-node (open-node protid))
                  (node (get-node protid))
                  (user (get-user protid)))
-             (unless (flag-is-p (flags open-node) 'read)
+             (unless (flag-is-p (flags open-node) :read)
                (return-from io-read :bad-fd))
              ;			 (when (< offset -1)
              ;			   (warn "offset < -1")

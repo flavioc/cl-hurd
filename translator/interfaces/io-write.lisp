@@ -17,10 +17,10 @@
            (let ((open (open-node protid))
                  (node (get-node protid))
                  (user (get-user protid)))
-             (unless (flag-is-p (flags open) 'write)
+             (unless (flag-is-p (flags open) :write)
                (return-from io-write :invalid-argument))
              (when (%is-minus-one-p offset)
-               (when (flag-is-p (flags open) 'append)
+               (when (flag-is-p (flags open) :append)
                  ;; Move file offset to the end of the file!
                  (setf (file-offset open)
                        (stat-get (stat node) 'size)))

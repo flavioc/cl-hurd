@@ -34,7 +34,9 @@
            (is-chr-p stat)
            (is-fifo-p stat))
        (or
-         (flag-is-p flags 'read) (flag-is-p flags 'write) (flag-is-p flags 'exec))))
+         (flag-is-p flags :read)
+         (flag-is-p flags :write)
+         (flag-is-p flags :exec))))
 
 (def-fsys-interface :fsys-getroot ((fsys port)
 								   (reply port)
@@ -54,11 +56,11 @@
                (port-exists-p fsys))
       (let ((user (make-iouser-mem gen-uids gen-uids-count
                                    gen-gids gen-gids-count)))
-        (only flags 'hurd)
+        (only flags :hurd)
         (block outer-block
                (when (and (or (has-passive-trans-p (stat root-node))
                               (box-translated-p (box root-node)))
-                          (flag-is-p flags 'notrans))
+                          (flag-is-p flags :notrans))
                  (insert-temporary-data *translator* fsys root-node)
                  (let ((ret-fetch (fetch-root (box root-node) fsys
                                               dotdot flags
@@ -76,7 +78,7 @@
                  (return-from outer-block nil))
                (unless (allow-open *translator* root-node user flags t)
                  (return-from outer-block :not-permitted))
-               (disable flags 'open-modes)
+               (disable flags :open-modes)
                (let ((new (new-protid *translator* user
                                       (make-open-node (root *translator*)
                                                       flags
