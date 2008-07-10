@@ -53,7 +53,7 @@
   "Sets the mode bits from a stat."
   (setf (foreign-slot-value (ptr stat) 'stat-struct 'mode) new-value))
 
-(defun copy-stat-struct (stat-dest stat-src)
+(defun stat-copy (stat-dest stat-src)
   "Copies to 'stat-dest' all the stat information from 'stat-src'."
   (memcpy (ptr stat-dest) (ptr stat-src) +stat-size+))
 
@@ -180,6 +180,10 @@ size: initial size for the size field.
     (setf (stat-get obj 'size) size)
     ; Return the new object
     obj))
+
+(defmethod stat-clean ((stat stat))
+  "Clean the stat struct, putting zeros there."
+  (bzero (ptr stat) (foreign-type-size 'stat-struct)))
 
 (defmethod print-object ((stat stat) stream)
   "Print a stat object."
