@@ -77,7 +77,7 @@
 (defmethod setup ((translator translator) &optional (flags nil))
   "Gets the bootstrap port to call fsys-startup and create a new port into the bucket. After that we get the underlying node."
   (with-port-deallocate (bootstrap (task-get-bootstrap-port))
-    (let ((port (add-new-port (port-bucket translator))))
+    (let ((port (add-control-port (port-bucket translator))))
       (with-port-deallocate (right (get-send-right port))
         (let ((file (fsys-startup bootstrap flags right :copy-send)))
           (setf (slot-value translator 'underlying-node) file)
