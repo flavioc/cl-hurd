@@ -49,35 +49,35 @@
 ;; in the translate-*-foreign functions.
 ;;
 (defconstant +flags-list+
-  `((read ,+o-read+)
-    (write ,+o-write+)
-    (exec ,+o-exec+)
-    (norw ,+o-norw+)
-    (largefile ,+o-largefile+)
-    (creat ,+o-creat+)
-    (excl ,+o-excl+)
-    (nolink ,+o-nolink+)
-    (notrans ,+o-notrans+)
-    (nofollow ,+o-nofollow+)
-    (directory ,+o-directory+)
-    (append ,+o-append+)
-    (async ,+o-async+)
-    (fsync ,+o-fsync+)
-    (sync ,+o-sync+)
-    (noatime ,+o-noatime+)
-    (shlock ,+o-shlock+)
-    (exlock ,+o-exlock+)
-    (dsync ,+o-dsync+)
-    (rsync ,+o-rsync+)
-    (nonblock ,+o-nonblock+)
-    (hurd ,+o-hurd+)
-    (trunc ,+o-trunc+)
-    (cloexec ,+o-cloexec+)
-    (open-modes ,(chained-bit-op boole-ior
-                                 +o-creat+
-                                 +o-excl+
-                                 +o-nolink+
-                                 +o-notrans+))))
+  `((:read ,+o-read+)
+    (:write ,+o-write+)
+    (:exec ,+o-exec+)
+    (:norw ,+o-norw+)
+    (:largefile ,+o-largefile+)
+    (:creat ,+o-creat+)
+    (:excl ,+o-excl+)
+    (:nolink ,+o-nolink+)
+    (:notrans ,+o-notrans+)
+    (:nofollow ,+o-nofollow+)
+    (:directory ,+o-directory+)
+    (:append ,+o-append+)
+    (:async ,+o-async+)
+    (:fsync ,+o-fsync+)
+    (:sync ,+o-sync+)
+    (:noatime ,+o-noatime+)
+    (:shlock ,+o-shlock+)
+    (:exlock ,+o-exlock+)
+    (:dsync ,+o-dsync+)
+    (:rsync ,+o-rsync+)
+    (:nonblock ,+o-nonblock+)
+    (:hurd ,+o-hurd+)
+    (:trunc ,+o-trunc+)
+    (:cloexec ,+o-cloexec+)
+    (:open-modes ,(chained-bit-op boole-ior
+                                  +o-creat+
+                                  +o-excl+
+                                  +o-nolink+
+                                  +o-notrans+))))
 
 (defun %flag-to-bits (flag)
   "Returns the bits associated with 'flag'."
