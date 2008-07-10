@@ -67,13 +67,16 @@
   (:actual-type :unsigned-int)
   (:simple-parser port-type-single-t))
 
+(defun translate-type-bits (value)
+  (translate-foreign-list value +port-type-codes+ 'to))
+
 (defmethod translate-from-foreign (value (type port-type-single-type))
   "Translate a foreign value into a symbol."
   (translate-foreign-list value +port-type-codes+ 'from))
 
 (defmethod translate-to-foreign (value (type port-type-single-type))
   "Translate a symbol into a foreign value."
-  (translate-foreign-list value +port-type-codes+ 'to))
+  (translate-type-bits value))
 
 (defclass port-type-class ()
   ((value :initarg :value
