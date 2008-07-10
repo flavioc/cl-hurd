@@ -26,6 +26,7 @@
                                             :depends-on ("types"))
                                      (:file "flags"
                                             :depends-on ("utils"))
+                                     (:file "fs-type")
                                      (:file "mode"
                                             :depends-on ("utils"))
                                      (:file "memcpy")
@@ -34,6 +35,9 @@
                                                          "types"
                                                          "ids"
                                                          "memcpy"))
+                                     (:file "statfs"
+                                            :depends-on ("types"
+                                                         "fs-type"))
                                      (:file "functions"
                                             :depends-on ("error")))
                         :depends-on ("packages" "paths"))
@@ -122,7 +126,6 @@
                         :components ((:file "types")
                                      (:file "paths")
                                      (:file "retry")
-                                     (:file "fs-type")
                                      (:file "functions"
                                             :depends-on ("types"))
                                      (:file "macros")
@@ -233,6 +236,7 @@
                                                            (:file "fsys-goaway")
                                                            (:file "file-getcontrol")
                                                            (:file "fsys-syncfs")
+                                                           (:file "file-statfs")
                                                            (:file "file-check-access"))
                                               :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
