@@ -26,9 +26,9 @@
   (with-accessors ((port port-set)) bucket
     (port-destroy port)))
 
-(defmethod add-new-port ((bucket port-bucket))
-  "Adds a new port to bucket."
-  (let ((port (make-instance 'port-info)))
+(defmethod add-control-port ((bucket port-bucket))
+  "Adds a new control port to bucket."
+  (let ((port (make-instance 'port-info :control t)))
     (add-port bucket port)))
 
 (defmethod add-port ((bucket port-bucket) (port port-info))
@@ -61,10 +61,30 @@
   (with-accessors ((cleanup-fun cleanup-function)) bucket
     (remhash (port-right port) (table bucket))
     (set-send-rights port nil)
-    (when cleanup-fun
+    (when (and cleanup-fun
+               (port-is-user-p port)) ; Must be an user port.
       (funcall cleanup-fun port))
     (port-cleanup port)))
 
 (defun make-bucket (cleanup)
   "Create a new bucket with the cleanup function 'cleanup'."
   (make-instance 'port-bucket :cleanup cleanup))
+
+(defun bucket-total-users ((bucket port-bucket))
+  "Return number of user ports"
+  (loop for key being the hash-keys of (table bucket)
+        using (hash-value value)
+        sum (if (port-is-user-p value) 1 0)))
+
+(defun bucket-total-control ((bucket port-bucket))
+  "Return number of control ports"
+  (loop for key being the hash-keys of (table bucket)
+        using (hash-value value)
+        sum (if (port-is-control-p value) 1 0)))
+
+(defmethod bucket-statistics ((bucket port-bucket))
+  "Prints bucket statistics."
+  (format *error-output* "Bucket statistics:~%")
+  (format *error-output* "User ports: ~a~%Control ports: ~a~%"
+          (bucket-total-users bucket)
+          (bucket-total-control bucket)))
