@@ -1,5 +1,5 @@
 
-(in-package :hurd)
+(in-package :hurd-common)
 
 ;;
 ;; File system types for the stat's fsid field.
