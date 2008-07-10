@@ -47,3 +47,6 @@
   "Print a node to stream."
   (format stream "#<node ref: ~s>" (references node)))
 
+(defmethod is-controller-p ((node node) (user iouser))
+  "Specialize is-controller-p for nodes."
+  (is-controller-p (stat node) user))
