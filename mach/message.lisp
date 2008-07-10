@@ -260,8 +260,8 @@
 (defmethod get-message-remote-port ((msg message))
   (header-get-remote-port (ptr msg)))
 
-(defvar *p1* (port-allocate :right-receive))
-(defparameter *spec-mixed* (make-message-spec
-                             :fields '(:string :integer :char :string :integer :real)))
-(defparameter *msg-mixed* (make-message :spec *spec-mixed*))
-(print (send-message *msg-mixed* :remote *p1* :data (list "ola" 42 #\b "sim" 314 3.14)))
+;(defvar *p1* (port-allocate :right-receive))
+;(defparameter *spec-mixed* (make-message-spec
+;                             :fields '(:string :integer :char :string :integer :real)))
+;(defparameter *msg-mixed* (make-message :spec *spec-mixed*))
+;(print (send-message *msg-mixed* :remote *p1* :data (list "ola" 42 #\b "sim" 314 3.14)))
