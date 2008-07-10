@@ -28,6 +28,9 @@
    (root-node :initform nil
               :accessor root
               :documentation "The root node.")
+   (statfs :initform (make-statfs)
+           :accessor get-statfs
+           :documentation "File system statistics")
    (name :initform "cl-translator"
          :accessor name
          :documentation "Translator's name.")
