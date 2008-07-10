@@ -8,7 +8,7 @@
                  (:documentation ,doc))
      (defmethod ,name ((translator translator) ,@args)
        ,@(if (null body)
-           nil 
+           'nil 
            body))))
 
 (%add-callback make-root-node (underlying-stat)
@@ -79,7 +79,8 @@ please see common/pathconf.lisp."
   "User wants to sync the contents in node. 'wait-p' indicates the user wants to wait. 'omit-metadata-p' indicates we must omit the update of the file metadata (like stat information).")
 
 (%add-callback file-syncfs (user wait-p do-children-p)
-  "User wants to sync the entire filesystem. 'wait-p' indicates the user wants to wait for it. 'do-children-p' indicates we should also sync the children nodes.")
+  "User wants to sync the entire filesystem. 'wait-p' indicates the user wants to wait for it. 'do-children-p' indicates we should also sync the children nodes."
+  t)
 
 (%add-callback file-write (node user offset stream)
   "The user wants to write the bytes in the input stream 'stream' starting at 'offset'.")
@@ -87,6 +88,11 @@ please see common/pathconf.lisp."
 (%add-callback drop-node (node)
   "The 'node' has no more references, drop it."
   (warn "Dropped node ~s" node)
+  nil)
+
+(%add-callback report-access (node user)
+  "This should return a list of permitted access modes for 'user'.Permitted modes are:
+:read :write :exec."
   nil)
 
 (defmacro define-callback (name trans-type args &body body)
