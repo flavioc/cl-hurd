@@ -112,3 +112,12 @@ a/b/c/ -> ('a', 'b', 'c', '') pay attention to the last component!"
                                   (concatenate 'string all "/" x))
                                 ls
                                 :initial-value "")))
+
+(defcfun ("bzero" %bzero)
+  :void
+  (s :pointer)
+  (n :int))
+
+(defun bzero (ptr n)
+  "Copies n bytes, each with a value of zero, into ptr."
+  (%bzero ptr n))
