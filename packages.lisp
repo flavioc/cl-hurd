@@ -282,7 +282,7 @@
            :make-bucket
            :run-server
            :add-port
-           :add-new-port
+           :add-control-port
            :has-port
            :lookup-port
            :+servers+
@@ -306,6 +306,7 @@
            :io-server-version
            :make-iouser
            :make-iouser-mem
+           :make-iouser-root
            :contains-uid
            :contains-gid
            :empty-uids-p
@@ -335,6 +336,19 @@
            :can-modify-file-in-dir-p
            :is-owner-p
            :transbox-drop
+           :nowait
+           :nosync
+           :force
+           :unlink
+           :recurse
+           :fsys-goaway-flags
+           :fsys-goaway-flag-is-p
+           :fsys-goaway-reply
+           :bucket-statistics
+           :port-is-control-p
+           :port-is-user-p
+           :bucket-total-users
+           :bucket-total-control
            ))
 
 (defpackage :cl-hurd.translator
@@ -370,7 +384,8 @@
            :inc-refs
            :dec-refs
            :drop-node
-           :make-node-dirent))
+           :make-node-dirent
+           :report-access))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)
