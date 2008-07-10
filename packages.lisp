@@ -50,6 +50,7 @@
            :stat-struct
            :make-stat
            :stat-t
+           :stat-clean
            :ptr
            :fstype
            :fsid
@@ -110,7 +111,7 @@
            :set-active-trans
            :set-passive-trans
            :set-root
-           :copy-stat-struct
+           :stat-copy
            :only
            :open-modes
            :set-types
@@ -160,7 +161,21 @@
            :get-type
            :type
            :from
-           :to))
+           :to
+           :statfs-t
+           :make-statfs
+           :statfs-get
+           :statfs-set
+           :statfs-clean
+           :statfs-copy
+           :bsize
+           :bfree
+           :bavail
+           :files
+           :ffree
+           :namelen
+           :favail
+           :frsize))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -385,7 +400,10 @@
            :dec-refs
            :drop-node
            :make-node-dirent
-           :report-access))
+           :report-access
+           :refresh-statfs
+           :*translator*
+           :get-statfs))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)
