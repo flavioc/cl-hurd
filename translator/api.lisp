@@ -95,6 +95,11 @@ please see common/pathconf.lisp."
 :read :write :exec."
   nil)
 
+(%add-callback refresh-statfs (user)
+  "The statfs translator field must be updated for 'user'.
+Return t for success, nil for unsupported operation."
+  nil)
+
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
   `(defmethod ,name ((translator ,trans-type) ,@args)
