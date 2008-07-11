@@ -100,6 +100,11 @@ please see common/pathconf.lisp."
 Return t for success, nil for unsupported operation."
   nil)
 
+(%add-callback file-change-size (node user new-size)
+  "The user wants to change node size to 'new-size'.
+Return t on success, nil for unsupported operation."
+  nil)
+
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
   `(defmethod ,name ((translator ,trans-type) ,@args)

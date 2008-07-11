@@ -404,7 +404,8 @@
            :report-access
            :refresh-statfs
            :*translator*
-           :get-statfs))
+           :get-statfs
+           :file-change-size))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)
