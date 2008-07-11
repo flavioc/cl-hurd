@@ -21,6 +21,7 @@
                                             :depends-on ("utils"))
                                      (:file "dirent")
                                      (:file "pathconf")
+                                     (:file "seek")
                                      (:file "types")
                                      (:file "ids"
                                             :depends-on ("types"))
@@ -226,18 +227,21 @@
                                                            (:file "io-get-owner")
                                                            (:file "io-mod-owner")
                                                            (:file "io-pathconf")
-                                                           (:file "io-read")
+                                                           (:file "io-read"
+                                                                  :depends-on ("common"))
                                                            (:file "io-readable")
                                                            (:file "io-server-version")
                                                            (:file "io-set-all-openmodes")
                                                            (:file "io-set-some-openmodes")
                                                            (:file "io-stat")
-                                                           (:file "io-write")
+                                                           (:file "io-write"
+                                                                  :depends-on ("common"))
                                                            (:file "fsys-goaway")
                                                            (:file "file-getcontrol")
                                                            (:file "fsys-syncfs")
                                                            (:file "file-statfs")
-                                                           (:file "file-check-access"))
+                                                           (:file "file-check-access")
+                                                           (:file "io-seek"))
                                               :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
