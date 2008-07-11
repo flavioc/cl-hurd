@@ -19,7 +19,7 @@
                  (user (get-user protid)))
              (unless (flag-is-p (flags open) :write)
                (return-from io-write :invalid-argument))
-             (when (%is-minus-one-p offset)
+             (when (= offset -1)
                (when (flag-is-p (flags open) :append)
                  ;; Move file offset to the end of the file!
                  (setf (file-offset open)
