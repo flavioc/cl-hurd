@@ -18,7 +18,6 @@ TODO list:
   - file-lock-stat
   - file-lock
   - file-reparent
-  - file-set-size
   - file-set-translator
   - fsys-get-options
   - fsys-set-options
