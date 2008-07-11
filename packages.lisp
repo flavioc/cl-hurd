@@ -175,7 +175,8 @@
            :ffree
            :namelen
            :favail
-           :frsize))
+           :frsize
+           :seek-type))
 
 (defpackage :cl-mach
   (:nicknames :mach)
