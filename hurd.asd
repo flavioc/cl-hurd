@@ -241,7 +241,8 @@
                                                            (:file "fsys-syncfs")
                                                            (:file "file-statfs")
                                                            (:file "file-check-access")
-                                                           (:file "io-seek"))
+                                                           (:file "io-seek")
+                                                           (:file "file-set-size"))
                                               :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
