@@ -11,9 +11,9 @@
           (not (fsys-goaway-flag-is-p flags :force))
           (plusp (bucket-total-users (port-bucket *translator*))))
     (return-from %shutdown :resource-busy))
-  (if (fsys-goaway-flag-is-p flags :nosync)
-    t
-    (file-syncfs *translator* (make-iouser-root) t t)))
+  (unless (fsys-goaway-flag-is-p flags :nosync)
+    (file-syncfs *translator* (make-iouser-root) t t))
+  (shutdown *translator*))
 
 ;;
 ;; Run the fsys-goaway callback terminating the translator.
@@ -29,7 +29,7 @@
          (fsys-goaway-reply reply reply-type t)
          #+clisp (ext:exit)
          #+sbcl (sb-ext:quit :unix-status 0)
-         #-(or sbcl clisp) (error "(exit) not implemented in your lisp implementation")
+         #-(or sbcl clisp) (error "(quit) not implemented in your lisp implementation")
          )
         (t
           shut-ret)))))
