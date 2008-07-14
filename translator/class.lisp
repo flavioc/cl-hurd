@@ -7,16 +7,13 @@
 
 (defun %get-identity-port ()
   "Creates a new port as the translator identity port."
-  (let ((port (port-allocate :right-receive)))
-    (if (not (port-valid port))
-      (error "Invalid fsys identity port")
-      port)))
+  (port-allocate :right-receive))
 
 (defclass translator ()
   ((identity-port :initform (%get-identity-port)
                   :accessor identity-port
                   :documentation "The translator's identity port.")
-   (port-bucket :initform nil
+   (port-bucket :initform (make-bucket)
                 :accessor port-bucket
                 :documentation "The bucket, where we save all the translator ports.")
    (temporary-bucket :initform (make-hash-table)
@@ -36,19 +33,12 @@
          :documentation "Translator's name.")
    (version :initform (list 1 0 0)
             :accessor version
-            :documentation "Translator version."))
+            :documentation "Translator version.")
+   (flags :initform nil
+          :reader flags
+          :initarg flags
+          :documentation "Startup translator flags to be passed to fsys-startup."))
   (:documentation "Translator class."))
-
-(defmethod initialize-instance :after ((translator translator) &key)
-  "Sets up the translator bucket with a port cleanup function."
-  (setf (port-bucket translator)
-        (make-bucket (lambda (protid)
-                       (let ((node (get-node protid)))
-                         (dec-refs node)
-                         (when (no-refs-p node)
-                           (pre-drop-node node)
-                           (drop-node translator node))
-                         t)))))
 
 (defmethod insert-temporary-data ((trans translator) key value)
   "Inserts temporary data on the temporary bucket."
@@ -69,19 +59,16 @@
   (add-port (port-bucket trans)
             (make-protid user open-node)))
 
-(defun make-translator (&optional (base-class 'translator))
-  "Creates a new translator with class 'base-class'."
-  (let ((translator (make-instance base-class)))
-    (with-accessors ((id-port identity-port)) translator
-      ; Destroy identity port when translator goes away
-      (finalize translator (lambda () (port-destroy id-port))))
-    translator))
-
-(defmethod setup ((translator translator) &optional (flags nil))
-  "Gets the bootstrap port to call fsys-startup and create a new port into the bucket. After that we get the underlying node."
+(defmethod initialize-instance :after ((translator translator) &key)
+  "Gets the bootstrap port to call fsys-startup and installs a new control port into the bucket."
   (with-port-deallocate (bootstrap (task-get-bootstrap-port))
     (let ((port (add-control-port (port-bucket translator))))
       (with-port-deallocate (right (get-send-right port))
-        (let ((file (fsys-startup bootstrap flags right :copy-send)))
-          (setf (slot-value translator 'underlying-node) file)
-          t)))))
+        (setf (slot-value translator 'underlying-node)
+              (fsys-startup bootstrap (flags translator) right :copy-send)))))
+  ;; Destroy identity port when translator goes away.
+  (with-accessors ((id identity-port)) translator
+    (finalize translator (lambda () (port-destroy id)))))
+
+(defmethod running-p ((translator translator))
+  (slot-value translator 'underlying-node))
