@@ -405,7 +405,9 @@
            :refresh-statfs
            :*translator*
            :get-statfs
-           :file-change-size))
+           :file-change-size
+           :file-rename
+           :shutdown))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)
@@ -418,6 +420,7 @@
            :make-dir
            :make-entry
            :get-entry
+           :rename-dir-entry
            :setup-entry))
 
 (defpackage :cl-hurd.translator.examples
