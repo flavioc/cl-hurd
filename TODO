@@ -2,17 +2,13 @@ TODO list:
 
 - symlinks in dir-lookup and io-read
 - find... why?
-- grep, why?
-- ps, why?
 - shutdown other translators
 - more callbacks:
   - dir-link
   - dir-mkfile
-  - dir-rename
   - file-chflags
   - file-exec
   - file-get-fs-options
-  - file-get-storage-info-default
   - file-get-storage-info
   - file-get-translator
   - file-lock-stat
@@ -21,10 +17,4 @@ TODO list:
   - file-set-translator
   - fsys-get-options
   - fsys-set-options
-  - io-async
-  - io-get-icky-async-openmodes
-  - io-identity
-  - io-reauthenticate
-  - io-restrict-auth
-  - io-revoke
   - io-select
