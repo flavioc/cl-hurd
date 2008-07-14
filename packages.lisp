@@ -176,7 +176,12 @@
            :namelen
            :favail
            :frsize
-           :seek-type))
+           :seek-time
+           :maptime-map
+           :maptime-seconds
+           :maptime-microseconds
+           :maptime-check-seconds
+           :*mapped-time*))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -207,10 +212,6 @@
            :msg-type-number
            :msg-server-timeout
            :msg-server
-           :maptime-map
-           :maptime-seconds
-           :maptime-microseconds
-           :maptime-check-seconds
            :vm-size
            :mmap-prot-flags
            :mmap-map-flags
@@ -360,12 +361,14 @@
            :fsys-goaway-flags
            :fsys-goaway-flag-is-p
            :fsys-goaway-reply
-           :bucket-statistics
-           :port-is-control-p
-           :port-is-user-p
-           :bucket-total-users
-           :bucket-total-control
+           :bucket-count-type
+           :bucket-iterate
+           :bucket-find
+           :remove-port
            :deallocate-send-right
+           :user-reauth
+           :port-cleanup
+           :get-io-identity
            ))
 
 (defpackage :cl-hurd.translator
