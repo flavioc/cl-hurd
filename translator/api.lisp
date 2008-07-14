@@ -105,6 +105,15 @@ Return t for success, nil for unsupported operation."
 Return t on success, nil for unsupported operation."
   nil)
 
+(%add-callback file-rename (user old-dir old-name new-dir new-name)
+  "Rename file 'old-name' from 'old-dir' to 'new-name' in 'new-dir'.
+Return T for success, nil for unsupported, or other error code for other errors."
+  nil)
+
+(%add-callback shutdown ()
+  "Shutdown the translator."
+  t)
+
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
   `(defmethod ,name ((translator ,trans-type) ,@args)
