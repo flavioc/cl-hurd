@@ -242,7 +242,8 @@
                                                            (:file "file-statfs")
                                                            (:file "file-check-access")
                                                            (:file "io-seek")
-                                                           (:file "file-set-size"))
+                                                           (:file "file-set-size")
+                                                           (:file "dir-rename"))
                                               :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
