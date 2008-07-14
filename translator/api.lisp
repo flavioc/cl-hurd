@@ -48,7 +48,8 @@ please see common/pathconf.lisp."
 
 (%add-callback file-utimes (node user atime mtime)
   "The user is attempting to change the access and modification time of the node.
-'atime' or 'mtime' can be nil.")
+'atime' or 'mtime' can be :now.
+Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both cases.")
 
 (%add-callback dir-lookup (node user filename)
   "This must return the node with the name 'filename' in the directory 'node', nil when it is not found.")
