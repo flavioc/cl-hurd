@@ -9,7 +9,7 @@
   ; XXX make translators go away
   (when (and
           (not (fsys-goaway-flag-is-p flags :force))
-          (plusp (bucket-total-users (port-bucket *translator*))))
+          (plusp (bucket-count-type (port-bucket *translator*) 'protid)))
     (return-from %shutdown :resource-busy))
   (unless (fsys-goaway-flag-is-p flags :nosync)
     (file-syncfs *translator* (make-iouser-root) t t))
