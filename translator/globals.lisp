@@ -4,8 +4,8 @@
 (defvar *translator* nil
   "Variable used to represent the currently used translator.")
 
-; port of current authentication server
-;(defconstant +auth-server+ (getauth))
+;; Port of current authentication server.
+(defconstant +auth-server+ (getauth))
 
 ; port of the current exec server (for file_exec interface)
 ;(defconstant +exec-server+ (file-name-lookup +servers-exec+))
