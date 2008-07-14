@@ -1,5 +1,5 @@
 
-(in-package :mach)
+(in-package :hurd-common)
 
 ;; Load libshouldbeinlibc
 (define-foreign-library libshouldbeinlibc
@@ -42,3 +42,4 @@ Returned value is a foreign pointer."
   "Return the check seconds field from a mapped-time-value."
   (foreign-slot-value ptr 'mapped-time-value 'check-seconds))
 
+(defvar *mapped-time* (maptime-map))
