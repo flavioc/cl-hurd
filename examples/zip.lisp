@@ -48,6 +48,35 @@
   (setf (statfs-get (get-statfs *translator*) 'bfree) 1)
   t)
 
+(define-callback file-change-size zip-translator
+                 (node user new-size)
+  (warn "user ~s wants to change ~s to size ~s"
+        user node new-size)
+  nil)
+
+(define-callback shutdown zip-translator
+                 ()
+  (warn "Going down...~%")
+  t)
+
+(define-callback file-rename zip-translator
+                 (user old-dir old-name new-dir new-name)
+  (rename-dir-entry old-dir old-name new-dir new-name)
+  t)
+
+(define-callback create-file zip-translator
+                 (node user filename mode)
+  (warn "Create file ~s in ~s" filename node)
+  (let ((entry (make-instance 'zip-entry
+                              :stat (make-stat (stat node))
+                              :name filename
+                              :parent node
+                              :data (make-array 0))))
+    (setup-entry entry)
+    (add-entry node entry)
+    entry))
+
+
 ;; XXX
 (define-callback file-write zip-translator
 				 (node user offset stream)
@@ -104,11 +133,7 @@
   (do-zipfile-entries (name entry *zip*)
                       (add-zip-file node (split-path name) entry)))
 
-(defvar *zip-translator*
-  (make-translator 'zip-translator) "The translator.")
-
-;; Startup the translator.
-(run-translator *zip-translator*)
+(defvar *zip-translator* (make-instance 'zip-translator))
 
 ;; to be removed
 ;;
@@ -138,4 +163,7 @@
 				 (node user author)
   (warn "changing author in node ~s to ~s" (name node) author)
   t)
+
+;; Startup the translator.
+(run-translator *zip-translator*)
 
