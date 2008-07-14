@@ -28,3 +28,10 @@
   (make-dirent name
                (stat-get (stat node) 'ino)
                (stat-get (stat node) 'type)))
+
+(defmethod print-object ((dirent dirent) stream)
+  (format stream "#<dirent name=~s ino=~s filetype=~s>"
+          (name dirent)
+          (ino dirent)
+          (file-type dirent)))
+
