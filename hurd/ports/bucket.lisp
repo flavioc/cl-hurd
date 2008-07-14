@@ -12,10 +12,6 @@
   ((port-set :initform (port-allocate :right-port-set)
              :accessor port-set
              :documentation "A port set containing all the ports in the bucket")
-   (cleanup :initform nil
-            :initarg :cleanup
-            :accessor cleanup-function
-            :documentation "To be run when a port is not used anymore")
    (hash :initform (make-hash-table)
          :accessor table
          :documentation "Contains the ports in this bucket"))
@@ -28,8 +24,8 @@
 
 (defmethod add-control-port ((bucket port-bucket))
   "Adds a new control port to bucket."
-  (let ((port (make-instance 'port-info :control t)))
-    (add-port bucket port)))
+  (add-port bucket
+            (make-instance 'port-info)))
 
 (defmethod add-port ((bucket port-bucket) (port port-info))
   "Adds port 'port' to bucket 'bucket'."
@@ -58,33 +54,30 @@
 
 (defmethod remove-port ((bucket port-bucket) port)
   "Removes the port 'port' from the bucket 'bucket'."
-  (with-accessors ((cleanup-fun cleanup-function)) bucket
-    (remhash (port-right port) (table bucket))
+  (with-accessors ((table table)) bucket
+    (remhash (port-right port) table)
     (set-send-rights port nil)
-    (when (and cleanup-fun
-               (port-is-user-p port)) ; Must be an user port.
-      (funcall cleanup-fun port))
     (port-cleanup port)))
 
-(defun make-bucket (cleanup)
+(defmethod bucket-iterate ((bucket port-bucket) fn)
+  "Apply 'fn' for each port-info in 'bucket'."
+  (maphash (lambda (key value)
+             (funcall fn value)) (table bucket)))
+
+(defun make-bucket ()
   "Create a new bucket with the cleanup function 'cleanup'."
-  (make-instance 'port-bucket :cleanup cleanup))
+  (make-instance 'port-bucket))
 
-(defun bucket-total-users ((bucket port-bucket))
-  "Return number of user ports"
+(defmethod bucket-count-type ((bucket port-bucket) this-type)
+  "Count number of ports with a certain type."
   (loop for key being the hash-keys of (table bucket)
         using (hash-value value)
-        sum (if (port-is-user-p value) 1 0)))
+        sum (if (typep value this-type) 1 0)))
 
-(defun bucket-total-control ((bucket port-bucket))
-  "Return number of control ports"
+(defmethod bucket-find ((bucket port-bucket) fn)
+  "Find a port that satisfies 'fn'."
   (loop for key being the hash-keys of (table bucket)
         using (hash-value value)
-        sum (if (port-is-control-p value) 1 0)))
+        when (funcall fn value)
+        return value))
 
-(defmethod bucket-statistics ((bucket port-bucket))
-  "Prints bucket statistics."
-  (format *error-output* "Bucket statistics:~%")
-  (format *error-output* "User ports: ~a~%Control ports: ~a~%"
-          (bucket-total-users bucket)
-          (bucket-total-control bucket)))
