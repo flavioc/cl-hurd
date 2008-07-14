@@ -23,10 +23,14 @@
                                                  new-name)))
                  (when (and found-new-node excl)
                    (return-from dir-rename :file-exists))
-                 (file-rename *translator*
-                              (get-user old-dir-protid)
-                              (get-node old-dir-protid)
-                              old-name
-                              (get-node new-dir-protid)
-                              new-name)))))))
+                 (let ((return-code (file-rename *translator*
+                                                 (get-user old-dir-protid)
+                                                 (get-node old-dir-protid)
+                                                 old-name
+                                                 (get-node new-dir-protid)
+                                                 new-name)))
+                   (when (eq t return-code)
+                     (deallocate-send-right new-dir-protid))
+                   return-code)))))))
+
 
