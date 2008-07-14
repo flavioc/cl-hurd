@@ -9,6 +9,7 @@
 (defclass protid (port-info)
   ((user :initform nil
          :initarg :user
+         :accessor user
          :documentation "The user that opened the node.")
    (open-node :initform nil
               :initarg :open-node
@@ -53,3 +54,12 @@
 (defmethod get-open-flags ((protid protid))
   "Get the open flags."
   (flags (open-node protid)))
+
+(defmethod port-cleanup :before ((port protid))
+  "Drop a node on a port cleanup."
+  (let ((node (get-node port)))
+    (dec-refs node)
+    (when (no-refs-p node)
+      (pre-drop-node node)
+      (drop-node *translator* node))))
+
