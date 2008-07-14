@@ -29,6 +29,12 @@
                    :uids (if (listp uids) uids (list uids))
                    :gids (if (listp gids) gids (list gids)))))
 
+(defun make-empty-iouser ()
+  "Create an empty iouser."
+  (make-instance 'iouser
+                 :uids '()
+                 :gids '()))
+
 (defun make-iouser-mem (uids-ptr uids-len gids-ptr gids-len)
   "Create an iouser based on foreign pointers."
   (let ((obj (make-instance 'iouser
