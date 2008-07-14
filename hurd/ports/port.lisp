@@ -14,9 +14,7 @@
                     :documentation "If we have given send rights to someone")
    (mscount :initform 0
             :accessor mscount
-            :documentation "Send rights count")
-   (is-control :initform nil
-               :initarg :control)))
+            :documentation "Send rights count")))
 
 (defmethod deallocate-send-right ((port port-info))
   "Deallocates the port's send right."
@@ -58,12 +56,6 @@
   "Cleanup routine for ports."
   (if (has-send-rights port)
     (error 'port-still-has-send-righs :port port))
-  (port-destroy (port-right port)))
-
-(defmethod port-is-control-p ((port port-info))
-  "Tells if this port is a control port."
-  (slot-value port 'is-control))
-
-(defmethod port-is-user-p ((port port-info))
-  "Tells if this port is an user port."
-  (not (port-is-control-p port)))
+  (port-mod-refs (port-right port) :right-receive -1)
+  (setf (port-right port) nil)
+  t)
