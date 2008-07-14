@@ -31,11 +31,18 @@
                                      (:file "mode"
                                             :depends-on ("utils"))
                                      (:file "memcpy")
+                                     (:file "maptime"
+                                            :depends-on ("types"
+                                                         "error"))
+                                     (:file "time-value"
+                                            :depends-on ("types"))
                                      (:file "stat"
                                             :depends-on ("mode"
                                                          "types"
                                                          "ids"
-                                                         "memcpy"))
+                                                         "memcpy"
+                                                         "time-value"
+                                                         "maptime"))
                                      (:file "statfs"
                                             :depends-on ("types"
                                                          "fs-type"))
@@ -114,8 +121,6 @@
                                                          "port-names"))
                                      (:file "macros"
                                             :depends-on ("functions"))
-                                     (:file "maptime"
-                                            :depends-on ("types"))
                                      (:file "mmap"
                                             :depends-on ("types"))
                                      (:file "round-page"
@@ -124,7 +129,8 @@
                                             :depends-on ("types")))
                         :depends-on ("packages" "common" "paths"))
                (:module hurd
-                        :components ((:file "types")
+                        :components ((:file "libs")
+                                     (:file "types")
                                      (:file "paths")
                                      (:file "retry")
                                      (:file "functions"
@@ -136,23 +142,15 @@
                                      (:module iohelp
                                               :components ((:file "utils")
                                                            (:file "iouser"
-                                                                  :depends-on ("utils"))))
+                                                                  :depends-on ("utils"))
+                                                           (:file "reauth"
+                                                                  :depends-on ("iouser")))
+                                              :depends-on ("libs" "types"))
                                      (:module fsys
                                               :components ((:file "startup")
                                                            (:file "goaway-flags")
                                                            (:file "goaway-reply")
                                                            (:file "getroot")))
-                                     (:module fshelp
-                                              :components ((:file "access")
-                                                           (:file "checkdirmod")
-                                                           (:file "isowner")
-                                                           (:file "iscontroller")
-                                                           (:file "fshelp")
-                                                           (:file "touch"
-                                                                  :depends-on ("fshelp"))
-                                                           (:file "transbox")
-                                                           (:file "fetch-root"))
-                                              :depends-on ("iohelp" "fsys"))
                                      (:module ports
                                               :components ((:file "port")
                                                            (:file "bucket"
@@ -169,7 +167,19 @@
                                                                                "no-senders"
                                                                                "notify"
                                                                                "demuxer")))
-                                              :depends-on ("macros")))
+                                              :depends-on ("macros"))
+                                     (:module fshelp
+                                              :components ((:file "access")
+                                                           (:file "checkdirmod")
+                                                           (:file "isowner")
+                                                           (:file "iscontroller")
+                                                           (:file "fshelp")
+                                                           (:file "touch"
+                                                                  :depends-on ("fshelp"))
+                                                           (:file "transbox")
+                                                           (:file "fetch-root")
+                                                           (:file "identity"))
+                                              :depends-on ("iohelp" "fsys" "ports")))
                         :depends-on ("packages" "paths" "common" "mach"))
                (:module translator
                         :components ((:file "io-wrapper")
@@ -186,7 +196,8 @@
                                      (:file "open"
                                             :depends-on ("node"))
                                      (:file "protid"
-                                            :depends-on ("open"))
+                                            :depends-on ("open"
+                                                         "globals"))
                                      (:file "class"
                                             :depends-on ("debug"
                                                          "node"
@@ -243,8 +254,12 @@
                                                            (:file "file-check-access")
                                                            (:file "io-seek")
                                                            (:file "file-set-size")
-                                                           (:file "dir-rename"))
-                                              :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals")))
+                                                           (:file "dir-rename")
+                                                           (:file "io-reauthenticate")
+                                                           (:file "io-restrict-auth")
+                                                           (:file "io-revoke")
+                                                           (:file "io-identity"))
+                                              :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
                         :components ((:file "sorted-container")
