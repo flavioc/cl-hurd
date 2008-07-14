@@ -50,3 +50,7 @@
 (defmethod is-controller-p ((node node) (user iouser))
   "Specialize is-controller-p for nodes."
   (is-controller-p (stat node) user))
+
+(defmethod is-owner-p ((node node) (user iouser))
+  "Specialize is-owner-p for nodes."
+  (is-owner-p (stat node) user))
