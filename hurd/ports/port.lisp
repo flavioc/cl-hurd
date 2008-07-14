@@ -18,6 +18,10 @@
    (is-control :initform nil
                :initarg :control)))
 
+(defmethod deallocate-send-right ((port port-info))
+  "Deallocates the port's send right."
+  (port-deallocate (port-right port)))
+
 (defmethod has-send-rights ((port port-info))
   "Has this port name send rights?"
   (with-slots ((has has-send-rights)) port

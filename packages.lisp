@@ -365,6 +365,7 @@
            :port-is-user-p
            :bucket-total-users
            :bucket-total-control
+           :deallocate-send-right
            ))
 
 (defpackage :cl-hurd.translator
