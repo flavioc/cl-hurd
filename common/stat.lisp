@@ -133,7 +133,7 @@ uid, gid, size, atim, mtim, ctim, blksize, blocks, author, flags."
 ; Use the new method...
 (defsetf stat-get stat-set)
 
-(defun make-stat (&optional (extra nil) &key (size 0))
+(defun make-stat (&optional (extra nil) &key (size 0) (mode nil))
   "Create a new stat object. 'extra' can be:
 a mode object: we copy it to the mode field.
 a stat object: we make a copy of it for the new stat object.
@@ -157,6 +157,8 @@ size: initial size for the size field.
           (memcpy mem (ptr extra) +stat-size+))))
     ; Optional/Key parameters go here:
     (setf (stat-get obj 'size) size)
+    (when mode
+      (setf (stat-get obj 'mode) mode))
     ; Return the new object
     obj))
 
