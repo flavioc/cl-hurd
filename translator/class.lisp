@@ -55,7 +55,6 @@
 
 (defmethod new-protid ((trans translator) user (open-node open-node))
   "Creates a new protid and inserts it into the translator bucket."
-  (inc-refs (refers open-node)) ; Increment references to this node
   (add-port (port-bucket trans)
             (make-protid user open-node)))
 
