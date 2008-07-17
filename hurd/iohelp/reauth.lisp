@@ -17,24 +17,6 @@
   (agids :pointer)
   (agis-count :pointer))
 
-(defun %free-memory-reauth (gubuf ggbuf aubuf agbuf
-                                  gen-uids gen-gids aux-uids aux-gids
-                                  gen-uids-len gen-gids-len
-                                  aux-uids-len aux-gids-len)
-  (foreign-free gubuf)
-  (foreign-free ggbuf)
-  (foreign-free aubuf)
-  (foreign-free agbuf)
-
-  (foreign-free gen-uids)
-  (foreign-free gen-gids)
-  (foreign-free aux-uids)
-  (foreign-free aux-gids)
-  (foreign-free gen-uids-len)
-  (foreign-free gen-gids-len)
-  (foreign-free aux-uids-len)
-  (foreign-free aux-gids-len))
-
 (defun %new-ptr ()
   (foreign-alloc :pointer))
 
@@ -60,9 +42,10 @@
           (mem-ref aux-uids :pointer) aubuf
           (mem-ref aux-gids :pointer) agbuf)
 
-    (with-cleanup (%free-memory-reauth gubuf ggbuf aubuf agbuf
+    (with-cleanup (free-memory-list (list
+                                       gubuf ggbuf aubuf agbuf
                                        gen-uids gen-gids aux-uids aux-gids
-                                       gen-uids-len gen-gids-len aux-uids-len aux-gids-len)
+                                       gen-uids-len gen-gids-len aux-uids-len aux-gids-len))
       (let ((err (%auth-server-authenticate
                    auth-server
                    rend-port
@@ -80,30 +63,28 @@
               (auids-len (mem-ref aux-uids-len :unsigned-int))
               (agids-len (mem-ref aux-gids-len :unsigned-int))
               (auids-ptr (mem-ref aux-uids :pointer))
-              (agids-ptr (mem-ref aux-gids :pointer))
-              (uid-t-size (foreign-type-size 'uid-t))
-              (gid-t-size (foreign-type-size 'gid-t)))
+              (agids-ptr (mem-ref aux-gids :pointer)))
           (with-cleanup (progn
           ;                (warn "testing gubuf")
                           (unless (eql (pointer-address gubuf)
                                        (pointer-address uids-ptr))
          ;                   (warn "cleanup gubuf")
-                            (munmap uids-ptr (* uid-t-size uids-len)))
+                            (munmap uids-ptr (* +uid-t-size+ uids-len)))
         ;                  (warn "testing ggbuf")
                           (unless (eql (pointer-address ggbuf)
                                        (pointer-address gids-ptr))
        ;                     (warn "cleanup ggbuf")
-                            (munmap gids-ptr (* gid-t-size gids-len)))
+                            (munmap gids-ptr (* +gid-t-size+ gids-len)))
       ;                    (warn "testing aubuf")
                           (unless (eql (pointer-address aubuf)
                                        (pointer-address auids-ptr))
      ;                       (warn "cleanup aubuf")
-                            (munmap auids-ptr (* uid-t-size auids-len)))
+                            (munmap auids-ptr (* +uid-t-size+ auids-len)))
     ;                      (warn "testing agbuf")
                           (unless (eql (pointer-address agbuf)
                                        (pointer-address agids-ptr))
    ;                         (warn "cleanup agbuf")
-                            (munmap agids-ptr (* gid-t-size agids-len))))
+                            (munmap agids-ptr (* +gid-t-size+ agids-len))))
             (cond
               ((eq err t)
   ;             (warn "ok... creating iouser.")
