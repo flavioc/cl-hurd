@@ -2,8 +2,10 @@
 (in-package :hurd-translator)
 
 (def-io-interface :io-set-some-openmodes ((port port)
-                                          (bits open-flags-t))
+                                          (new-flags open-flags))
   (with-lookup protid port
-    (enable (flags (open-node protid)) bits)
+    (setf (flags (open-node protid))
+          (enable-flags (flags (open-node protid))
+                        new-flags))
     t))
 
