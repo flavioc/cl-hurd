@@ -156,7 +156,7 @@ dir, reg, chr, blk, lnk, sock."
                (%get-type-bits new-type)))
   new-type)
 
-(defun %get-perm-bits (perm-type &optional user-type)
+(defun %get-perm-bits (perm-type &optional user-type useunk-p)
   "Returns the permission bytes associated with perm-type and user-type.
 These are the possible combinations:
 
@@ -172,19 +172,19 @@ You can also ignore user-type and the bits will be for all the user types.
                         +irusr+
                         +irgrp+
                         +iroth+
-                        +irunk+))
+                        (if useunk-p +irunk+ 0)))
       (write
         (chained-bit-op boole-ior
                         +iwusr+
                         +iwgrp+
                         +iwoth+
-                        +iwunk+))
+                        (if useunk-p +iwunk+ 0)))
       (exec
         (chained-bit-op boole-ior
                         +ixusr+
                         +ixgrp+
                         +ixoth+
-                        +ixunk+))
+                        (if useunk-p +ixunk+ 0)))
       (otherwise
         0))
   (case user-type
@@ -207,31 +207,29 @@ You can also ignore user-type and the bits will be for all the user types.
         (exec +ixoth+)
         (otherwise 0)))
     (unknown
-      (case perm-type
-        (read +irunk+)
-        (write +iwunk+)
-        (exec +ixunk+)
-        (otherwise 0)))
+      (if useunk-p
+        (case perm-type
+          (read +irunk+)
+          (write +iwunk+)
+          (exec +ixunk+)
+          (otherwise 0))
+        0))
     (otherwise 0))))
 
 (define-mode-meth has-perms-p (perm-type user-type)
-
   "Predicate telling if the mode bitfield has certain permissions. Same combinations as get-perm-bits."
-  (if (and (eq user-type 'unknown)
-           (not (is-useunk-p mode)))
-    ;; We not using the unknown bits and user-type is unknown
-    ;; Always return nil
-    nil
-    (let ((bits (%get-perm-bits perm-type user-type)))
-      (eq bits
-          (boole boole-and val bits)))))
+  (let* ((useunk-p (is-useunk-p mode))
+        (bits (%get-perm-bits perm-type user-type useunk-p)))
+    (and (plusp bits)
+         (eq bits
+             (boole boole-and val bits)))))
 
 (define-mode-meth set-perms (perm-type &optional user-type)
   "Activates permission bits for perm-type/user-type."
   (setf (mode-bits mode)
 	(boole boole-ior
          val
-         (%get-perm-bits perm-type user-type)))
+         (%get-perm-bits perm-type user-type t)))
   t)
 
 (define-mode-meth clear-perms (perm-type &optional user-type)
@@ -239,7 +237,7 @@ You can also ignore user-type and the bits will be for all the user types.
   (setf (mode-bits mode)
         (boole boole-andc2
                val
-               (%get-perm-bits perm-type user-type)))
+               (%get-perm-bits perm-type user-type t)))
   t)
 
 (define-mode-meth set-perms-if (condit perm-type &optional user-type)
