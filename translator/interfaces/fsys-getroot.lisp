@@ -13,7 +13,7 @@
 (defcallback fetch-root-callback err
              ((node-port :pointer)
               (root-parent :pointer)
-              (flags open-flags-t)
+              (flags open-flags)
               (underlying port-pointer)
               (underlying-type :pointer))
   (let* ((node (get-temporary-data *translator* node-port))
@@ -46,7 +46,7 @@
 								   (gen-uids-count msg-type-number)
 								   (gen-gids :pointer)
 								   (gen-gids-count msg-type-number)
-								   (flags open-flags-t)
+								   (flags open-flags)
 								   (retry-type :pointer)
 								   (retry-name :pointer)
 								   (file port-pointer)
@@ -56,7 +56,6 @@
                (port-exists-p fsys))
       (let ((user (make-iouser-mem gen-uids gen-uids-count
                                    gen-gids gen-gids-count)))
-        (only flags :hurd)
         (block outer-block
                (when (and (or (has-passive-trans-p (stat root-node))
                               (box-translated-p (box root-node)))
@@ -78,7 +77,7 @@
                  (return-from outer-block nil))
                (unless (allow-open *translator* root-node user flags t)
                  (return-from outer-block :not-permitted))
-               (disable flags :open-modes)
+               (setf flags (disable-flags flags +open-flags+))
                (let ((new (new-protid *translator* user
                                       (make-open-node (root *translator*)
                                                       flags
