@@ -22,6 +22,7 @@
                                      (:file "dirent")
                                      (:file "pathconf")
                                      (:file "seek")
+                                     (:file "select")
                                      (:file "types")
                                      (:file "ids"
                                             :depends-on ("types"))
@@ -139,6 +140,9 @@
                                      (:module io
                                               :components ((:file "server-version")
                                                            (:file "stat")))
+                                     (:module fs
+                                              :components ((:file "trans-flags")
+                                                           (:file "storage")))
                                      (:module iohelp
                                               :components ((:file "utils")
                                                            (:file "iouser"
@@ -146,6 +150,14 @@
                                                            (:file "reauth"
                                                                   :depends-on ("iouser")))
                                               :depends-on ("libs" "types"))
+                                     (:module auth
+                                              :components ((:file "getids"))
+                                              :depends-on ("types" "libs" "iohelp"))
+                                     (:module exec
+                                              :components ((:file "flags")
+                                                           (:file "exec"
+                                                                  :depends-on ("flags")))
+                                              :depends-on ("types" "libs"))
                                      (:module fsys
                                               :components ((:file "startup")
                                                            (:file "goaway-flags")
@@ -198,11 +210,13 @@
                                      (:file "protid"
                                             :depends-on ("open"
                                                          "globals"))
+                                     (:file "options")
                                      (:file "class"
                                             :depends-on ("debug"
                                                          "node"
                                                          "open"
-                                                         "protid"))
+                                                         "protid"
+                                                         "options"))
                                      (:file "api"
                                             :depends-on ("class"))
                                      (:file "macros")
@@ -221,7 +235,9 @@
                                      (:module interfaces
                                               :components ((:file "common")
                                                            (:file "dir-mkdir")
-                                                           (:file "dir-lookup")
+                                                           (:file "open-modes")
+                                                           (:file "dir-lookup"
+                                                                  :depends-on ("open-modes"))
                                                            (:file "dir-readdir")
                                                            (:file "dir-rmdir")
                                                            (:file "file-chauthor")
@@ -231,7 +247,8 @@
                                                            (:file "file-sync")
                                                            (:file "file-syncfs")
                                                            (:file "file-utimes")
-                                                           (:file "fsys-getroot")
+                                                           (:file "fsys-getroot"
+                                                                  :depends-on ("open-modes"))
                                                            (:file "io-clear-some-openmodes")
                                                            (:file "io-duplicate")
                                                            (:file "io-get-openmodes")
@@ -258,7 +275,20 @@
                                                            (:file "io-reauthenticate")
                                                            (:file "io-restrict-auth")
                                                            (:file "io-revoke")
-                                                           (:file "io-identity"))
+                                                           (:file "io-identity")
+                                                           (:file "dir-unlink")
+                                                           (:file "dir-mkfile"
+                                                                  :depends-on ("open-modes"))
+                                                           (:file "dir-link")
+                                                           (:file "io-select")
+                                                           (:file "file-get-translator-cntl")
+                                                           (:file "options")
+                                                           (:file "fsys-get-options"
+                                                                  :depends-on ("options"))
+                                                           (:file "file-get-fs-options"
+                                                                  :depends-on ("options"))
+                                                           (:file "fsys-set-options")
+                                                           (:file "file-exec"))
                                               :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
