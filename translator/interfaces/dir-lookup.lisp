@@ -9,7 +9,7 @@
                            flags
                            newnode-p)))
     (when allow
-      (disable flags :open-modes)
+      (setf flags (disable-flags flags +open-flags+))
       (let* ((new-user (make-iouser :old user))
              (new-protid
                (new-protid *translator*
@@ -82,13 +82,13 @@
 
 (def-fs-interface :dir-lookup ((dir-port port)
                                (filename :string)
-                               (flags open-flags-t)
+                               (flags open-flags)
                                (mode mode-t)
                                (do-retry :pointer)
                                (retry-name :pointer)
                                (retry-port port-pointer)
                                (retry-port-type :pointer))
-;  (warn "dir-lookup ~s" filename)
+  ;(warn "dir-lookup ~s" filename)
   (with-lookup dir-protid dir-port
     ;(warn "filename to lookup in ~s: ~a~%" (get-node dir-protid) filename)
     (multiple-value-bind (ret-do-retry
