@@ -55,11 +55,9 @@
   "Get the open flags."
   (flags (open-node protid)))
 
-(defmethod port-cleanup :before ((port protid))
-  "Drop a node on a port cleanup."
-  (let ((node (get-node port)))
-    (dec-refs node)
-    (when (no-refs-p node)
-      (pre-drop-node node)
-      (drop-node *translator* node))))
-
+(defmethod initialize-node ((node node))
+  (tg:finalize node
+               (lambda ()
+                 (pre-drop-node node)
+                 (when *translator*
+                   (drop-node *translator* node)))))
