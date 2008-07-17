@@ -11,7 +11,7 @@
 (defcfun ("file_name_lookup" %file-name-lookup)
   port
   (name :string)
-  (flags open-flags-t)
+  (flags open-flags)
   (mode mode-t))
 
 (defun file-name-lookup (name &optional (flags nil) (mode nil))
