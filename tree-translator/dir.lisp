@@ -8,11 +8,7 @@
 (defvar *ino-value* 1)
 
 (defclass entry (node)
-  ((name :initform nil
-         :initarg :name
-         :accessor name
-         :documentation "The file name.")
-   (parent :initform nil
+  ((parent :initform nil
            :initarg :parent
            :accessor parent
            :documentation "Parent node."))
@@ -20,9 +16,18 @@
 
 (defmethod print-object ((node entry) stream)
   "Print an entry to stream."
-  (format stream "#<entry name: ~s node: " (name node))
+  (format stream "#<entry node: ")
   (call-next-method)
   (format stream ">"))
+
+(defclass inner-entry ()
+  ((node :initarg :node
+         :accessor node)
+   (name :initarg :name
+         :accessor name)))
+
+(defun make-inner-entry (node name)
+  (make-instance 'inner-entry :node node :name name))
 
 (defclass dir-entry (entry)
   ((entries :initform (make-sorted-container #'string< #'name)
@@ -34,37 +39,34 @@
   "Sets and increments the ino value of a stat struct."
   (setf (stat-get stat 'ino) (incf *ino-value*)))
 
-(defun make-dir (name stat &optional (parent nil))
-  "Creates a new directory node."
-  (let ((obj (make-instance 'dir-entry :stat stat
-                            :name name
-                            :parent parent)))
-    (setup-entry obj)
-    obj))
-
-(defmethod add-entry ((dir dir-entry) (entry entry))
+(defmethod add-entry ((dir dir-entry) (entry entry) (name string))
   "Adds a new entry to the directory node 'dir'."
-  (incf (stat-get (stat dir) 'nlink)) ; New entry.
-  (insert-element (entries dir) entry))
+  (let ((found (get-entry dir name)))
+    (cond
+      (found
+        found)
+      (t
+        (incf (stat-get (stat dir) 'nlink)) ; New entry.
+        (insert-element (entries dir)
+                        (make-inner-entry entry name))
+        entry))))
 
 (defmethod setup-entry ((entry entry))
   "Changes some node information to sane defaults."
-  (set-type (stat entry) :reg)
   (%new-ino-val (stat entry))
-  (setf (stat-get (stat entry) 'nlink) 1))
+  (setf (stat-get (stat entry) 'nlink) 1)
+  entry)
 
 (defmethod setup-entry ((entry dir-entry))
   "Changes some node information to sane defaults on directories."
   (set-type (stat entry) :dir)
   (%new-ino-val (stat entry))
   ; nlink represents number of objects in a directory
-  (setf (stat-get (stat entry) 'nlink) 2))
+  (setf (stat-get (stat entry) 'nlink) 2)
+  entry)
 
-(defun make-entry (name stat &optional (parent nil))
-  "Creates a new entry."
-  (let ((obj (make-instance 'entry :stat stat :name name :parent parent)))
-    (setup-entry obj)
-    obj))
+(defmethod initialize-instance :after ((entry entry) &key)
+  (setup-entry entry))
 
 (defmethod dir-size ((dir dir-entry))
   "Returns number of entries in a directory."
@@ -73,7 +75,10 @@
 
 (defmethod get-entry ((dir dir-entry) (entry string))
   "Gets an entry from a directory based on the filename 'entry'."
-  (get-element (entries dir) entry))
+  (let ((found (get-element (entries dir) entry)))
+    (if found
+      (node found)
+      nil)))
 
 (defmethod remove-dir-entry ((dir dir-entry) (entry string))
   "Removes a directory entry with name 'entry'."
@@ -87,6 +92,5 @@
   "Rename file 'old-name' in dir to new-dir with name 'new-name'."
   (let ((entry (get-entry dir old-name)))
     (remove-dir-entry dir old-name)
-    (setf (name entry) new-name)
     (setf (parent entry) new-dir)
-    (add-entry new-dir entry)))
+    (add-entry new-dir entry new-name)))

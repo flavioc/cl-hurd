@@ -19,9 +19,11 @@
                  (underlying-stat)
   (when (not (is-dir-p underlying-stat))
     (propagate-read-to-execute underlying-stat))
-  (set-type underlying-stat :dir)
   (set-trans underlying-stat nil)
-  (let ((obj (make-dir "root" underlying-stat)))
+  (set-active-trans underlying-stat t)
+  (let ((obj (make-instance 'dir-entry
+                            :stat underlying-stat
+                            :parent nil)))
     (fill-root-node translator obj)
     obj))
 
@@ -53,18 +55,18 @@ root node."
     (when (and (<= start 1) (>= end 1))
       (push (make-dirent ".." 1 :dir) return-list))
     (append return-list
-            (mapcar (lambda (node)
-                      (make-node-dirent (name node) node))
+            (mapcar (lambda (inner-entry)
+                      (make-node-dirent (name inner-entry) (node inner-entry)))
                     (get-dir-entries node
                                      real-start
                                      (- (1- end) real-start))))))
 
 (define-callback create-directory tree-translator
-				 (node user name mode)
-  (let ((new-stat (make-stat (stat node))))
-    (setf (stat-get new-stat 'mode) mode)
-    (add-entry node (make-dir name new-stat node))))
+                 (node user name mode)
+  (add-entry node (make-instance 'dir-entry
+                                 :stat (make-stat (stat node) :mode mode) node)
+             name))
 
-(define-callback remove-entry tree-translator
+(define-callback remove-directory-entry tree-translator
 				 (node user name directory-p)
   (remove-dir-entry node name))
