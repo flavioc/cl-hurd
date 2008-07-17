@@ -35,6 +35,12 @@
   (with-accessors ((port active)) box
     (port-valid port)))
 
+(defmethod box-fetch-control ((box transbox))
+  "Fetch a new control port from a translator box."
+  (assert (box-translated-p box))
+  (port-mod-refs (active box) 1)
+  (active box))
+
 (defmethod set-starting ((box transbox) v)
   "Changes the starting field to 'v'."
   (setf (slot-value box 'starting) v))
