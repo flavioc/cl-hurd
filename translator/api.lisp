@@ -35,7 +35,7 @@ please see common/pathconf.lisp."
       32)))
 
 (%add-callback allow-open (node user flags is-new-p)
-  "'user' want's to open 'node' with flags 'flags', 'is-new-p' indicates that this is a newly created node. This should return nil when we don't wanna open the node.")
+  "'user' wants to open 'node' with flags 'flags', 'is-new-p' indicates that this is a newly created node. This should return nil when we don't wanna open the node.")
 
 (%add-callback get-translator (node)
   "This must return the translator path that is set under 'node'.")
@@ -70,7 +70,7 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
 (%add-callback create-directory (node user name mode)
   "The user wants to create a directory in the directory 'node' with 'name' and 'mode', return nil if don't permitted.")
 
-(%add-callback remove-entry (node user name directory-p)
+(%add-callback remove-directory-entry (node user name directory-p)
   "The user wants to remove an entry named 'name' from the directory 'node'. 'directory-p' indicates that the entry is a directory.")
 
 (%add-callback file-read (node user start amount stream)
@@ -114,6 +114,41 @@ Return T for success, nil for unsupported, or other error code for other errors.
 (%add-callback shutdown ()
   "Shutdown the translator."
   t)
+
+(%add-callback create-anonymous-file (node user mode)
+  "Create an anonymous file related to directory 'node'.
+Return nil for unsupported operation.")
+
+(%add-callback create-hard-link (dir user node name)
+  "Create an hard link in directory with 'name' pointing to 'node'.")
+
+(%add-callback block-read (node user)
+  "Block until we can read data from node.
+Return T when this is possible, nil otherwise."
+  t)
+
+(%add-callback block-write (node user)
+  "Block until we can write data to node.
+Return T when this is possible, nil otherwise."
+  t)
+
+(%add-callback get-options ()
+  "Return a list of translator options similar to --arguments."
+  (if (null (options translator))
+    nil
+    (get-translator-options (options translator))))
+
+(%add-callback set-options (option-list)
+  "Define a new set of translator options. 'option-list' is a list with two kinds of elements:
+a string: defines a new activated option, something like --option.
+a list of two elements: a string representing the option and the value, representing the option value. Option values can be strings, integers, nils, etc."
+  (set-translator-options (options translator) option-list)
+  ; Inform translator about option changes.
+  (options-changed translator)
+  t)
+
+(%add-callback options-changed ()
+  "Indicates that translator options have changed. You don't need to implement this if you implement 'set-options'.")
 
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
