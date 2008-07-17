@@ -15,7 +15,7 @@
   (:map-anon #x0002))
 
 (defcfun ("mmap" %mmap)
-  :int
+  :pointer
   (addr :pointer)
   (len :unsigned-int)
   (prot mmap-prot-flags)
@@ -27,9 +27,9 @@
   "Map files or devices into memory."
   (let ((ptr (%mmap addr len prot flags filedes off)))
     ; Mmap returns -1 in case of error
-    (if (= ptr -1)
+    (if (= (pointer-address ptr) #xffffffff)
       nil
-      (make-pointer ptr))))
+      ptr)))
 
 (defcfun ("munmap" %munmap) :int
   (addr :pointer)
@@ -37,6 +37,12 @@
 
 (defun munmap (addr len)
   "Remove a mapping."
-  (let ((result (%munmap addr len)))
-    ; In case of success, munmap returns 0.
-    (= result 0)))
+  (cond
+    ((zerop len)
+     t)
+    ((null addr)
+     nil)
+    (t
+      (let ((result (%munmap addr len)))
+        ; In case of success, munmap returns 0.
+        (= result 0)))))
