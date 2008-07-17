@@ -15,37 +15,25 @@
           :initarg :stat
           :accessor stat
           :documentation "Stat information about the node.")
-    (references :initform 1
-                :accessor references
-                :documentation "Number of references to this node.")
     (box :initform nil
          :accessor box
          :documentation "Node's translator box."))
    (:documentation "The node class."))
 
-(defmethod inc-refs ((node node) &optional (cnt 1))
-  "Increments 'node' references."
-  (incf (references node) cnt))
-
-(defmethod dec-refs ((node node) &optional (cnt 1))
-  "Decrements 'node' references."
-  (decf (references node) cnt))
-
-(defmethod no-refs-p ((node node))
-  "Tells if node has no references."
-  (zerop (references node)))
-
 (defmethod pre-drop-node ((node node))
   "Does some operations before we can drop a node."
   (transbox-drop (box node)))
 
+(defgeneric initialize-node (node))
+
 (defmethod initialize-instance :after ((node node) &key)
   "Set the node's transbox (note that we need the node reference to do that)."
-  (setf (box node) (make-transbox node)))
+  (setf (box node) (make-transbox node))
+  (initialize-node node))
 
 (defmethod print-object ((node node) stream)
   "Print a node to stream."
-  (format stream "#<node ref: ~s>" (references node)))
+  (format stream "#<node owner=~s>" (owner node)))
 
 (defmethod is-controller-p ((node node) (user iouser))
   "Specialize is-controller-p for nodes."
@@ -54,3 +42,7 @@
 (defmethod is-owner-p ((node node) (user iouser))
   "Specialize is-owner-p for nodes."
   (is-owner-p (stat node) user))
+
+(defmethod has-access-p ((node node) (user iouser) flag)
+  "Specialize has-access-p for nodes."
+  (has-access-p (stat node) user flag))
