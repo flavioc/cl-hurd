@@ -3,15 +3,15 @@
 
 (defun %shutdown (flags)
   (when (and
-          (fsys-goaway-flag-is-p flags :unlink)
+          (flag-is-p flags :unlink)
           (is-dir-p (stat (root *translator*))))
     (return-from %shutdown :resource-busy))
   ; XXX make translators go away
   (when (and
-          (not (fsys-goaway-flag-is-p flags :force))
+          (not (flag-is-p flags :force))
           (plusp (bucket-count-type (port-bucket *translator*) 'protid)))
     (return-from %shutdown :resource-busy))
-  (unless (fsys-goaway-flag-is-p flags :nosync)
+  (unless (flag-is-p flags :nosync)
     (file-syncfs *translator* (make-iouser-root) t t))
   (shutdown *translator*))
 
