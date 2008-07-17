@@ -14,7 +14,7 @@
   :FSYS-GETPRIV
   :FSYS-INIT
   :FSYS-FORWARD
-  :FSYS-GET_OPTIONS)
+  :FSYS-GET-OPTIONS)
 
 (defcfun ("set_fsys_routine" %set-fsys-routine) :void
   (what fsys-routine-code)
