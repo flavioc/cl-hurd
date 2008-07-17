@@ -14,12 +14,11 @@
            :translate-foreign-list
            :with-gensyms
            :select-error
-           :open-flags-t
-           :disable
-           :disabled
-           :enable
-           :disabled
            :flag-is-p
+           :enable-flags
+           :disable-flags
+           :only-flags
+           :free-memory-list
            :read
            :write
            :exec
@@ -112,12 +111,13 @@
            :set-passive-trans
            :set-root
            :stat-copy
-           :only
            :open-modes
            :set-types
            :set-spare
            :gid-t
+           :+gid-t-size+
            :uid-t
+           :+uid-t-size+
            :valid-id-p
            :time-value-t
            :time-value
@@ -176,17 +176,21 @@
            :namelen
            :favail
            :frsize
-           :seek-time
+           :seek-type
            :maptime-map
            :maptime-seconds
            :maptime-microseconds
            :maptime-check-seconds
-           :*mapped-time*))
+           :*mapped-time*
+           :select-type
+           :is-uid-p
+           :is-gid-p))
 
 (defpackage :cl-mach
   (:nicknames :mach)
   (:use :cl :cffi :hurd-common)
   (:export :task-self
+           :task
            :with-port-deallocate
            :with-port-destroy
            :with-port
@@ -359,7 +363,6 @@
            :unlink
            :recurse
            :fsys-goaway-flags
-           :fsys-goaway-flag-is-p
            :fsys-goaway-reply
            :bucket-count-type
            :bucket-iterate
@@ -369,6 +372,10 @@
            :user-reauth
            :port-cleanup
            :get-io-identity
+           :fs-trans-flags
+           :box-fetch-control
+           :exec-flags
+           :exec-exec
            ))
 
 (defpackage :cl-hurd.translator
@@ -390,7 +397,7 @@
            :get-entries
            :allow-author-change
            :create-directory
-           :remove-entry
+           :remove-directory-entry
            :file-read
            :file-write
            :run-translator
@@ -401,8 +408,6 @@
            :file-sync
            :file-syncfs
            :name
-           :inc-refs
-           :dec-refs
            :drop-node
            :make-node-dirent
            :report-access
@@ -411,7 +416,20 @@
            :get-statfs
            :file-change-size
            :file-rename
-           :shutdown))
+           :shutdown
+           :create-anonymous-file
+           :create-hard-link
+           :block-read
+           :block-write
+           :get-options
+           :set-options
+           :options-changed
+           :make-translator-options
+           :get-translator-options
+           :has-translator-option-p
+           :get-translator-option
+           :set-translator-options
+           :options))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)
@@ -421,8 +439,6 @@
            :dir-entry
            :entry
            :add-entry
-           :make-dir
-           :make-entry
            :get-entry
            :rename-dir-entry
            :setup-entry))
