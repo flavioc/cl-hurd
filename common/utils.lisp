@@ -121,3 +121,33 @@ a/b/c/ -> ('a', 'b', 'c', '') pay attention to the last component!"
 (defun bzero (ptr n)
   "Copies n bytes, each with a value of zero, into ptr."
   (%bzero ptr n))
+
+(defun %convert-list (item)
+  (if (symbolp item)
+    (list item)
+    item))
+
+(defun flag-is-p (flags flag)
+  "Checks if flags has the flag or flag's list 'flag' enabled."
+  (if (intersection flags (%convert-list flag))
+    t
+    nil))
+
+(defun enable-flags (flags new-flags)
+  "Enable all flags in new-flags."
+  (union flags (%convert-list new-flags)))
+
+(defun disable-flags (flags old-flags)
+  "Disable all flags in old-flags."
+  (set-difference flags (%convert-list old-flags)))
+
+(defun only-flags (flags new-flags)
+  "Only enable flags in new-flags."
+  (intersection flags (%convert-list new-flags)))
+
+(defun free-memory-list (ls)
+  "Frees a list with pointers."
+  (loop for item in ls
+        do (when (and (pointerp item)
+                      (not (null-pointer-p item)))
+             (foreign-free item))))
