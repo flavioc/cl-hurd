@@ -7,9 +7,3 @@
   (:force  #x00000004)
   (:unlink #x00000008)
   (:recurse #x00000010))
-
-(defun fsys-goaway-flag-is-p (flags flag)
-  (if (member flag flags)
-    t
-    nil))
-
