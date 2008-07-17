@@ -68,21 +68,43 @@
                  (node user filename mode)
   (warn "Create file ~s in ~s" filename node)
   (let ((entry (make-instance 'zip-entry
-                              :stat (make-stat (stat node))
-                              :name filename
+                              :stat (make-stat (stat node)
+                                               :mode mode)
                               :parent node
                               :data (make-array 0))))
     (setup-entry entry)
-    (add-entry node entry)
+    (add-entry node entry filename)
     entry))
 
+(define-callback create-anonymous-file zip-translator
+                 (node user mode)
+  (make-instance 'zip-entry
+                 :stat (make-stat (stat node) :mode mode)
+                 :parent node
+                 :data (make-array 0)))
+
+(define-callback create-hard-link zip-translator
+                 (dir user file name)
+  (add-entry dir file name)
+  t)
+
+(define-callback options-changed zip-translator
+                 ()
+  (warn "Options changed:")
+  (if (has-translator-option-p (options *translator*) "readonly")
+    (warn "READONLY activated"))
+  (if (has-translator-option-p (options *translator*) "coolness-level")
+    (warn "COOLNESS LEVEL ~s"
+          (get-translator-option (options *translator*)
+                                 "coolness-level")))
+  t)
 
 ;; XXX
 (define-callback file-write zip-translator
 				 (node user offset stream)
   t)
 
-(defun %create-zip-file (name parent entry)
+(defun %create-zip-file (parent entry)
   "Create a new zip entry."
   (let ((data-stream
           (make-in-memory-output-stream
@@ -90,21 +112,23 @@
         seq
         stat)
     (zipfile-entry-contents entry data-stream)
-    (setf seq (get-output-stream-sequence data-stream))
-    (setf stat (make-stat (stat parent)
-                          :size (length seq)))
+    (setf seq (get-output-stream-sequence data-stream)
+          stat (make-stat (stat parent)
+                          :size (length seq)
+                          :type :reg))
     (clear-perms stat 'exec) ; Clear exec permissions.
     (let ((obj (make-instance 'zip-entry
                               :stat stat
-                              :name name
                               :parent parent
                               :data seq)))
       (setup-entry obj)
       obj)))
 
-(defun %create-zip-dir (name parent)
+(defun %create-zip-dir (parent)
   "Create a new zip directory."
-  (make-dir name (make-stat (stat parent)) parent))
+  (make-instance 'dir-entry
+                 :stat (make-stat (stat parent))
+                 :parent parent))
 
 (defun add-zip-file (node name zip-entry)
   "Recursively using name as a path list add into 'node' a new 'zip-entry'."
@@ -123,8 +147,10 @@
         (t
           (let ((new-dir (add-entry node
                                     (if final-p
-                                      (%create-zip-file this-name node zip-entry)
-                                      (%create-zip-dir this-name node)))))
+                                      (%create-zip-file node zip-entry)
+                                      (%create-zip-dir node))
+                                    this-name)))
+            ;(warn "new-dir ~s" new-dir)
             (unless final-p
               (add-zip-file new-dir name-rest zip-entry))))))))
 
@@ -133,7 +159,11 @@
   (do-zipfile-entries (name entry *zip*)
                       (add-zip-file node (split-path name) entry)))
 
-(defvar *zip-translator* (make-instance 'zip-translator))
+(defvar *zip-translator*
+  (make-instance 'zip-translator
+                 :options (make-translator-options
+                            '(("coolness-level" 20)
+                              "fast"))))
 
 ;; to be removed
 ;;
@@ -148,6 +178,9 @@
 (define-callback file-chmod zip-translator
 				 (node user mode)
   (set-perms-if (stat node)
+                (has-perms-p mode 'exec 'owner)
+                'exec 'owner)
+  (set-perms-if (stat node)
                 (has-perms-p mode 'read 'others)
                 'read 'others))
 
@@ -161,7 +194,6 @@
 
 (define-callback allow-author-change zip-translator
 				 (node user author)
-  (warn "changing author in node ~s to ~s" (name node) author)
   t)
 
 ;; Startup the translator.
