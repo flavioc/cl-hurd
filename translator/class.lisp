@@ -37,7 +37,11 @@
    (flags :initform nil
           :reader flags
           :initarg flags
-          :documentation "Startup translator flags to be passed to fsys-startup."))
+          :documentation "Startup translator flags to be passed to fsys-startup.")
+   (options :initform (make-translator-options)
+            :accessor options
+            :initarg :options
+            :documentation "Translator options."))
   (:documentation "Translator class."))
 
 (defmethod insert-temporary-data ((trans translator) key value)
