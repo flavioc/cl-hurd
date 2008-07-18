@@ -7,8 +7,6 @@
   (with-lookup protid dir
     (let ((node (get-node protid))
           (user (get-user protid)))
-      (warn "trying to create a dir ~s in node ~s"
-            name (name (get-node protid)))
       (cond
         ((not (is-dir-p (stat node)))
          :not-directory)
