@@ -162,6 +162,8 @@
                                               :components ((:file "startup")
                                                            (:file "goaway-flags")
                                                            (:file "goaway-reply")
+                                                           (:file "goaway"
+                                                                  :depends-on ("goaway-flags"))
                                                            (:file "getroot")))
                                      (:module ports
                                               :components ((:file "port")
@@ -288,7 +290,8 @@
                                                            (:file "file-get-fs-options"
                                                                   :depends-on ("options"))
                                                            (:file "fsys-set-options")
-                                                           (:file "file-exec"))
+                                                           (:file "file-exec")
+                                                           (:file "file-set-translator"))
                                               :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
