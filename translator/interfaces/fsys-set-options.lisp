@@ -1,20 +1,10 @@
 
 (in-package :hurd-translator)
 
-(defun %get-string-list-options (data data-len)
-  (let ((total-len 0))
-    (loop until (eq total-len data-len)
-          collect (let* ((str (foreign-string-to-lisp data))
-                         (len (1+ (length str))))
-                    (incf-pointer data len)
-                    (incf total-len len)
-                    str))))
-
 (defun %split-options (item)
   "Split options, examples:
 'readonly' -> 'readonly'
-'max-files=5' -> ('max-files' '5')
-"
+'max-files=5' -> ('max-files' '5')"
   (let ((pos (position #\= item)))
     (cond
       ((null pos)
@@ -35,7 +25,8 @@
                                        (data-len msg-type-number)
                                        (do-children :boolean))
   (with-lookup protid fsys
-    (let* ((options-list (%get-string-list-options data data-len))
+    (let* ((options-list (foreign-string-zero-separated-to-list
+                           data data-len))
            (filtered-list ; Remove options without "--"
              (remove-if-not (lambda (item)
                               (and (> (length item) 2)
@@ -46,6 +37,5 @@
              (mapcar (lambda (item)
                        (%split-options (subseq item 2)))
                      filtered-list)))
-      (warn "final-list ~s" final-list)
       (set-options *translator* final-list)
       t)))
