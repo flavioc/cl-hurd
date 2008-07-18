@@ -183,8 +183,10 @@
            :maptime-check-seconds
            :*mapped-time*
            :select-type
+           :foreign-string-zero-separated-to-list
            :is-uid-p
-           :is-gid-p))
+           :is-gid-p
+           :with-stream))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -356,7 +358,8 @@
            :can-modify-dir-p
            :can-modify-file-in-dir-p
            :is-owner-p
-           :transbox-drop
+           :box-drop
+           :box-set-active
            :nowait
            :nosync
            :force
@@ -376,6 +379,7 @@
            :box-fetch-control
            :exec-flags
            :exec-exec
+           :fsys-goaway
            ))
 
 (defpackage :cl-hurd.translator
@@ -429,6 +433,9 @@
            :has-translator-option-p
            :get-translator-option
            :set-translator-options
+           :create-symlink
+           :link
+           :allow-link-p
            :options))
 
 (defpackage :cl-hurd.translator.tree
