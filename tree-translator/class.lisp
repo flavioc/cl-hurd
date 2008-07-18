@@ -64,7 +64,8 @@ root node."
 (define-callback create-directory tree-translator
                  (node user name mode)
   (add-entry node (make-instance 'dir-entry
-                                 :stat (make-stat (stat node) :mode mode) node)
+                                 :stat (make-stat (stat node) :mode mode)
+                                 :parent node)
              name))
 
 (define-callback remove-directory-entry tree-translator
