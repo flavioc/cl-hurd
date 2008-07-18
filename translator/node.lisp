@@ -17,12 +17,15 @@
           :documentation "Stat information about the node.")
     (box :initform nil
          :accessor box
-         :documentation "Node's translator box."))
+         :documentation "Node's translator box.")
+    (linktarget :initform nil
+                :accessor link
+                :documentation "If this is symlink, this is the target file."))
    (:documentation "The node class."))
 
 (defmethod pre-drop-node ((node node))
   "Does some operations before we can drop a node."
-  (transbox-drop (box node)))
+  (box-drop (box node)))
 
 (defgeneric initialize-node (node))
 
