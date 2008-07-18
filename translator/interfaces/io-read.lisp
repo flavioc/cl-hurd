@@ -12,11 +12,10 @@
          (start (if current-offset-p
                   (file-offset open-node)
                   offset)))
-    (let* ((out-stream (make-in-memory-output-stream))
-           (ret-read (file-read *translator*
+    (with-stream (out-stream (make-in-memory-out-stream))
+      (let ((ret-read (file-read *translator*
                                 node user start
                                 (if any-amount-p nil amount) out-stream)))
-      (with-cleanup (close out-stream)
         (when ret-read
           (let* ((data-read (get-output-stream-sequence out-stream))
                  (total-read (length data-read)))
