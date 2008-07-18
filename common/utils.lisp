@@ -151,3 +151,19 @@ a/b/c/ -> ('a', 'b', 'c', '') pay attention to the last component!"
         do (when (and (pointerp item)
                       (not (null-pointer-p item)))
              (foreign-free item))))
+
+(defun foreign-string-zero-separated-to-list (ptr ptr-len)
+  "Converts a foreign string sequence separated by '\0' into a list of lisp strings."
+  (let ((total-len 0))
+    (loop until (eq total-len ptr-len)
+          collect (let* ((str (foreign-string-to-lisp ptr))
+                         (len (1+ (length str))))
+                    (incf-pointer ptr len)
+                    (incf total-len len)
+                    str))))
+
+(defmacro with-stream ((stream-name init) &body body)
+  "Open stream with name 'stream-name' and initialization 'init' and the close it."
+  `(let ((,stream-name ,init))
+     (with-cleanup (close ,stream-name)
+       ,@body)))
