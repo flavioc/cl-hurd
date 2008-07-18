@@ -28,8 +28,6 @@
                        node-port
                        uid gid
                        path)
-    (set-starting box nil)
-    (set-wanted box nil)
     (if err
       (return-from try-start-translator err))
     (if (port-valid ret)
@@ -47,13 +45,8 @@
                        retry-name
                        retry-port)
   (unless (box-translated-p box)
-    (if (box-starting-p box)
-      (set-wanted box t))
-    (set-starting box t)
     (multiple-value-bind (path uid gid) (funcall get-translator-callback (node box) port)
       (unless path
-        (set-starting box nil)
-        (set-wanted box nil)
         (return-from fetch-root path)) ; return error
       (let ((control-port (try-start-translator box dotdot
                                                 fetch-root-callback
@@ -62,8 +55,6 @@
                                                 uid
                                                 gid)))
         (unless (port-valid control-port)
-          (set-starting box nil)
-          (set-wanted box nil)
           (return-from fetch-root control-port)) ; error
         (setf (active box) control-port))))
   (let ((control (active box)))
