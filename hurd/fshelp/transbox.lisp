@@ -11,10 +11,6 @@
            :accessor active
            :initform nil
            :documentation "Is the box active?")
-   (starting :initform nil
-             :documentation "If it is starting")
-   (wanted :initform nil
-           :documentation "If it is needed")
    (node :initform nil
          :initarg :node
          :accessor node
@@ -41,20 +37,20 @@
   (port-mod-refs (active box) 1)
   (active box))
 
-(defmethod set-starting ((box transbox) v)
-  "Changes the starting field to 'v'."
-  (setf (slot-value box 'starting) v))
-
-(defmethod set-wanted ((box transbox) v)
-  "Changes the wanted field to 'v'."
-  (setf (slot-value box 'wanted) v))
-
-(defmethod box-starting-p ((box transbox))
-  "Returns the 'starting' field."
-  (slot-value box 'starting))
-
-(defmethod transbox-drop ((box transbox))
+(defmethod box-drop ((box transbox))
   "Drops a transbox."
   (when (active box)
     (port-deallocate (active box))
     (setf (active box) nil)))
+
+(defmethod box-set-active ((box transbox) port excl-p)
+  "Set a new active port on a box."
+  (when (and excl-p
+             (active box))
+    ; See if the active name is dead
+    (if (zerop (port-get-refs (active box) :right-dead-name))
+      (return-from box-set-active nil)))
+  (when (active box)
+    (port-deallocate (active box)))
+  (setf (active box) port)
+  t)
