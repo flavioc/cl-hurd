@@ -150,6 +150,14 @@ a list of two elements: a string representing the option and the value, represen
 (%add-callback options-changed ()
   "Indicates that translator options have changed. You don't need to implement this if you implement 'set-options'.")
 
+(%add-callback create-symlink (node user target)
+  "Turn 'node' into a symlink to 'target'."
+  nil)
+
+(%add-callback allow-link-p (node user)
+  "Return T to allow reading from the symlink 'node' to 'user'."
+  t)
+
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
   `(defmethod ,name ((translator ,trans-type) ,@args)
