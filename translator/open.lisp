@@ -15,7 +15,7 @@
              :documentation "File offset.")
    (lock-status :initform 'unlock
                 :documentation "Lock status.") ; /usr/include/sys/file.h
-   (openstat :initform nil
+   (openstat :initform '()
              :initarg :flags
              :accessor flags
              :documentation "Open flags for this node.")
@@ -30,17 +30,33 @@
                        :documentation "Shadow root parent."))
   (:documentation "Open node class."))
 
+(defun %set-root-shadow-parent (obj parent shadow shadow-parent)
+  (when parent
+    (setf (root-parent obj) parent))
+  (when shadow
+    (setf (shadow-root obj) shadow))
+  (when shadow-parent
+    (setf (shadow-root-parent obj) shadow-parent)))
+
 (defun make-open-node (node flags
-                            &key (root-parent nil)
+                            &key
+                            (copy nil)
+                            (root-parent nil)
                             (shadow-root nil)
                             (shadow-root-parent nil))
   "Creates a new open node."
   (let ((obj (make-instance 'open-node :refers node :flags flags)))
-    (setf (root-parent obj) root-parent)
+    (when copy
+      (%set-root-shadow-parent obj
+                               (root-parent copy)
+                               (shadow-root copy)
+                               (shadow-root-parent copy)))
+    (%set-root-shadow-parent obj
+                             root-parent
+                             shadow-root
+                             shadow-root-parent)
     (if (port-valid (root-parent obj))
       (port-mod-refs (root-parent obj) :right-send 1))
-    (setf (shadow-root obj) shadow-root)
-    (setf (shadow-root-parent obj) shadow-root-parent)
     (if (port-valid shadow-root-parent)
       (port-mod-refs shadow-root-parent :right-send 1))
     obj))
