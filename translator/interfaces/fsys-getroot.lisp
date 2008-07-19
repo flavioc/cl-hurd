@@ -75,7 +75,7 @@
                (when (unsupported-root-file-p (stat root-node) flags)
                  (warn "unsupported!")
                  (return-from outer-block nil))
-               (unless (allow-open *translator* root-node user flags t)
+               (unless (allow-open-p *translator* root-node user flags t)
                  (return-from outer-block :not-permitted))
                (setf flags (disable-flags flags +open-flags+))
                (let ((new (new-protid *translator* user
