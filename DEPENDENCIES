@@ -2,5 +2,5 @@
 - Clisp.
 - CFFI (common-lisp.net/project/cffi/)
 - trivial-garbage (www.cliki.net/trivial-garbage?v=20)
-- flexi-streams
+- flexi-streams (for translator's file-read & file-write)
 - cl-zip (for the zipfs example translator).
