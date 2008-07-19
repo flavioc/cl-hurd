@@ -1,20 +1,13 @@
 TODO list:
 
-- symlinks in dir-lookup and io-read
 - find... why?
 - shutdown other translators
+- fsys set options on other translators
 - more callbacks:
-  - dir-link
-  - dir-mkfile
-  - file-chflags
-  - file-exec
-  - file-get-fs-options
-  - file-get-storage-info
-  - file-get-translator
-  - file-lock-stat
-  - file-lock
+  - file-exec -- (broken)
+  - file-get-storage-info (must investigate further...)
+  - file-get-translator --
+  - file-lock-stat (no need for it)
+  - file-lock (likewise)
   - file-reparent
-  - file-set-translator
-  - fsys-get-options
-  - fsys-set-options
-  - io-select
+  - file-set-translator --
