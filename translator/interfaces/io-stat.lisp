@@ -4,9 +4,9 @@
 (def-io-interface :io-stat ((io port)
 							(stat-info stat-t))
   (with-lookup protid io
-	  (stat-copy stat-info (get-stat protid))
+    ;(warn "stating node ~s" (get-node protid))
+    (stat-copy stat-info (get-stat protid))
     (set-root stat-info nil)
-    (set-active-trans stat-info nil)
     (set-active-trans stat-info
                       (box-translated-p (get-box protid)))
     (set-root stat-info
