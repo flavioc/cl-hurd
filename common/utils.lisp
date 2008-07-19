@@ -162,6 +162,10 @@ a/b/c/ -> ('a', 'b', 'c', '') pay attention to the last component!"
                     (incf total-len len)
                     str))))
 
+(defmacro concatenate-string (&body rest)
+  "Use concatenate to concat strings."
+  `(concatenate 'string ,@rest))
+
 (defmacro with-stream ((stream-name init) &body body)
   "Open stream with name 'stream-name' and initialization 'init' and the close it."
   `(let ((,stream-name ,init))
