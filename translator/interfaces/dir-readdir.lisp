@@ -17,6 +17,7 @@
         (ptr data)
         (total (- final-entry entry))
         (entries (get-entries *translator* (get-node dir-protid) (get-user dir-protid) entry final-entry)))
+    ;(warn "entries ~s" entries)
     (loop for dirent in entries
           for cnt = 0 then (1+ cnt)
           do (let* ((dirent-name (name dirent))
@@ -26,12 +27,12 @@
                            (- (pointer-address ptr)
                               (pointer-address data)))
                         size)
-                 (warn "exceeded")
+                 ;(warn "exceeded")
                  (when limited-p
-                   (warn "limited! returning..")
+                   ;(warn "limited! returning..")
                    (return (values cnt ptr size)))
                  (with-foreign-pointer (extension (foreign-type-size 'vm-address))
-                   (warn "extending..")
+                   ;(warn "extending..")
                    (let ((result (vm-allocate extension +chunk-size+ 0)))
                      (if (null result)
                        (return (values nil nil size))
@@ -91,6 +92,8 @@
 				(bufsiz :unsigned-int)
 				(amount :pointer))
   (with-lookup dir-protid port
+    ;(warn "listing ~s entry ~s nentries ~s" (get-node dir-protid)
+;          entry nentries)
     (block dir-readdir
            (unless (flag-is-p (get-open-flags dir-protid) :read)
              (return-from dir-readdir :bad-fd))
