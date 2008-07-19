@@ -1,84 +1,124 @@
 
 (in-package :hurd-translator)
 
+(defun %has-node-p (table node)
+  (multiple-value-bind (foo found-p)
+    (gethash node table)
+    found-p))
+
+(defun %put-node (table node)
+  (setf (gethash node table) nil)
+  table)
+
 (defun %create-new-protid (open-node user node flags newnode-p)
   "Creates a new protid."
-  (let ((allow (allow-open *translator*
-                           node
-                           user
-                           flags
-                           newnode-p)))
-    (when allow
-      (setf flags (disable-flags flags +open-flags+))
+  (let ((new-flags (disable flags +open-flags+)))
+    (when (allow-open-p *translator* node user new-flags newnode-p)
       (let* ((new-user (make-iouser :old user))
+             (new-open-node (make-open-node
+                              node
+                              new-flags
+                              :copy open-node))
              (new-protid
                (new-protid *translator*
                            new-user
-                           (make-open-node node
-                                           flags
-                                           :root-parent (root-parent open-node)
-                                           :shadow-root (shadow-root open-node)
-                                           :shadow-root-parent (shadow-root-parent open-node)))))
+                           new-open-node)))
         (values :retry-normal
                 ""
                 (get-right new-protid)
                 :make-send)))))
 
-(defun %dir-lookup (open-node user node path-ls flags mode)
+(defun %handle-shadow-roots (open-node user node this-path rest-path)
+  (let ((shadow-root (shadow-root open-node)))
+    (when (and (or (eq (root *translator*) node)
+                   (eq shadow-root node))
+               (string= this-path ".."))
+      (cond
+        ((eq node shadow-root)
+         (values :retry-reauth
+                 (join-path rest-path)
+                 (shadow-root-parent open-node)
+                 :copy-send))
+        ((root-parent open-node)
+         (values :retry-reauth
+                 (join-path rest-path)
+                 (root-parent open-node)
+                 :copy-send))))))
+
+(defun %handle-symlinks (open-node user dir node rest-path flags mode table)
+  (let ((target (link node)))
+    (cond
+      ((eq (char target 0) #\/) ; Points to root /!
+       (values :retry-magical
+               (concatenate-string target
+                                   "/"
+                                   (join-path rest-path))
+               nil
+               :make-send))
+      (t
+        ; Lookup new path based on the symlink target.
+        (%dir-lookup open-node
+                     user
+                     dir
+                     (if (null rest-path)
+                       (split-path target)
+                       (append (remove "" (split-path target) :test #'string=)
+                               rest-path))
+                     (disable-flags flags :creat)
+                     mode
+                     (%put-node table node))))))
+
+(defun %dir-lookup (open-node user node path-ls flags mode table)
   (let ((this-path (first path-ls))
         (rest-path (rest path-ls)))
+    (warn "this-path ~s, rest-path ~s" this-path rest-path)
     (when (string= this-path "") ; this is last path
-      (return-from %dir-lookup (%create-new-protid open-node user node flags nil)))
-    (let ((shadow-root (shadow-root open-node)))
+      (return-from %dir-lookup
+                   (%create-new-protid open-node user node flags nil)))
+    (multiple-value-bind (retry path port retry-type)
+      (%handle-shadow-roots open-node user node this-path rest-path)
+      (when retry
+        (return-from %dir-lookup (values retry path port retry-type))))
+    (let ((found-node (dir-lookup *translator* node user this-path)))
       (cond
-        ((and (or (eq (root *translator*) node)
-                  (eq shadow-root node))
-              (string= this-path ".."))
-         (cond
-           ((eq node shadow-root)
-            (return-from %dir-lookup (values :retry-reauth
-                                             (join-path rest-path)
-                                             (root-parent open-node)
-                                             :copy-send)))
-           ((not (null (root-parent open-node)))
-            (return-from %dir-lookup (values :retry-reauth
-                                             (join-path rest-path)
-                                             (root-parent open-node)
-                                             :copy-send)))))
+        ((and found-node
+              (flag-is-p flags :creat)
+              (flag-is-p flags :excl))
+         :file-exists)
+        ((and (not found-node)
+              (flag-is-p flags :creat)
+              (null rest-path))
+         (set-vtx mode nil)
+         (set-spare mode nil)
+         (set-type mode :reg)
+         (let ((new-node (create-file *translator*
+                                      node
+                                      user
+                                      this-path
+                                      mode)))
+           (unless new-node
+             (return-from %dir-lookup :not-permitted))
+           (%create-new-protid open-node user new-node flags t)))
+        ((and found-node
+              (is-lnk-p (stat found-node))
+              (or (and (not (flag-is-p flags :nolink))
+                       (not (flag-is-p flags :notrans)))
+                  rest-path)
+              (link found-node))
+         (if (%has-node-p table found-node)
+           :too-many-links
+           (%handle-symlinks open-node user node found-node rest-path flags mode table)))
+        ((and (null rest-path)
+              found-node)
+         (%create-new-protid open-node user found-node flags nil))
+        ((and rest-path
+              found-node
+              (not (is-dir-p (stat found-node))))
+         :not-directory)
+        ((not found-node)
+         :no-such-file)
         (t
-          (let ((found-node (dir-lookup *translator* node user this-path)))
-            (cond
-              ((and found-node
-                    (flag-is-p flags :creat)
-                    (flag-is-p flags :excl))
-               :file-exists)
-              ((and (not found-node)
-                    (flag-is-p flags :creat)
-                    (null rest-path))
-               (set-vtx mode nil)
-               (set-spare mode nil)
-               (set-type mode :reg)
-               (let ((new-node (create-file *translator*
-                                            node
-                                            user
-                                            this-path
-                                            mode)))
-                 (unless new-node
-                   (return-from %dir-lookup :not-permitted))
-                 (%create-new-protid open-node user new-node flags t)))
-              ((and (null rest-path)
-                    found-node)
-               (%create-new-protid open-node user found-node flags nil))
-              ((and rest-path
-                    found-node
-                    (not (is-dir-p (stat found-node))))
-               :not-directory)
-              ((not found-node)
-               :no-such-file)
-              (t
-                ;(warn "continue lookup in ~s" node)
-                ;; continue lookup
-                (%dir-lookup open-node user found-node rest-path flags mode)))))))))
+          (%dir-lookup open-node user found-node rest-path flags mode table))))))
 
 (def-fs-interface :dir-lookup ((dir-port port)
                                (filename :string)
@@ -100,7 +140,8 @@
                    (get-node dir-protid)
                    (split-path filename)
                    flags
-                   mode)
+                   mode
+                   (make-hash-table))
       (cond
         ((null ret-retry-name)
          ret-do-retry) ;; some error ocurred
