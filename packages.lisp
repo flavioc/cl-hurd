@@ -186,7 +186,8 @@
            :foreign-string-zero-separated-to-list
            :is-uid-p
            :is-gid-p
-           :with-stream))
+           :with-stream
+           :concatenate-string))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -388,7 +389,7 @@
   (:export :translator
            :make-root-node
            :pathconf
-           :allow-open
+           :allow-open-p
            :node
            :get-translator
            :file-chmod
