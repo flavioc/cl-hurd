@@ -99,6 +99,13 @@
                                  "coolness-level")))
   t)
 
+(define-callback create-symlink zip-translator
+                 (node user target)
+  (set-type (stat node) :lnk)
+  (setf (link node) target)
+  (setf (stat-get (stat node) 'size) (length target))
+  t)
+
 ;; XXX
 (define-callback file-write zip-translator
 				 (node user offset stream)
