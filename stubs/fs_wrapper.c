@@ -455,8 +455,6 @@ lisp_dir_readdir(file_t dir,
 		vm_size_t bufsiz,
 		int *amount)
 {
-//	fprintf(stderr, "IN READDIR\n");
-
 	if(routines[DIR_READDIR] == NULL) {
 		return EOPNOTSUPP;
 	}
