@@ -63,10 +63,15 @@ root node."
 
 (define-callback create-directory tree-translator
                  (node user name mode)
-  (add-entry node (make-instance 'dir-entry
-                                 :stat (make-stat (stat node) :mode mode)
-                                 :parent node)
-             name))
+  (let ((old (get-entry node name)))
+    (cond
+      (old
+        nil)
+      (t
+        (add-entry node (make-instance 'dir-entry
+                                       :stat (make-stat (stat node) :mode mode)
+                                       :parent node)
+                   name)))))
 
 (define-callback remove-directory-entry tree-translator
 				 (node user name directory-p)
