@@ -1,34 +1,52 @@
 
 (in-package :hurd-translator)
 
-(defun get-translator-callback (node port)
-  (unless (has-passive-trans-p (stat node))
-    (return-from get-translator-callback :no-such-file))
-  (let ((translator-path (get-translator *translator* node)))
-    (when translator-path
-      (values translator-path
-              (stat-get (stat node) 'uid)
-              (stat-get (stat node) 'gid)))))
+(defun %must-follow-symlink-p (node user flags)
+  (and (is-lnk-p (stat node))
+       (link node)
+       (not (flag-is-p flags :nolink))
+       (not (flag-is-p flags :notrans))
+       (allow-link-p *translator* node user)))
 
-(defcallback fetch-root-callback err
-             ((node-port :pointer)
-              (root-parent :pointer)
-              (flags open-flags)
-              (underlying port-pointer)
-              (underlying-type :pointer))
-  (let* ((node (get-temporary-data *translator* node-port))
-         (stat (stat node))
-         (iouser (make-iouser :uids (stat-get stat 'uid)
-                              :gids (stat-get stat 'gid)))
-         (root-parent-port (mem-ref root-parent :int))
-         (new (new-protid *translator* iouser
-                          (make-open-node node flags
-                                          :root-parent root-parent-port))))
-    (setf (mem-ref underlying 'port) (get-right new))
-    (setf (mem-ref underlying-type 'msg-type-name) :make-send)
-    t))
+(defun %handle-normal-file (node flags dotdot user)
+  (cond
+    ((allow-open-p *translator* node user flags t)
+     (let* ((new-open-node (make-open-node
+                             node
+                             (disable-flags flags +open-flags+)
+                             :root-parent dotdot))
+            (new (new-protid *translator*
+                            user
+                            new-open-node)))
+       (port-deallocate dotdot)
+       (values :retry-normal
+               (get-right new)
+               :make-send
+               "")))
+    (t :not-permitted)))
 
-(defun unsupported-root-file-p (stat flags)
+(defun %handle-symlink (node dotdot)
+  (let ((target (link node)))
+    (cond
+      ((eq (char target 0) #\/) ; Points to root.
+       (port-deallocate dotdot)
+       (values :retry-magical
+               nil
+               :copy-send
+               target))
+      (t
+        (values :retry-reauth
+                dotdot
+                :move-send
+                target)))))
+
+(defun %fsys-getroot-normal (node flags dotdot user)
+  (cond
+    ((%must-follow-symlink-p node user flags)
+     (%handle-symlink node dotdot))
+    (t (%handle-normal-file node flags dotdot user))))
+
+(defun %unsupported-root-file-p (stat flags)
   (and (or (is-sock-p stat)
            (is-blk-p stat)
            (is-chr-p stat)
@@ -38,54 +56,56 @@
          (flag-is-p flags :write)
          (flag-is-p flags :exec))))
 
-(def-fsys-interface :fsys-getroot ((fsys port)
-								   (reply port)
-								   (reply-poly msg-type-name)
-								   (dotdot port)
-								   (gen-uids :pointer)
-								   (gen-uids-count msg-type-number)
-								   (gen-gids :pointer)
-								   (gen-gids-count msg-type-number)
-								   (flags open-flags)
-								   (retry-type :pointer)
-								   (retry-name :pointer)
-								   (file port-pointer)
-								   (file-poly :pointer))
-  (with-accessors ((root-node root)) *translator*
-    (when (and root-node
-               (port-exists-p fsys))
-      (let ((user (make-iouser-mem gen-uids gen-uids-count
-                                   gen-gids gen-gids-count)))
-        (block outer-block
-               (when (and (or (has-passive-trans-p (stat root-node))
-                              (box-translated-p (box root-node)))
-                          (flag-is-p flags :notrans))
-                 (insert-temporary-data *translator* fsys root-node)
-                 (let ((ret-fetch (fetch-root (box root-node) fsys
-                                              dotdot flags
-                                              gen-uids gen-uids-count
-                                              gen-gids gen-gids-count
-                                              #'get-translator-callback (callback fetch-root-callback)
-                                              retry-type retry-name file)))
-                   (remove-temporary-data *translator* fsys)
-                   (unless (eq ret-fetch :no-such-file)
-                     (if (eq ret-fetch t)
-                       (setf (mem-ref file-poly 'msg-type-name) :move-send))
-                     (return-from outer-block ret-fetch))))
-               (when (unsupported-root-file-p (stat root-node) flags)
-                 (warn "unsupported!")
-                 (return-from outer-block nil))
-               (unless (allow-open-p *translator* root-node user flags t)
-                 (return-from outer-block :not-permitted))
-               (setf flags (disable-flags flags +open-flags+))
-               (let ((new (new-protid *translator* user
-                                      (make-open-node (root *translator*)
-                                                      flags
-                                                      :root-parent dotdot))))
-                 (port-deallocate dotdot)
-                 (setf (mem-ref retry-type 'retry-type) :retry-normal)
-                 (setf (mem-ref file 'port) (get-right new))
-                 (setf (mem-ref file-poly 'msg-type-name) :make-send)
-                 (lisp-string-to-foreign "" retry-name 1)
-                 t))))))
+(defun %must-follow-translator-p (node flags)
+  (and (translator node)
+       (not (flag-is-p flags :notrans))
+       (or (has-passive-trans-p (stat node))
+           (box-translated-p (box node)))))
 
+(defun %fsys-getroot (node flags dotdot user)
+  (when (%must-follow-translator-p node flags)
+    (warn "has translator in root!")
+    (let* ((*current-node* node)
+           (*current-dotdot* dotdot))
+      (multiple-value-bind (retry retry-name port)
+        (fetch-root (box node) 
+                    dotdot flags user
+                    #'get-translator-callback
+                    (callback fetch-root-callback))
+        ;(warn "fetch-root returned ~s ~s ~s" retry retry-name port)
+        (unless (eq retry :no-such-file)
+          (return-from %fsys-getroot (values retry port :move-send retry-name))))))
+  (when (%unsupported-root-file-p (stat node) flags)
+    (return-from %fsys-getroot nil))
+  (%fsys-getroot-normal node flags dotdot user))
+
+(def-fsys-interface :fsys-getroot ((fsys port)
+                                   (reply port)
+                                   (reply-poly msg-type-name)
+                                   (dotdot port)
+                                   (gen-uids :pointer)
+                                   (gen-uids-count msg-type-number)
+                                   (gen-gids :pointer)
+                                   (gen-gids-count msg-type-number)
+                                   (flags open-flags)
+                                   (retry-type :pointer)
+                                   (retry-name :pointer)
+                                   (file port-pointer)
+                                   (file-poly :pointer))
+  (with-accessors ((node root)) *translator*
+    (block getroot
+           (unless (and node (port-exists-p fsys))
+             (return-from getroot nil))
+           (let ((user (make-iouser-mem gen-uids gen-uids-count
+                                        gen-gids gen-gids-count)))
+             (multiple-value-bind (retry-type0 file0 file-poly0 retry-name0)
+               (%fsys-getroot node flags dotdot user)
+               ;(warn "got from %fsys-getroot ~s ~s ~s ~s"
+               ;      retry-type0 file0 file-poly0 retry-name0)
+               (setf (mem-ref retry-type 'retry-type) retry-type0
+                     (mem-ref file 'port) file0
+                     (mem-ref file-poly 'msg-type-name) file-poly0)
+               (lisp-string-to-foreign retry-name0
+                                       retry-name
+                                       (1+ (length retry-name0)))
+               t)))))
