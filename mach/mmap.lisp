@@ -10,8 +10,14 @@
 
 ;; Specifies the type of the object in mmap 'flags'.
 (defbitfield mmap-map-flags
+  (:map-file #x0001)
+  (:map-type #x000f)
   (:map-shared #x0010)
   (:map-private #x0000)
+  (:map-fixed #x0100)
+  (:map-noextend #x0200)
+  (:map-hassemphore #x0400)
+  (:map-inherit #x0800)
   (:map-anon #x0002))
 
 (defcfun ("mmap" %mmap)
