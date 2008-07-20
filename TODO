@@ -6,8 +6,6 @@ TODO list:
 - more callbacks:
   - file-exec -- (broken)
   - file-get-storage-info (must investigate further...)
-  - file-get-translator --
   - file-lock-stat (no need for it)
   - file-lock (likewise)
   - file-reparent
-  - file-set-translator --
