@@ -11,7 +11,7 @@
                                   body)
   "Generates for code for port using and releasing."
   `(let ((,port-name ,creation))
-     (when (port-valid ,port-name)
+     (when (port-valid-p ,port-name)
        (with-cleanup ,(funcall destroy port-name (%get-nil-task task))
          ,@body))))
 
@@ -31,7 +31,7 @@
 
 (defun with-right-generic (what right body)
   "Wraps some code and then releases a port right"
-  `(when (port-valid ,right)
+  `(when (port-valid-p ,right)
      (with-cleanup (port-mod-refs ,right ,what -1)
 		   ,@body)))
 

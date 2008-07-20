@@ -24,7 +24,7 @@
                                                         foo)))
        (select-error error-code
                      (let ((foo-ref (mem-ref foo 'port)))
-                       (when (port-valid foo-ref)
+                       (when (port-valid-p foo-ref)
                          (port-deallocate foo-ref task)
                          t))))))
 
