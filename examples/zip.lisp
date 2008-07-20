@@ -19,7 +19,7 @@
                   :documentation "The zip data associated with this file."))
   (:documentation "Extends entry with a zip-entry."))
 
-(define-callback allow-open zip-translator (node user flags is-new-p) t)
+(define-callback allow-open-p zip-translator (node user flags is-new-p) t)
 
 (define-callback file-read zip-translator
                  (node user start amount stream)
@@ -103,7 +103,38 @@
                  (node user target)
   (set-type (stat node) :lnk)
   (setf (link node) target)
-  (setf (stat-get (stat node) 'size) (length target))
+  t)
+
+(define-callback create-block zip-translator
+                 (node user device)
+  (warn "create-block")
+  (set-type (stat node) :blk)
+  (setf (stat-get (stat node) 'rdev) device)
+  t)
+
+(define-callback create-character zip-translator
+                 (node user device)
+  (warn "create character.")
+  (set-type (stat node) :chr)
+  (setf (stat-get (stat node) 'rdev) device)
+  t)
+
+(define-callback create-fifo zip-translator
+                 (node user)
+  (warn "create fifo.")
+  (set-type (stat node) :fifo)
+  t)
+
+(define-callback create-socket zip-translator
+                 (node user)
+  (warn "create socket.")
+  (set-type (stat node) :sock)
+  t)
+
+(define-callback set-translator zip-translator
+                 (node user arg-list)
+  (warn "setting passive translator ~s" arg-list)
+  (setf (translator node) arg-list)
   t)
 
 ;; XXX
