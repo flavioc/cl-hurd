@@ -52,12 +52,13 @@
   (with-accessors ((table table)) bucket
     (gethash port table)))
 
-(defmethod remove-port ((bucket port-bucket) port)
+(defmethod remove-port ((bucket port-bucket) port &optional (cleanup t))
   "Removes the port 'port' from the bucket 'bucket'."
   (with-accessors ((table table)) bucket
     (remhash (port-right port) table)
     (set-send-rights port nil)
-    (port-cleanup port)))
+    (when cleanup
+      (port-cleanup port))))
 
 (defmethod bucket-iterate ((bucket port-bucket) fn)
   "Apply 'fn' for each port-info in 'bucket'."
