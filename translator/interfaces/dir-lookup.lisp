@@ -68,10 +68,26 @@
                      mode
                      (%put-node table node))))))
 
+(defun %must-handle-symlink (node user flags rest-path)
+  (and node
+       (is-lnk-p (stat node))
+       (link node)
+       (allow-link-p *translator* node user)
+       (or rest-path
+           (and (not (flag-is-p flags :nolink))
+                (not (flag-is-p flags :notrans))))))
+
+(defun %must-handle-translator (node user flags rest-path)
+  (and node
+       (or (not (flag-is-p flags :notrans))
+           rest-path) ; This is not the path end, so we must continue
+       (or (has-passive-trans-p (stat node)) ; Must be passive
+           (box-translated-p (box node))))) ; ... or active.
+
 (defun %dir-lookup (open-node user node path-ls flags mode table)
   (let ((this-path (first path-ls))
         (rest-path (rest path-ls)))
-    (warn "this-path ~s, rest-path ~s" this-path rest-path)
+    (warn "%dir-lookup: this-path ~s, rest-path ~s" this-path rest-path)
     (when (string= this-path "") ; this is last path
       (return-from %dir-lookup
                    (%create-new-protid open-node user node flags nil)))
@@ -81,44 +97,65 @@
         (return-from %dir-lookup (values retry path port retry-type))))
     (let ((found-node (dir-lookup *translator* node user this-path)))
       (cond
-        ((and found-node
-              (flag-is-p flags :creat)
-              (flag-is-p flags :excl))
-         :file-exists)
-        ((and (not found-node)
-              (flag-is-p flags :creat)
-              (null rest-path))
-         (set-vtx mode nil)
-         (set-spare mode nil)
-         (set-type mode :reg)
-         (let ((new-node (create-file *translator*
-                                      node
-                                      user
-                                      this-path
-                                      mode)))
-           (unless new-node
-             (return-from %dir-lookup :not-permitted))
-           (%create-new-protid open-node user new-node flags t)))
-        ((and found-node
-              (is-lnk-p (stat found-node))
-              (or (and (not (flag-is-p flags :nolink))
-                       (not (flag-is-p flags :notrans)))
-                  rest-path)
-              (link found-node))
-         (if (%has-node-p table found-node)
-           :too-many-links
-           (%handle-symlinks open-node user node found-node rest-path flags mode table)))
-        ((and (null rest-path)
-              found-node)
-         (%create-new-protid open-node user found-node flags nil))
-        ((and rest-path
-              found-node
-              (not (is-dir-p (stat found-node))))
-         :not-directory)
-        ((not found-node)
-         :no-such-file)
-        (t
-          (%dir-lookup open-node user found-node rest-path flags mode table))))))
+        (found-node ; File exists.
+          (when (%must-handle-translator found-node user flags rest-path)
+            (let* ((empty-user (make-empty-iouser))
+                   (new-open-node (make-open-node node
+                                                  nil
+                                                  :copy open-node))
+                   (protid (new-protid *translator* empty-user new-open-node))
+                   (*current-dotdot* (get-send-right protid))
+                   (*current-node* found-node))
+              (multiple-value-bind (retry retry-name port)
+                (fetch-root (box found-node)
+                            *current-dotdot*
+                            (if rest-path flags nil)
+                            user
+                            #'get-translator-callback
+                            (callback fetch-root-callback))
+                (warn "fetch-root returned ~s ~s ~s" retry retry-name port)
+                (unless (or (eq retry :no-such-file)
+                            (null retry))
+                  (return-from %dir-lookup
+                               (values retry
+                                       (concatenate-string retry-name
+                                                           "/"
+                                                           (join-path rest-path))
+                                       port
+                                       :move-send))))))
+          (cond
+            ((and (flag-is-p flags :creat)
+                  (flag-is-p flags :excl))
+             :file-exists)
+            ((%must-handle-symlink found-node user flags rest-path)
+             (if (%has-node-p table found-node)
+               :too-many-links
+               (%handle-symlinks open-node user node found-node rest-path flags mode table)))
+            ((null rest-path)
+             (%create-new-protid open-node user found-node flags nil))
+            ((and rest-path
+                  (not (is-dir-p (stat found-node))))
+             :not-directory)
+            (t
+              (%dir-lookup open-node user found-node rest-path flags mode table))))
+          ; File does not exist.
+          (t
+            (cond
+              ((and (flag-is-p flags :creat)
+                    (null rest-path))
+               (set-vtx mode nil)
+               (set-spare mode nil)
+               (set-type mode :reg)
+               (let ((new-node (create-file *translator*
+                                            node
+                                            user
+                                            this-path
+                                            mode)))
+                 (unless new-node
+                   (return-from %dir-lookup :not-permitted))
+                 (%create-new-protid open-node user new-node flags t)))
+              (t
+                :no-such-file)))))))
 
 (def-fs-interface :dir-lookup ((dir-port port)
                                (filename :string)
