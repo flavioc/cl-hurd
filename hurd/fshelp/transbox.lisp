@@ -29,12 +29,12 @@
 (defmethod box-translated-p ((box transbox))
   "Is there an active translator on this box?"
   (with-accessors ((port active)) box
-    (port-valid port)))
+    (port-valid-p port)))
 
 (defmethod box-fetch-control ((box transbox))
   "Fetch a new control port from a translator box."
   (assert (box-translated-p box))
-  (port-mod-refs (active box) 1)
+  (port-mod-refs (active box) :right-send 1)
   (active box))
 
 (defmethod box-drop ((box transbox))
@@ -47,10 +47,13 @@
   "Set a new active port on a box."
   (when (and excl-p
              (active box))
+    (warn "box: excl and active! refs ~s" (port-get-refs (active box) :right-dead-name))
     ; See if the active name is dead
     (if (zerop (port-get-refs (active box) :right-dead-name))
       (return-from box-set-active nil)))
   (when (active box)
+    (warn "box: deallocate old active")
     (port-deallocate (active box)))
+  (warn "box: setting new ~s" port)
   (setf (active box) port)
   t)
