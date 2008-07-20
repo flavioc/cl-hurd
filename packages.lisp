@@ -186,8 +186,16 @@
            :foreign-string-zero-separated-to-list
            :is-uid-p
            :is-gid-p
+           :device
+           :major
+           :minor
+           :device-id
            :with-stream
-           :concatenate-string))
+           :concatenate-string
+           :exit
+           :list-to-foreign-string-zero-separated
+           :string-list-len
+           :sum-list))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -202,7 +210,7 @@
            :port
            :port-type-is-p
            :port-pointer
-           :port-valid
+           :port-valid-p
            :port-allocate
            :port-deallocate
            :port-destroy
@@ -331,6 +339,7 @@
            :make-iouser
            :make-iouser-mem
            :make-iouser-root
+           :make-empty-iouser
            :contains-uid
            :contains-gid
            :empty-uids-p
@@ -381,6 +390,10 @@
            :exec-flags
            :exec-exec
            :fsys-goaway
+           :file-get-translator
+           :file-get-translator-cntl
+           :node
+           :wait
            ))
 
 (defpackage :cl-hurd.translator
@@ -437,7 +450,12 @@
            :create-symlink
            :link
            :allow-link-p
-           :options))
+           :options
+           :create-block
+           :create-character
+           :create-fifo
+           :create-socket
+           :set-translator))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)
