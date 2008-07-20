@@ -16,9 +16,6 @@
    (port-bucket :initform (make-bucket)
                 :accessor port-bucket
                 :documentation "The bucket, where we save all the translator ports.")
-   (temporary-bucket :initform (make-hash-table)
-                     :accessor temporary-bucket
-                     :documentation "Temporary bucket to pass data between foreign calls.")
    (underlying-node :initform nil
                     :reader underlying-node
                     :documentation "The port to the underlying node where the translator is set.")
@@ -43,19 +40,6 @@
             :initarg :options
             :documentation "Translator options."))
   (:documentation "Translator class."))
-
-(defmethod insert-temporary-data ((trans translator) key value)
-  "Inserts temporary data on the temporary bucket."
-  (setf (gethash (temporary-bucket trans) key) value))
-
-(defmethod get-temporary-data ((trans translator) key)
-  "Gets inserted temporary data."
-  (with-cleanup (remove-temporary-data trans key)
-    (gethash (temporary-bucket trans) key)))
-
-(defmethod remove-temporary-data ((trans translator) key)
-  "Remove a temporary entry."
-  (remhash (temporary-bucket trans) key))
 
 (defmethod new-protid ((trans translator) user (open-node open-node))
   "Creates a new protid and inserts it into the translator bucket."
