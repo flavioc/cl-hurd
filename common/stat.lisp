@@ -76,9 +76,15 @@ uid, gid, size, atim, mtim, ctim, blksize, blocks, author, flags."
       (type (get-type stat))
       ; 'dev' is an alias to 'fsid'.
       (dev (foreign-slot-value ptr 'stat-struct 'fsid))
-      ; we return a mode object here
+      ; We return a mode object here
       (mode (make-mode-clone
               (foreign-slot-value ptr 'stat-struct 'mode)))
+      ; With rdev, we return a device-id object.
+      (rdev
+        (let ((field (foreign-slot-value ptr 'stat-struct 'rdev)))
+          (make-instance 'device-id
+                         :major (get-major-dev field)
+                         :minor (get-minor-dev field))))
       (otherwise
         (foreign-slot-value ptr 'stat-struct what)))))
 
@@ -120,6 +126,12 @@ uid, gid, size, atim, mtim, ctim, blksize, blocks, author, flags."
       (ctime (%stat-time-set ptr 'ctim new-value))
       ; Just an alias to fsid
       (dev (setf (foreign-slot-value ptr 'stat-struct 'fsid) new-value))
+      ; We can use device-id objects here.
+      (rdev
+        (setf (foreign-slot-value ptr 'stat-struct 'rdev)
+              (if (typep new-value 'device-id)
+                 (get-device-integer new-value)
+                  new-value))) ; We treat 'new-value' as a simple integer value
       (mode
         ; If 'new-value' is a mode object, copy its bits
         ; else it must be the mode bitfield itself.
