@@ -37,9 +37,6 @@ please see common/pathconf.lisp."
 (%add-callback allow-open-p (node user flags is-new-p)
   "'user' wants to open 'node' with flags 'flags', 'is-new-p' indicates that this is a newly created node. This should return nil when we don't wanna open the node.")
 
-(%add-callback get-translator (node)
-  "This must return the translator path that is set under 'node'.")
-
 (%add-callback file-chmod (node user mode)
   "The user is attempting to 'chmod' node with the mode permission bits.")
 
