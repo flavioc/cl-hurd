@@ -55,8 +55,8 @@
                              root-parent
                              shadow-root
                              shadow-root-parent)
-    (if (port-valid (root-parent obj))
+    (if (port-valid-p (root-parent obj))
       (port-mod-refs (root-parent obj) :right-send 1))
-    (if (port-valid shadow-root-parent)
+    (if (port-valid-p shadow-root-parent)
       (port-mod-refs shadow-root-parent :right-send 1))
     obj))
