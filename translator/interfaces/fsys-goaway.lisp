@@ -27,10 +27,7 @@
       (cond
         ((eq t shut-ret)
          (fsys-goaway-reply reply reply-type t)
-         #+clisp (ext:exit)
-         #+sbcl (sb-ext:quit :unix-status 0)
-         #-(or sbcl clisp) (error "(quit) not implemented in your lisp implementation")
-         )
+         (exit 0))
         (t
           shut-ret)))))
 
