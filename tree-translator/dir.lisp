@@ -80,6 +80,9 @@
       (node found)
       nil)))
 
+(defmethod get-entry ((foo entry) (entry string))
+  nil)
+
 (defmethod remove-dir-entry ((dir dir-entry) (entry string))
   "Removes a directory entry with name 'entry'."
   (remove-element (entries dir) entry))
