@@ -130,10 +130,8 @@ a/b/c/ -> ('a', 'b', 'c', '') pay attention to the last component!"
 (defun flag-is-p (flags flag)
   "Checks if flags has the flag or flag's list 'flag' enabled."
   (let ((new-list (%convert-list flag)))
-    (if (equal new-list
-               (intersection flags new-list))
-      t
-      nil)))
+    (equal new-list
+           (intersection flags new-list))))
 
 (defun enable-flags (flags new-flags)
   "Enable all flags in new-flags."
