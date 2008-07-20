@@ -24,6 +24,7 @@
                                      (:file "seek")
                                      (:file "select")
                                      (:file "types")
+                                     (:file "exit")
                                      (:file "ids"
                                             :depends-on ("types"))
                                      (:file "flags"
@@ -37,12 +38,14 @@
                                                          "error"))
                                      (:file "time-value"
                                             :depends-on ("types"))
+                                     (:file "device-id")
                                      (:file "stat"
                                             :depends-on ("mode"
                                                          "types"
                                                          "ids"
                                                          "memcpy"
                                                          "time-value"
+                                                         "device-id"
                                                          "maptime"))
                                      (:file "statfs"
                                             :depends-on ("types"
@@ -142,6 +145,8 @@
                                                            (:file "stat")))
                                      (:module fs
                                               :components ((:file "trans-flags")
+                                                           (:file "file-get-translator")
+                                                           (:file "file-get-translator-cntl")
                                                            (:file "storage")))
                                      (:module iohelp
                                               :components ((:file "utils")
@@ -164,13 +169,17 @@
                                                            (:file "goaway-reply")
                                                            (:file "goaway"
                                                                   :depends-on ("goaway-flags"))
-                                                           (:file "getroot")))
+                                                           (:file "getroot"))
+                                              :depends-on ("iohelp" "retry"))
                                      (:module ports
                                               :components ((:file "port")
                                                            (:file "bucket"
                                                                   :depends-on ("port"))
                                                            (:file "notify")
                                                            (:file "no-senders"
+                                                                  :depends-on ("bucket"
+                                                                               "notify"))
+                                                           (:file "dead-name"
                                                                   :depends-on ("bucket"
                                                                                "notify"))
                                                            (:file "demuxer"
@@ -191,7 +200,8 @@
                                                            (:file "touch"
                                                                   :depends-on ("fshelp"))
                                                            (:file "transbox")
-                                                           (:file "fetch-root")
+                                                           (:file "fetch-root"
+                                                                  :depends-on ("transbox"))
                                                            (:file "identity"))
                                               :depends-on ("iohelp" "fsys" "ports")))
                         :depends-on ("packages" "paths" "common" "mach"))
@@ -238,8 +248,10 @@
                                               :components ((:file "common")
                                                            (:file "dir-mkdir")
                                                            (:file "open-modes")
+                                                           (:file "getroot-lookup-callbacks")
                                                            (:file "dir-lookup"
-                                                                  :depends-on ("open-modes"))
+                                                                  :depends-on ("open-modes"
+                                                                               "getroot-lookup-callbacks"))
                                                            (:file "dir-readdir")
                                                            (:file "dir-rmdir")
                                                            (:file "file-chauthor")
@@ -250,7 +262,8 @@
                                                            (:file "file-syncfs")
                                                            (:file "file-utimes")
                                                            (:file "fsys-getroot"
-                                                                  :depends-on ("open-modes"))
+                                                                  :depends-on ("open-modes"
+                                                                               "getroot-lookup-callbacks"))
                                                            (:file "io-clear-some-openmodes")
                                                            (:file "io-duplicate")
                                                            (:file "io-get-openmodes")
@@ -291,8 +304,9 @@
                                                                   :depends-on ("options"))
                                                            (:file "fsys-set-options")
                                                            (:file "file-exec")
-                                                           (:file "file-set-translator"))
-                                              :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent")))
+                                                           (:file "file-set-translator")
+                                                           (:file "file-get-translator"))
+                                              :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent" "utils")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
                         :components ((:file "sorted-container")
@@ -302,5 +316,8 @@
                                             :depends-on ("dir")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd" "translator"))
                (:module examples
-                        :components ((:file "zip"))
+                        :components (
+                                     (:file "zip")
+                                     ;(:file "link")
+                                     )
                         :depends-on ("packages" "paths" "common" "mach" "hurd" "translator" "tree-translator"))))
