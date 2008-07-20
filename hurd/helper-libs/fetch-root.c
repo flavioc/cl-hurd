@@ -28,13 +28,14 @@
 #include <hurd/auth.h>
 #include <hurd/io.h>
 
+typedef error_t (*mycallback2_t)(int, mach_port_t *, mach_msg_type_name_t *);
+
 error_t
 helper_fetch_root (file_t dotdot,
-		fshelp_fetch_root_callback2_t callback2,
-		mach_port_t node_port,
-		uid_t uid, gid_t gid,
-		char *argz, size_t argz_len,
-		mach_port_t *control_port)
+                   mycallback2_t callback2,
+                   uid_t uid, gid_t gid,
+                   char *argz, size_t argz_len,
+                   mach_port_t *control_port)
 {
 	error_t err;
 	mach_port_t control;
@@ -79,10 +80,8 @@ helper_fetch_root (file_t dotdot,
 			task_t task, void *cookie)
 	{
 		return
-			(*callback2) ((void *)node_port, (void *)dotdot, flags,
-					underlying, underlying_type);
+			(*callback2) (flags, underlying, underlying_type);
 	}
-
 
 	ourauth = getauth ();
 	if (ourauth == MACH_PORT_NULL)
@@ -123,8 +122,6 @@ helper_fetch_root (file_t dotdot,
 	for (i = 0; i < INIT_PORT_MAX; i++)
 		if (i != INIT_PORT_CWDIR)
 			mach_port_deallocate (mach_task_self (), ports[i]);
-
-	free (argz);
 
 	*control_port = control;
 
