@@ -12,7 +12,7 @@
 
 (defun %create-new-protid (open-node user node flags newnode-p)
   "Creates a new protid."
-  (let ((new-flags (disable flags +open-flags+)))
+  (let ((new-flags (disable-flags flags +open-flags+)))
     (when (allow-open-p *translator* node user new-flags newnode-p)
       (let* ((new-user (make-iouser :old user))
              (new-open-node (make-open-node
