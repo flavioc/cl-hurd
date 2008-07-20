@@ -6,7 +6,16 @@
           (flag-is-p flags :unlink)
           (is-dir-p (stat (root *translator*))))
     (return-from %shutdown :resource-busy))
-  ; XXX make translators go away
+  (when (flag-is-p flags :recurse)
+    (bucket-iterate (port-bucket *translator*)
+                    (lambda (port)
+                      (when (typep port 'protid)
+                        (let ((node (get-node port)))
+                          (when (box-translated-p (box node))
+                            (with-port-deallocate (control (box-fetch-control (box node)))
+                              ; We will catch errors later on
+                              (fsys-goaway control flags)))))))
+    (wait :miliseconds 100))
   (when (and
           (not (flag-is-p flags :force))
           (plusp (bucket-count-type (port-bucket *translator*) 'protid)))
@@ -23,6 +32,7 @@
                                   (reply-type msg-type-name)
                                   (flags fsys-goaway-flags))
   (with-lookup protid control
+    (warn "flags ~s" flags)
     (let ((shut-ret (%shutdown flags)))
       (cond
         ((eq t shut-ret)
