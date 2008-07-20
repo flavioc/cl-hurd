@@ -1,7 +1,6 @@
 TODO list:
 
 - find... why?
-- shutdown other translators
 - fsys set options on other translators
 - more callbacks:
   - file-exec -- (broken)
