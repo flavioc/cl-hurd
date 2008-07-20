@@ -4,7 +4,7 @@
 ;; This is run when we get a dead name notification
 (def-notify-interface :do-mach-notify-dead-name
                       ((notify port) (name port))
-  (let ((port-data (gethash port *all-ports*)))
+  (let ((port-data (gethash notify *all-ports*)))
     (when (listp port-data)
       (let ((port-info (first port-data))
             (bucket (second port-data)))
