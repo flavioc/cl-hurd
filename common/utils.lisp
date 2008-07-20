@@ -171,3 +171,24 @@ a/b/c/ -> ('a', 'b', 'c', '') pay attention to the last component!"
   `(let ((,stream-name ,init))
      (with-cleanup (close ,stream-name)
        ,@body)))
+
+(defun string-list-len (ls)
+  "Given a list of strings, return a list of string lengths plus one."
+  (mapcar #'1+ (mapcar #'length ls)))
+
+(defun sum-list (ls)
+  "Return sum of an number list."
+  (reduce #'+ ls))
+
+(defun list-to-foreign-string-zero-separated (ls ptr &optional ls-len)
+  "Write a list of strings into a foreign array. Strings are '\0'-separated.
+If you have the list with the length for each string pass it in ls-len."
+  (unless ls-len
+    (setf ls-len (string-list-len ls)))
+  (loop for item in ls
+        for item-len in ls-len
+        do (progn
+             (lisp-string-to-foreign item
+                                     ptr
+                                     item-len)
+             (incf-pointer ptr item-len))))
