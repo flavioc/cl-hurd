@@ -158,6 +158,26 @@ a list of two elements: a string representing the option and the value, represen
   "Return T to allow reading from the symlink 'node' to 'user'."
   t)
 
+(%add-callback create-block (node user device)
+  "Turn 'node' into a block device with device-id 'device'."
+  nil)
+
+(%add-callback create-character (node user device)
+  "Turn 'node' into a character device with device-id 'device'."
+  nil)
+
+(%add-callback create-fifo (node user)
+  "Turn 'node' into a fifo."
+  nil)
+
+(%add-callback create-socket (node user)
+  "Turn 'node' into a socket."
+  nil)
+
+(%add-callback set-translator (node user arg-list)
+  "Set passive translator 'arg-list' on 'node'."
+  nil)
+
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
   `(defmethod ,name ((translator ,trans-type) ,@args)
