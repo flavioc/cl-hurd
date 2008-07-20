@@ -48,6 +48,18 @@
   "Create the root iouser."
   (make-iouser :uids '(0) :gids '(0)))
 
+(defmethod get-foreign-uids ((iouser iouser))
+  (let* ((uids (uids iouser))
+         (total (if (listp uids) (length uids) 0))
+         (ptr (foreign-alloc 'uid-t :initial-contents uids)))
+    (list ptr total)))
+
+(defmethod get-foreign-gids ((iouser iouser))
+  (let* ((gids (gids iouser))
+         (total (if (listp gids) (length gids) 0))
+         (ptr (foreign-alloc 'gid-t :initial-contents gids)))
+    (list ptr total)))
+
 (defmethod contains-uid ((iouser iouser) uid)
   "Does it contain 'uid' in UIDs?"
   (member uid (uids iouser)))
