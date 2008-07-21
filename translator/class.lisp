@@ -31,6 +31,10 @@
    (version :initform (list 1 0 0)
             :accessor version
             :documentation "Translator version.")
+   (storage :initform :memory
+            :initarg :storage
+            :accessor storage
+            :documentation "Translator's storage type.")
    (flags :initform nil
           :reader flags
           :initarg flags
