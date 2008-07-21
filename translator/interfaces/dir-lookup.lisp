@@ -28,22 +28,29 @@
                 (get-right new-protid)
                 :make-send)))))
 
-(defun %handle-shadow-roots (open-node user node this-path rest-path)
-  (let ((shadow-root (shadow-root open-node)))
-    (when (and (or (eq (root *translator*) node)
-                   (eq shadow-root node))
-               (string= this-path ".."))
-      (cond
-        ((eq node shadow-root)
-         (values :retry-reauth
-                 (join-path rest-path)
-                 (shadow-root-parent open-node)
-                 :copy-send))
-        ((root-parent open-node)
-         (values :retry-reauth
-                 (join-path rest-path)
-                 (root-parent open-node)
-                 :copy-send))))))
+(defun %must-handle-shadow-roots (open-node node this-path)
+  (and (or (eq (root *translator*) node)
+           (eq (shadow-root open-node) node))
+       (string= this-path "..")
+       (or (eq node (shadow-root open-node))
+           (port-valid-p (root-parent open-node)))))
+
+(defun %handle-shadow-roots (open-node node rest-path)
+  (cond
+    ((eq node (shadow-root open-node))
+     (values :retry-reauth
+             (if (null rest-path)
+               ""
+               (join-path rest-path))
+             (shadow-root-parent open-node)
+             :copy-send))
+    ((port-valid-p (root-parent open-node))
+     (values :retry-reauth
+             (if (null rest-path)
+               ""
+               (join-path rest-path))
+             (root-parent open-node)
+             :copy-send))))
 
 (defun %handle-symlinks (open-node user dir node rest-path flags mode table)
   (let ((target (link node)))
@@ -91,10 +98,9 @@
     (when (string= this-path "") ; this is last path
       (return-from %dir-lookup
                    (%create-new-protid open-node user node flags nil)))
-    (multiple-value-bind (retry path port retry-type)
-      (%handle-shadow-roots open-node user node this-path rest-path)
-      (when retry
-        (return-from %dir-lookup (values retry path port retry-type))))
+    (when (%must-handle-shadow-roots open-node node this-path)
+      (return-from %dir-lookup
+                   (%handle-shadow-roots open-node rest-path)))
     (let ((found-node (dir-lookup *translator* node user this-path)))
       (cond
         (found-node ; File exists.
