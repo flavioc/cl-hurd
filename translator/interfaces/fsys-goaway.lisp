@@ -15,7 +15,7 @@
                             (with-port-deallocate (control (box-fetch-control (box node)))
                               ; We will catch errors later on
                               (fsys-goaway control flags)))))))
-    (wait :miliseconds 100))
+    (wait :miliseconds 500))
   (when (and
           (not (flag-is-p flags :force))
           (plusp (bucket-count-type (port-bucket *translator*) 'protid)))
