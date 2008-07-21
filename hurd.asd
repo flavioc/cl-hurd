@@ -25,6 +25,7 @@
                                      (:file "select")
                                      (:file "types")
                                      (:file "exit")
+                                     (:file "lock")
                                      (:file "ids"
                                             :depends-on ("types"))
                                      (:file "flags"
@@ -305,7 +306,10 @@
                                                            (:file "fsys-set-options")
                                                            (:file "file-exec")
                                                            (:file "file-set-translator")
-                                                           (:file "file-get-translator"))
+                                                           (:file "file-get-translator")
+                                                           (:file "file-reparent")
+                                                           (:file "file-lock-stat")
+                                                           (:file "file-get-storage-info"))
                                               :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent" "utils")))
                         :depends-on ("packages" "paths" "common" "mach" "hurd"))
                (:module tree-translator
