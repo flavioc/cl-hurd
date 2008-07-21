@@ -44,10 +44,8 @@
 (defun munmap (addr len)
   "Remove a mapping."
   (cond
-    ((zerop len)
-     t)
-    ((null addr)
-     nil)
+    ((zerop len) t)
+    ((null addr) nil)
     (t
       (let ((result (%munmap addr len)))
         ; In case of success, munmap returns 0.
