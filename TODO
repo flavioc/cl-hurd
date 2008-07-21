@@ -4,7 +4,3 @@ TODO list:
 - fsys set options on other translators
 - more callbacks:
   - file-exec -- (broken)
-  - file-get-storage-info (must investigate further...)
-  - file-lock-stat (no need for it)
-  - file-lock (likewise)
-  - file-reparent
