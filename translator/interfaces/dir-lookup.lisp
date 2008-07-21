@@ -94,13 +94,12 @@
 (defun %dir-lookup (open-node user node path-ls flags mode table)
   (let ((this-path (first path-ls))
         (rest-path (rest path-ls)))
-    (warn "%dir-lookup: this-path ~s, rest-path ~s" this-path rest-path)
     (when (string= this-path "") ; this is last path
       (return-from %dir-lookup
                    (%create-new-protid open-node user node flags nil)))
     (when (%must-handle-shadow-roots open-node node this-path)
       (return-from %dir-lookup
-                   (%handle-shadow-roots open-node rest-path)))
+                   (%handle-shadow-roots open-node node rest-path)))
     (let ((found-node (dir-lookup *translator* node user this-path)))
       (cond
         (found-node ; File exists.
@@ -119,7 +118,6 @@
                             user
                             #'get-translator-callback
                             (callback fetch-root-callback))
-                (warn "fetch-root returned ~s ~s ~s" retry retry-name port)
                 (unless (or (eq retry :no-such-file)
                             (null retry))
                   (return-from %dir-lookup
@@ -171,9 +169,7 @@
                                (retry-name :pointer)
                                (retry-port port-pointer)
                                (retry-port-type :pointer))
-  ;(warn "dir-lookup ~s" filename)
   (with-lookup dir-protid dir-port
-    ;(warn "filename to lookup in ~s: ~a~%" (get-node dir-protid) filename)
     (multiple-value-bind (ret-do-retry
                            ret-retry-name
                            ret-retry-port
