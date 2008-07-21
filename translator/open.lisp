@@ -60,3 +60,11 @@
     (if (port-valid-p shadow-root-parent)
       (port-mod-refs shadow-root-parent :right-send 1))
     obj))
+
+(defmethod install-shadow-root ((node open-node) root parent)
+  (with-accessors ((s-r-parent shadow-root-parent)) node
+    (when (port-valid-p s-r-parent)
+      (port-deallocate s-r-parent)))
+  (setf (shadow-root node) root
+        (shadow-root-parent node) parent)
+  t)
