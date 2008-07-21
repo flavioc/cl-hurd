@@ -13,7 +13,8 @@
    (file-pos :initform 0
              :accessor file-offset
              :documentation "File offset.")
-   (lock-status :initform 'unlock
+   (lock-status :initform :lock-un
+                :accessor lock-status
                 :documentation "Lock status.") ; /usr/include/sys/file.h
    (openstat :initform '()
              :initarg :flags
