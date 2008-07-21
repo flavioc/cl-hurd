@@ -15,8 +15,7 @@
     (setf (mem-ref data-len 'msg-type-number) 0
           (mem-ref num-offsets 'msg-type-number) 0
           (mem-ref num-ports 'msg-type-number) 0)
-    (when (zerop (mem-ref num-ints 'msg-type-number))
-      (warn "mmap ints")
+    (unless (plusp (mem-ref num-ints 'msg-type-number))
       (setf (mem-ref ints :pointer)
             (mmap (make-pointer 0)
                   (foreign-type-size 'msg-type-number)
@@ -24,9 +23,7 @@
                   '(:map-anon)
                   0
                   0)))
-    (setf (mem-ref num-ints 'msg-type-number) 1)
-    (let ((firstptr (mem-ref ints :pointer)))
-      (warn "type is ~s" (storage *translator*))
-      (setf (mem-ref firstptr 'file-storage-class)
-            (storage *translator*)))
+    (setf (mem-ref num-ints 'msg-type-number) 1
+          (mem-ref (mem-ref ints :pointer) 'file-storage-class)
+          (storage *translator*))
     t))
