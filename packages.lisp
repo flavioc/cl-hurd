@@ -195,7 +195,8 @@
            :exit
            :list-to-foreign-string-zero-separated
            :string-list-len
-           :sum-list))
+           :sum-list
+           :lock-flags))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -394,6 +395,7 @@
            :file-get-translator-cntl
            :node
            :wait
+           :file-storage-class
            ))
 
 (defpackage :cl-hurd.translator
@@ -404,7 +406,6 @@
            :pathconf
            :allow-open-p
            :node
-           :get-translator
            :file-chmod
            :file-chown
            :file-utimes
@@ -455,6 +456,7 @@
            :create-character
            :create-fifo
            :create-socket
+           :storage
            :set-translator))
 
 (defpackage :cl-hurd.translator.tree
