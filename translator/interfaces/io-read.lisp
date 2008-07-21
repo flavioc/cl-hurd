@@ -26,9 +26,7 @@
     (otherwise
       (file-read *translator*
                  node user start
-                 (if (%is-minus-one-p amount)
-                   nil
-                   amount)
+                 amount
                  out-stream))))
 
 (defun %io-read (open-node node user amount offset)
@@ -41,9 +39,14 @@
       (when (%try-read node user start amount out-stream)
         (let* ((data-read (get-output-stream-sequence out-stream))
                (total-read (length data-read)))
-          (if current-offset-p
-            (incf (file-offset open-node) total-read))
-          (values data-read total-read))))))
+          (cond
+            ((and (numberp amount)
+                  (> total-read amount))
+             :gratuitous-error)
+            (t
+              (if current-offset-p
+                (incf (file-offset open-node) total-read))
+              (values data-read total-read))))))))
 
 (def-io-interface :io-read ((port port)
 							(data :pointer)
@@ -66,11 +69,17 @@
                (%io-read open-node
                          node
                          user
-                         amount
+                         (if (%is-minus-one-p amount)
+                           nil
+                           amount)
                          offset)
-               (when (null data-read)
+               (when (null total)
                  (setf (mem-ref datalen 'msg-type-number) 0)
-                 (return-from io-read t))
+                 (return-from io-read
+                              ; Possibly return an error code.
+                              (if (null data-read)
+                                t
+                                data-read)))
                (let ((needs-allocate-p (> total (mem-ref datalen 'msg-type-number))))
                  (when needs-allocate-p
                    ; We need to grow the pointer to copy all the data we have.
