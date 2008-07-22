@@ -3,7 +3,8 @@ include ../../defs.mk
 
 TARGETS = error.so portset-demuxer.so \
 		  fetch-root.so \
-		  round-page.so 
+		  round-page.so \
+			file-utimes.so
 
 LDFLAGS =
 
