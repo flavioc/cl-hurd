@@ -56,7 +56,7 @@
         (second item)
         (first item)))))
 
-(defmacro select-error (error-code result)
+(defmacro select-error (error-code &optional (result t))
   "If error-code is success returns result, else returns multiple values 'nil' and 'error-code'."
   `(cond
      ((eq ,error-code t)
