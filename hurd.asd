@@ -165,7 +165,17 @@
                                                            (:file "file-getlinknode")
                                                            (:file "dir-lookup")
                                                            (:file "dir-readdir")
-                                                           (:file "storage")))
+                                                           (:file "file-set-translator")
+                                                           (:file "file-reparent")
+                                                           (:file "file-get-fs-options")
+                                                           (:file "dir-unlink")
+                                                           (:file "dir-rmdir")
+                                                           (:file "dir-rename")
+                                                           (:file "dir-mkfile")
+                                                           (:file "dir-mkdir")
+                                                           (:file "dir-link")
+                                                           (:file "storage"))
+                                              :depends-on ("retry"))
                                      (:module iohelp
                                               :components ((:file "utils")
                                                            (:file "iouser"
