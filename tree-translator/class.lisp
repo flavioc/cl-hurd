@@ -50,10 +50,10 @@ root node."
 				(node user start end)
   (let* ((return-list nil)
          (real-start (max 0 (- start 2))))
-    (when (= start 0)
-      (push (make-node-dirent "." node) return-list))
     (when (and (<= start 1) (>= end 1))
       (push (make-dirent ".." 1 :dir) return-list))
+    (when (= start 0)
+      (push (make-node-dirent "." node) return-list))
     (append return-list
             (mapcar (lambda (inner-entry)
                       (make-node-dirent (name inner-entry) (node inner-entry)))
