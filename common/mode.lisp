@@ -289,7 +289,7 @@ You can also ignore user-type and the bits will be for all the user types.
   "Makes a mode object based on 'bits' bitfield."
   (make-instance 'mode :mode-bits bits))
 
-(defun make-mode (&key (type 'reg)
+(defun make-mode (&key (type :reg)
                        (perms '((owner read write) (group read))) ; starting permissions
                        (uid nil) ; activate uid bit
                        (gid nil) ; activate gid bit
@@ -327,12 +327,12 @@ You can also ignore user-type and the bits will be for all the user types.
 (defun %type-char (type)
   "Returns the associated character with 'type' file type."
   (case type
-    (dir #\d)
-    (chr #\c)
-    (blk #\b)
-    (reg #\-)
-    (lnk #\l)
-    (sock #\s)
+    (:dir #\d)
+    (:chr #\c)
+    (:blk #\b)
+    (:reg #\-)
+    (:lnk #\l)
+    (:sock #\s)
     (otherwise #\-)))
 
 (define-mode-meth print-object (stream)
