@@ -19,11 +19,12 @@
                         :components ((:file "utils")
                                      (:file "error"
                                             :depends-on ("utils"))
-                                     (:file "dirent")
+                                     (:file "types")
+                                     (:file "dirent"
+                                            :depends-on ("types"))
                                      (:file "pathconf")
                                      (:file "seek")
                                      (:file "select")
-                                     (:file "types")
                                      (:file "exit")
                                      (:file "lock")
                                      (:file "ids"
@@ -38,7 +39,8 @@
                                             :depends-on ("types"
                                                          "error"))
                                      (:file "time-value"
-                                            :depends-on ("types"))
+                                            :depends-on ("types"
+                                                         "maptime"))
                                      (:file "device-id")
                                      (:file "stat"
                                             :depends-on ("mode"
@@ -148,6 +150,21 @@
                                               :components ((:file "trans-flags")
                                                            (:file "file-get-translator")
                                                            (:file "file-get-translator-cntl")
+                                                           (:file "file-chown")
+                                                           (:file "file-chauthor")
+                                                           (:file "file-chmod")
+                                                           (:file "file-utimes")
+                                                           (:file "file-set-size")
+                                                           (:file "file-lock")
+                                                           (:file "file-lock-stat")
+                                                           (:file "file-check-access")
+                                                           (:file "file-getcontrol")
+                                                           (:file "file-statfs")
+                                                           (:file "file-sync")
+                                                           (:file "file-syncfs")
+                                                           (:file "file-getlinknode")
+                                                           (:file "dir-lookup")
+                                                           (:file "dir-readdir")
                                                            (:file "storage")))
                                      (:module iohelp
                                               :components ((:file "utils")
@@ -215,6 +232,7 @@
                                                          "fs-wrapper"
                                                          "fsys-wrapper"))
                                      (:file "globals")
+                                     (:file "transbox")
                                      (:file "node")
                                      (:file "dirent"
                                             :depends-on ("node"))
