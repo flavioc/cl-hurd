@@ -96,19 +96,11 @@ uid, gid, size, atim, mtim, ctim, blksize, blocks, author, flags."
        ; Copy the time-value seconds
        ; and convert the microseconds to nanoseconds.
        (setf (foreign-slot-value timespec 'timespec-struct 'sec)
-             (foreign-slot-value (ptr new-value) 'time-value-struct 'seconds)
+             (seconds new-value)
              (foreign-slot-value timespec 'timespec-struct 'nsec)
              (* 1000
-                (foreign-slot-value (ptr new-value)
-                                    'time-value-struct 'microseconds)))
+                (microseconds new-value)))
        t)
-      ((eq new-value :now)
-       ; Use *mapped-time* to update fields.
-       (setf (foreign-slot-value timespec 'timespec-struct 'sec)
-             (maptime-seconds *mapped-time*)
-             (foreign-slot-value timespec 'timespec-struct 'nsec)
-             (* 1000
-                (maptime-microseconds *mapped-time*))))
       (t
         ; For everything else just copy the value to seconds.
         (setf (foreign-slot-value timespec 'timespec-struct 'sec)
