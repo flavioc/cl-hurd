@@ -168,6 +168,7 @@
            :statfs-set
            :statfs-clean
            :statfs-copy
+           :statfs-struct
            :bsize
            :bfree
            :bavail
@@ -196,7 +197,18 @@
            :list-to-foreign-string-zero-separated
            :string-list-len
            :sum-list
-           :lock-flags))
+           :lock-flags
+           :make-mode
+           :make-time-value
+           :+now-time-value+
+           :seconds
+           :microseconds
+           :make-dirent
+           :dirent
+           :write-dirent
+           :read-dirent
+           :size
+           :time-value-eq))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -396,6 +408,7 @@
            :node
            :wait
            :file-storage-class
+           :transbox
            ))
 
 (defpackage :cl-hurd.translator
@@ -422,7 +435,6 @@
            :run-translator
            :define-callback
            :make-translator
-           :make-dirent
            :propagate-read-to-execute
            :file-sync
            :file-syncfs
