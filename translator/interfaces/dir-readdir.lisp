@@ -43,7 +43,7 @@
         (return-from %dir-readdir nil))
       (let* ((needs-more-p (< current-size size-bytes))
              (dataptr (if needs-more-p
-                        (mmap (make-pointer 0)
+                        (mmap (null-pointer)
                               size-bytes
                               '(:prot-read :prot-write)
                               '(:map-anon)

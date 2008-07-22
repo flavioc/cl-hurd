@@ -84,7 +84,7 @@
                  (when needs-allocate-p
                    ; We need to grow the pointer to copy all the data we have.
                    (setf (mem-ref data :pointer)
-                         (mmap (make-pointer 0)
+                         (mmap (null-pointer)
                                total
                                '(:prot-read :prot-write)
                                '(:map-anon)

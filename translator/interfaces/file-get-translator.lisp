@@ -33,7 +33,7 @@
                  (total (sum-list len-args)))
             (when (> total (mem-ref data-len 'msg-type-number))
               (setf (mem-ref data :pointer)
-                    (mmap (make-pointer 0)
+                    (mmap (null-pointer)
                           total
                           '(:prot-read :prot-write)
                           '(:map-anon)

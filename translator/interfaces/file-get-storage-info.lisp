@@ -17,7 +17,7 @@
           (mem-ref num-ports 'msg-type-number) 0)
     (unless (plusp (mem-ref num-ints 'msg-type-number))
       (setf (mem-ref ints :pointer)
-            (mmap (make-pointer 0)
+            (mmap (null-pointer)
                   (foreign-type-size 'msg-type-number)
                   '(:prot-read :prot-write)
                   '(:map-anon)
