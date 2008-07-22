@@ -50,9 +50,7 @@
              (let* ((new-user (make-iouser :old user))
                     (new-open (make-open-node node
                                               '(:read)
-                                              :root-parent (root-parent open)
-                                              :shadow-root (shadow-root open)
-                                              :shadow-root-parent (shadow-root-parent open)))
+                                              :copy open))
                     (new-protid (new-protid *translator*
                                             new-user
                                             new-open)))
