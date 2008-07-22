@@ -32,7 +32,7 @@
 
 (defmethod initialize-instance :after ((node node) &key)
   "Set the node's transbox (note that we need the node reference to do that)."
-  (setf (box node) (make-transbox node))
+  (setf (box node) (make-instance 'node-transbox :node node))
   (initialize-node node))
 
 (defmethod print-object ((node node) stream)
@@ -81,4 +81,3 @@
   (cond
     ((is-lnk-p (stat node)) (slot-value node 'link))
     (t nil)))
-
