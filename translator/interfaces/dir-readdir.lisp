@@ -1,52 +1,24 @@
 
 (in-package :hurd-translator)
 
-(defconstant +chunk-size+ (* 8 1024))
-
-(defcstruct dirent-struct
-  (ino ino-t)
-  (reclen :unsigned-short)
-  (type :unsigned-char)
-  (namlen :unsigned-char))
-
-(defconstant +name-offset+ (foreign-type-size 'dirent-struct))
-
-(defun %rec-size (rec) (first rec))
-(defun %rec-name-size (rec) (second rec))
-
 (defun %readdir-count-size (entries limit)
+  "Counts number of size in bytes and items needed to write 'entries'."
   (let ((current 0)
-        (nitens 0)
-        size-list)
+        (nitens 0))
     (loop for dirent in entries
-          do (let* ((namelen (1+ (length (name dirent))))
-                    (more (+ +name-offset+ namelen))
-                    (newval (+ more current)))
+          do (let* ((this-size (size dirent))
+                    (newval (+ this-size current)))
                (cond
-                 ((and limit
-                       (> newval limit))
-                  (return))
+                 ((and limit (> newval limit)) (return))
                  (t
-                   (push (list more namelen) size-list)
                    (incf nitens)
                    (setf current newval)))))
-    (list current nitens (reverse size-list))))
+    (list current nitens)))
 
-(defun %write-dir-data (initial-ptr items sizes)
-  "Writes to initial-ptr all 'items' with size information 'sizes'."
-  (let ((ptr (inc-pointer initial-ptr 0)))
-    (loop for item in items
-          for size in sizes
-          do (progn
-               (setf (foreign-slot-value ptr 'dirent-struct 'ino) (ino item)
-                     (foreign-slot-value ptr 'dirent-struct 'reclen) (%rec-size size)
-                     (foreign-slot-value ptr 'dirent-struct 'type)
-                     (foreign-enum-value 'dirent-type (file-type item))
-                     (foreign-slot-value ptr 'dirent-struct 'namlen) (%rec-name-size size))
-               (lisp-string-to-foreign (name item)
-                                       (inc-pointer ptr +name-offset+)
-                                       (%rec-name-size size))
-               (incf-pointer ptr (%rec-size size))))))
+(defun %write-dir-data (ptr items)
+  "Writes to initial-ptr all dirent items."
+  (loop for item in items
+        do (incf-pointer ptr (write-dirent item ptr))))
 
 (defun %calculate-final-entry (entry nentries existing-entries)
   (let ((unlimited-p (= nentries -1)))
@@ -66,7 +38,6 @@
     (let* ((sizes (%readdir-count-size entries limit))
            (size-bytes (first sizes))
            (size-items (second sizes))
-           (size-list (third sizes))
            (real-entries (subseq entries 0 size-items)))
       (unless real-entries
         (return-from %dir-readdir nil))
@@ -79,7 +50,7 @@
                               0
                               0)
                         old-dataptr))) ; Old value is large enough.
-        (%write-dir-data dataptr real-entries size-list)
+        (%write-dir-data dataptr real-entries)
         (values dataptr 
                 size-bytes
                 size-items)))))
@@ -121,3 +92,4 @@
                        (mem-ref data-dealloc :boolean)
                        (not (pointer-eq old-ptr data-ptr)))
                  t))))))
+
