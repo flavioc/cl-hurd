@@ -5,6 +5,7 @@
                                    (status :pointer)
                                    (otherstatus :pointer))
   (with-lookup protid file
-    (setf (mem-ref status 'lock-flags) (lock-status (open-node protid))
-          (mem-ref otherstatus :int) 0)
-    t))
+    (let ((status (lock-status (open-node protid))))
+      (setf (mem-ref status 'lock-flags) status
+            (mem-ref otherstatus 'lock-flags) status)
+      t)))
