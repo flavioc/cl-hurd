@@ -14,7 +14,6 @@
   (:documentation "The transbox class"))
 
 (defmethod initialize-instance :after ((transbox transbox) &key)
-  (warn "setting finalize")
   (tg:finalize transbox (lambda ()
                           (when (active transbox)
                             (port-deallocate (active transbox)))))
