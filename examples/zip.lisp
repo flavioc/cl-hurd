@@ -35,8 +35,8 @@
                (end (+ start total)))
         (write-sequence (subseq (data node) start end)
                         stream)
-        (if (eq end size)
-          (write-byte #xA0 stream))
+        ;(if (eq end size)
+        ;  (write-byte #xA0 stream))
         t)))))
 
 (define-callback report-access zip-translator
@@ -197,11 +197,6 @@
   (do-zipfile-entries (name entry *zip*)
                       (add-zip-file node (split-path name) entry)))
 
-(defvar *zip-translator*
-  (make-instance 'zip-translator
-                 :options (make-translator-options
-                            '(("coolness-level" 20)
-                              "fast"))))
 
 ;; to be removed
 ;;
@@ -234,6 +229,11 @@
 				 (node user author)
   t)
 
-;; Startup the translator.
-(run-translator *zip-translator*)
+(defun main ()
+  (let ((trans (make-instance 'zip-translator
+                              :options (make-translator-options
+                                         '(("coolness-level" 20)
+                                           "fast")))))
+    (run-translator trans)))
 
+(main)
