@@ -208,6 +208,7 @@
            :write-dirent
            :read-dirent
            :size
+           :name
            :time-value-eq))
 
 (defpackage :cl-mach
