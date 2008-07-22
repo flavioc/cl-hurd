@@ -10,21 +10,15 @@
   ((active :initarg :active
            :accessor active
            :initform nil
-           :documentation "Is the box active?")
-   (node :initform nil
-         :initarg :node
-         :accessor node
-         :documentation "Node where it is set"))
+           :documentation "Is the box active?"))
   (:documentation "The transbox class"))
 
-(defun make-transbox (node)
-  "Creates a new transbox object on node."
-  (let ((obj (make-instance 'transbox :node node)))
-    ; Deallocate port when the object goes away
-    (finalize obj (lambda ()
-                    (when (active obj)
-                      (port-deallocate (active obj)))))
-    obj))
+(defmethod initialize-instance :after ((transbox transbox) &key)
+  (warn "setting finalize")
+  (tg:finalize transbox (lambda ()
+                          (when (active transbox)
+                            (port-deallocate (active transbox)))))
+  transbox)
 
 (defmethod box-translated-p ((box transbox))
   "Is there an active translator on this box?"
@@ -34,6 +28,7 @@
 (defmethod box-fetch-control ((box transbox))
   "Fetch a new control port from a translator box."
   (assert (box-translated-p box))
+  (warn "box: active refs ~s" (port-get-refs (active box) :right-dead-name))
   (port-mod-refs (active box) :right-send 1)
   (active box))
 
