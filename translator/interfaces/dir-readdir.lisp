@@ -11,89 +11,88 @@
 
 (defconstant +name-offset+ (foreign-type-size 'dirent-struct))
 
-(defun %dir-readdir-count (dir-protid entry final-entry data initial-size limited-p)
-  "Returns number of entries, pointer to them and size in bytes, otherwise nil."
-  (let ((size initial-size)
-        (ptr data)
-        (total (- final-entry entry))
-        (entries (get-entries *translator* (get-node dir-protid) (get-user dir-protid) entry final-entry)))
-    ;(warn "entries ~s" entries)
-    (loop for dirent in entries
-          for cnt = 0 then (1+ cnt)
-          do (let* ((dirent-name (name dirent))
-                    (namelen (1+ (length dirent-name)))
-                    (this-size (+ +name-offset+ namelen)))
-               (when (> (+ this-size
-                           (- (pointer-address ptr)
-                              (pointer-address data)))
-                        size)
-                 ;(warn "exceeded")
-                 (when limited-p
-                   ;(warn "limited! returning..")
-                   (return (values cnt ptr size)))
-                 (with-foreign-pointer (extension (foreign-type-size 'vm-address))
-                   ;(warn "extending..")
-                   (let ((result (vm-allocate extension +chunk-size+ 0)))
-                     (if (null result)
-                       (return (values nil nil size))
-                       (incf size +chunk-size+)))))
-               (with-foreign-pointer (dirent-ptr this-size)
-                 ; (warn "name-offset: ~s node is ~s size: ~s ; this-size ~s~%"
-                 ;	   +name-offset+ dirent-name (+ +name-offset+ namelen) this-size)
-                 (setf (foreign-slot-value dirent-ptr 'dirent-struct 'ino) (ino dirent))
-                 (setf (foreign-slot-value dirent-ptr 'dirent-struct 'reclen) this-size)
-                 (setf (foreign-slot-value dirent-ptr 'dirent-struct 'type)
-                       (foreign-enum-value 'dirent-type (file-type dirent)))
-                 (setf (foreign-slot-value dirent-ptr 'dirent-struct 'namlen) namelen)
-                 (lisp-string-to-foreign dirent-name
-                                         (inc-pointer dirent-ptr +name-offset+)
-                                         namelen)
-                 (memcpy ptr dirent-ptr this-size)
-                 (incf-pointer ptr this-size)))
-          when (= cnt total)
-          return (values (1+ cnt) ptr size))))
+(defun %rec-size (rec) (first rec))
+(defun %rec-name-size (rec) (second rec))
 
-(defun %dir-readdir (dir-protid bufsiz entry nentries existing-entries)
+(defun %readdir-count-size (entries limit)
+  (let ((current 0)
+        (nitens 0)
+        size-list)
+    (loop for dirent in entries
+          do (let* ((namelen (1+ (length (name dirent))))
+                    (more (+ +name-offset+ namelen))
+                    (newval (+ more current)))
+               (cond
+                 ((and limit
+                       (> newval limit))
+                  (return))
+                 (t
+                   (push (list more namelen) size-list)
+                   (incf nitens)
+                   (setf current newval)))))
+    (list current nitens (reverse size-list))))
+
+(defun %write-dir-data (initial-ptr items sizes)
+  "Writes to initial-ptr all 'items' with size information 'sizes'."
+  (let ((ptr (inc-pointer initial-ptr 0)))
+    (loop for item in items
+          for size in sizes
+          do (progn
+               (setf (foreign-slot-value ptr 'dirent-struct 'ino) (ino item)
+                     (foreign-slot-value ptr 'dirent-struct 'reclen) (%rec-size size)
+                     (foreign-slot-value ptr 'dirent-struct 'type)
+                     (foreign-enum-value 'dirent-type (file-type item))
+                     (foreign-slot-value ptr 'dirent-struct 'namlen) (%rec-name-size size))
+               (lisp-string-to-foreign (name item)
+                                       (inc-pointer ptr +name-offset+)
+                                       (%rec-name-size size))
+               (incf-pointer ptr (%rec-size size))))))
+
+(defun %calculate-final-entry (entry nentries existing-entries)
+  (let ((unlimited-p (= nentries -1)))
+    (1- (if unlimited-p
+          existing-entries
+          (min (+ entry nentries) existing-entries)))))
+
+(defun %dir-readdir (protid limit entry nentries existing-entries
+                            old-dataptr current-size)
   "Returns pointer to entries, size and total of entries, otherwise nil."
-  (let* ((size (if (or (zerop bufsiz) (> bufsiz +chunk-size+))
-                 +chunk-size+
-                 bufsiz))
-         (data (mmap (make-pointer 0) size '(:prot-read :prot-write) '(:map-anon) 0 0)))
-    (unless data
+  (let* ((node (get-node protid))
+         (user (get-user protid))
+         (final-entry (%calculate-final-entry entry nentries existing-entries))
+         (entries (get-entries *translator* node user entry final-entry)))
+    (unless entries
       (return-from %dir-readdir nil))
-    (let* ((limited-p (> bufsiz 0))
-           (final-entry (1- (if (= nentries -1)
-                              existing-entries
-                              (min (+ entry nentries) existing-entries)))))
-      (multiple-value-bind (cnt ptr new-size)
-        (%dir-readdir-count dir-protid entry final-entry data size limited-p)
-        (cond
-          ((null cnt)
-           (unless (null new-size)
-             (munmap data new-size))
-           nil)
-          (t
-            ;(warn "start ptr ~s final ptr ~s total size ~s" data ptr new-size)
-            (let ((alloc-end (pointer-address (inc-pointer data new-size)))
-                  (real-end (round-page (pointer-address ptr))))
-              (when (> alloc-end real-end)
-                ;(warn "munmap unused from ~s to ~s" real-end alloc-end)
-                (munmap (make-pointer real-end) (- alloc-end real-end)))
-              (values data
-                      (- (pointer-address ptr) (pointer-address data))
-                      cnt))))))))
+    (let* ((sizes (%readdir-count-size entries limit))
+           (size-bytes (first sizes))
+           (size-items (second sizes))
+           (size-list (third sizes))
+           (real-entries (subseq entries 0 size-items)))
+      (unless real-entries
+        (return-from %dir-readdir nil))
+      (let* ((needs-more-p (< current-size size-bytes))
+             (dataptr (if needs-more-p
+                        (mmap (make-pointer 0)
+                              size-bytes
+                              '(:prot-read :prot-write)
+                              '(:map-anon)
+                              0
+                              0)
+                        old-dataptr))) ; Old value is large enough.
+        (%write-dir-data dataptr real-entries size-list)
+        (values dataptr 
+                size-bytes
+                size-items)))))
 
 (def-fs-interface :dir-readdir ((port port)
-				(data :pointer)
-				(data-count :pointer)
-				(data-dealloc :pointer)
-				(entry :int)
-				(nentries :int)
-				(bufsiz :unsigned-int)
-				(amount :pointer))
+                                (data :pointer)
+                                (data-count :pointer)
+                                (data-dealloc :pointer)
+                                (entry :int)
+                                (nentries :int)
+                                (bufsiz :unsigned-int)
+                                (amount :pointer))
   (with-lookup dir-protid port
-    ;(warn "listing ~s entry ~s nentries ~s" (get-node dir-protid)
-;          entry nentries)
     (block dir-readdir
            (unless (flag-is-p (get-open-flags dir-protid) :read)
              (return-from dir-readdir :bad-fd))
@@ -105,13 +104,20 @@
              (when (> (1+ entry) existing-entries)
                (setf (mem-ref amount :int) 0)
                (return-from dir-readdir t))
-             (multiple-value-bind (data-ptr len cnt)
-               (%dir-readdir dir-protid bufsiz entry nentries existing-entries)
-               (when (null data-ptr)
-                 (setf (mem-ref amount :int) 0)
-                 (return-from dir-readdir t))
-               (setf (mem-ref amount :int) cnt)
-               (setf (mem-ref data :pointer) data-ptr)
-               (setf (mem-ref data-count 'msg-type-number) len)
-               (setf (mem-ref data-dealloc :int) 1)
-               t)))))
+             (let ((old-ptr (mem-ref data :pointer)))
+               (multiple-value-bind (data-ptr len cnt)
+                 (%dir-readdir dir-protid (if (zerop bufsiz) nil bufsiz)
+                               entry
+                               nentries
+                               existing-entries
+                               old-ptr
+                               (mem-ref data-count 'msg-type-number))
+                 (when (null data-ptr)
+                   (setf (mem-ref amount :int) 0)
+                   (return-from dir-readdir t))
+                 (setf (mem-ref amount :int) cnt
+                       (mem-ref data :pointer) data-ptr
+                       (mem-ref data-count 'msg-type-number) len
+                       (mem-ref data-dealloc :boolean)
+                       (not (pointer-eq old-ptr data-ptr)))
+                 t))))))
