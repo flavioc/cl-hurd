@@ -58,7 +58,7 @@
 
 (defsetf statfs-get statfs-set)
 
-(defun statfs-copy (statfs-dest statfs-src)
+(defmethod statfs-copy ((statfs-dest statfs) (statfs-src statfs))
   "Copies to 'statfs-dest' all the statfs information from 'statfs-src'."
   (memcpy (ptr statfs-dest) (ptr statfs-src) +statfs-size+))
 
