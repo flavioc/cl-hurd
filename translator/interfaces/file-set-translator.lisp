@@ -77,7 +77,7 @@
                                (eq :send-invalid-dest away-err))
                      (return-from set-translator away-err)))))
              (when (and (flag-is-p passive-flags '(:set :excl))
-                        (has-passive-trans-p (stat node)))
+                        (box-passive-p (box node)))
                (return-from set-translator :resource-busy))
              (when (flag-is-p active-flags :set)
                (unless (box-set-active (box node) active
@@ -96,8 +96,7 @@
                     (sct t)
                     (t
                       (warn "going to set...")
-                      (set-translator *translator*
-                                      node user
-                                      passive-list)))))
+                      (box-set-passive (box node)
+                                       passive-list)))))
                ((flag-is-p active-flags :set)
                 t))))))
