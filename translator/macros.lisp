@@ -6,11 +6,7 @@
   (with-gensyms (result)
 	  `(define-hurd-interface ,what ,name ,params
        ; Remove 'declare' declarative clauses first.
-       ,(when (and (>= (length body) 1)
-                   (eq (first (first body)) 'declare))
-          (let ((ret (first body)))
-            (setf body (rest body))
-            ret))
+       ,(remove-declare body)
 		   ;(warn "enter at ~s ~s~%" (quote ,what) (quote ,name))
 		   (let ((,result (when *translator*
                         ,@body)))
