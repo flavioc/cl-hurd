@@ -19,10 +19,13 @@
                   :documentation "The zip data associated with this file."))
   (:documentation "Extends entry with a zip-entry."))
 
-(define-callback allow-open-p zip-translator (node user flags is-new-p) t)
+(define-callback allow-open-p zip-translator (node user flags is-new-p)
+  (declare (ignore node user flags is-new-p))
+  t)
 
 (define-callback file-read zip-translator
                  (node user start amount stream)
+  (declare (ignore user))
   (let* ((size (stat-get (stat node) 'size))
          (size-res (- size start)))
     (cond
@@ -41,10 +44,12 @@
 
 (define-callback report-access zip-translator
                  (node user)
+  (declare (ignore node user))
   '(:read))
 
 (define-callback refresh-statfs zip-translator
                  (user)
+  (declare (ignore user))
   (setf (statfs-get (get-statfs *translator*) 'bfree) 1)
   t)
 
@@ -61,11 +66,13 @@
 
 (define-callback file-rename zip-translator
                  (user old-dir old-name new-dir new-name)
+  (declare (ignore user))
   (rename-dir-entry old-dir old-name new-dir new-name)
   t)
 
 (define-callback create-file zip-translator
                  (node user filename mode)
+  (declare (ignore user))
   (warn "Create file ~s in ~s" filename node)
   (let ((entry (make-instance 'zip-entry
                               :stat (make-stat (stat node)
@@ -78,6 +85,7 @@
 
 (define-callback create-anonymous-file zip-translator
                  (node user mode)
+  (declare (ignore user))
   (make-instance 'zip-entry
                  :stat (make-stat (stat node) :mode mode)
                  :parent node
@@ -85,6 +93,7 @@
 
 (define-callback create-hard-link zip-translator
                  (dir user file name)
+  (declare (ignore user))
   (add-entry dir file name)
   t)
 
@@ -101,12 +110,13 @@
 
 (define-callback create-symlink zip-translator
                  (node user target)
-  (set-type (stat node) :lnk)
+  (declare (ignore user))
   (setf (link node) target)
   t)
 
 (define-callback create-block zip-translator
                  (node user device)
+  (declare (ignore user))
   (warn "create-block")
   (set-type (stat node) :blk)
   (setf (stat-get (stat node) 'rdev) device)
@@ -114,6 +124,7 @@
 
 (define-callback create-character zip-translator
                  (node user device)
+  (declare (ignore user))
   (warn "create character.")
   (set-type (stat node) :chr)
   (setf (stat-get (stat node) 'rdev) device)
@@ -121,25 +132,23 @@
 
 (define-callback create-fifo zip-translator
                  (node user)
+  (declare (ignore user))
   (warn "create fifo.")
   (set-type (stat node) :fifo)
   t)
 
 (define-callback create-socket zip-translator
                  (node user)
+  (declare (ignore user))
   (warn "create socket.")
   (set-type (stat node) :sock)
   t)
 
 (define-callback set-translator zip-translator
                  (node user arg-list)
+  (declare (ignore user))
   (warn "setting passive translator ~s" arg-list)
   (setf (translator node) arg-list)
-  t)
-
-;; XXX
-(define-callback file-write zip-translator
-				 (node user offset stream)
   t)
 
 (defun %create-zip-file (parent entry)
@@ -202,6 +211,7 @@
 ;;
 (define-callback file-utimes zip-translator
 				 (node user atime mtime)
+  (declare (ignore user))
   (when atime
     (setf (stat-get (stat node) 'atime) atime))
   (when mtime
@@ -210,6 +220,7 @@
 
 (define-callback file-chmod zip-translator
 				 (node user mode)
+  (declare (ignore user))
   (set-perms-if (stat node)
                 (has-perms-p mode 'exec 'owner)
                 'exec 'owner)
@@ -219,21 +230,22 @@
 
 (define-callback file-chown zip-translator
 				 (node user uid gid)
+  (declare (ignore user))
   (when (valid-id-p uid)
     (setf (stat-get (stat node) 'uid) uid))
   (when (valid-id-p gid)
     (setf (stat-get (stat node) 'gid) gid))
   t)
 
-(define-callback allow-author-change zip-translator
+(define-callback allow-author-change-p zip-translator
 				 (node user author)
+  (declare (ignore node user author))
   t)
 
 (defun main ()
   (let ((trans (make-instance 'zip-translator
                               :options (make-translator-options
-                                         '(("coolness-level" 20)
-                                           "fast")))))
+                                         '(("coolness-level" 20) "fast")))))
     (run-translator trans)))
 
 (main)
