@@ -428,7 +428,7 @@
            :number-of-entries
            :number-of-entries
            :get-entries
-           :allow-author-change
+           :allow-author-change-p
            :create-directory
            :remove-directory-entry
            :file-read
