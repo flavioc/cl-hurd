@@ -45,6 +45,7 @@
   "Has 'bucket' the port 'port'?"
   (with-accessors ((table table)) bucket
     (multiple-value-bind (val found) (gethash port table)
+      (declare (ignore val))
       found)))
 
 (defmethod lookup-port ((bucket port-bucket) port)
@@ -63,6 +64,7 @@
 (defmethod bucket-iterate ((bucket port-bucket) fn)
   "Apply 'fn' for each port-info in 'bucket'."
   (maphash (lambda (key value)
+             (declare (ignore key))
              (funcall fn value)) (table bucket)))
 
 (defun make-bucket ()

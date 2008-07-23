@@ -8,6 +8,7 @@
   ;; with success we get a list with a port
   ;; and the respective bucket
   (let ((port-data (gethash port *all-ports*)))
+    (declare (ignore count))
     (when (listp port-data)
       (let ((port-info (first port-data))
             (bucket (second port-data)))
