@@ -8,7 +8,7 @@
 
 (defclass transbox ()
   ((active :initarg :active
-           :accessor active
+           :reader active
            :initform nil
            :documentation "Is the box active?")
    (passive :initarg :active
@@ -74,3 +74,8 @@
   (box-set-active box port t))
 
 (defsetf active box-set-active-foo)
+
+(defmethod print-object ((box transbox) stream)
+  (format stream "#<transbox active=~s passive=~s>"
+          (active box)
+          (passive box)))
