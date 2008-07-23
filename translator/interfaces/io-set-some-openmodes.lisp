@@ -6,6 +6,6 @@
   (with-lookup protid port
     (setf (flags (open-node protid))
           (enable-flags (flags (open-node protid))
-                        new-flags))
+                        (only-flags new-flags +honored-open-modes+)))
     t))
 
