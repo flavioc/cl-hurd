@@ -4,7 +4,9 @@
 (defpackage :cl-hurd.common
   (:nicknames :hurd-common)
   (:use :cl :cffi :tg)
-  (:export :largest-representable-number
+  (:export :+minus-one-ll+
+           :+minus-one+
+           :largest-representable-number
            :num-bits
            :define-helper-library
            :define-stub-library
@@ -210,7 +212,8 @@
            :size
            :name
            :time-value-eq
-           :remove-declare))
+           :remove-declare
+           :getpid))
 
 (defpackage :cl-mach
   (:nicknames :mach)
@@ -315,7 +318,16 @@
            :+qlimit-max+
            :port-set-seqno
            :port-get-set-status
-           ))
+           :port-get-receive-status
+           :port-set
+           :mscount
+           :queue-limit
+           :msgcount
+           :so-rights
+           :has-send-rights
+           :port-deleted-notification-requested
+           :no-senders-notification-requested
+           :seqno))
 
 (defpackage :cl-hurd
   (:nicknames :hurd)
@@ -415,6 +427,8 @@
            :wait
            :file-storage-class
            :transbox
+           :+honored-open-modes+
+           :+honored-get-modes+
            ))
 
 (defpackage :cl-hurd.translator
