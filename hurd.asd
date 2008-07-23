@@ -165,7 +165,8 @@
                                                            (:file "file-getlinknode")
                                                            (:file "dir-lookup")
                                                            (:file "dir-readdir")
-                                                           (:file "file-set-translator")
+                                                           (:file "file-set-translator"
+                                                                  :depends-on ("trans-flags"))
                                                            (:file "file-reparent")
                                                            (:file "file-get-fs-options")
                                                            (:file "dir-unlink")
@@ -175,7 +176,7 @@
                                                            (:file "dir-mkdir")
                                                            (:file "dir-link")
                                                            (:file "storage"))
-                                              :depends-on ("retry"))
+                                              :depends-on ("retry" "fsys"))
                                      (:module iohelp
                                               :components ((:file "utils")
                                                            (:file "iouser"
