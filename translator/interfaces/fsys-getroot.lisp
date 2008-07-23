@@ -92,6 +92,7 @@
                                    (retry-name :pointer)
                                    (file port-pointer)
                                    (file-poly :pointer))
+  (declare (ignore reply reply-poly))
   (with-accessors ((node root)) *translator*
     (block getroot
            (unless (and node (port-exists-p fsys))

@@ -2,7 +2,7 @@
 (in-package :hurd-translator)
 
 (defun %get-options-callback (port data data-len)
-  (with-lookup protid port
+  (when (port-exists-p port)
     (let* ((args0 (get-options *translator*))
            (args (cons
                    (name *translator*) args0))

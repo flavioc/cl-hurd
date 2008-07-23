@@ -31,7 +31,7 @@
                                   (reply port)
                                   (reply-type msg-type-name)
                                   (flags fsys-goaway-flags))
-  (with-lookup protid control
+  (when (port-exists-p control)
     (warn "flags ~s" flags)
     (let ((shut-ret (%shutdown flags)))
       (cond

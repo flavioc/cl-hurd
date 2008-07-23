@@ -24,7 +24,8 @@
                                        (data :pointer)
                                        (data-len msg-type-number)
                                        (do-children :boolean))
-  (with-lookup protid fsys
+  (declare (ignore reply reply-type))
+  (when (port-exists-p fsys)
     (let* ((options-list (foreign-string-zero-separated-to-list
                            data data-len))
            (filtered-list ; Remove options without "--"
