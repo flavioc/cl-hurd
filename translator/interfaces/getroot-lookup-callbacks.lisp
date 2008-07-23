@@ -8,7 +8,7 @@
   (let ((node (node box)))
     (cond
       ((box-passive-p (box node))
-       (values (passive node)
+       (values (passive (box node))
                (stat-get (stat node) 'uid)
                (stat-get (stat node) 'gid)))
       (t :no-such-file))))
