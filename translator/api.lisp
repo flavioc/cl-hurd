@@ -133,7 +133,6 @@ Return T when this is possible, nil otherwise."
 
 (%add-callback get-options ()
   "Return a list of translator options similar to --arguments."
-  (declare (ignore translator))
   (if (null (options translator))
     nil
     (get-translator-options (options translator))))
