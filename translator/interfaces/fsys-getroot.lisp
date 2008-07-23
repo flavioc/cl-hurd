@@ -57,10 +57,8 @@
          (flag-is-p flags :exec))))
 
 (defun %must-follow-translator-p (node flags)
-  (and (translator node)
-       (not (flag-is-p flags :notrans))
-       (or (has-passive-trans-p (stat node))
-           (box-translated-p (box node)))))
+  (and (flag-is-p flags :notrans)
+       (box-translated-p (box node))))
 
 (defun %fsys-getroot (node flags dotdot user)
   (when (%must-follow-translator-p node flags)
