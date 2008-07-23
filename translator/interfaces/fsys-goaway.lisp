@@ -11,7 +11,7 @@
                     (lambda (port)
                       (when (typep port 'protid)
                         (let ((node (get-node port)))
-                          (when (box-translated-p (box node))
+                          (when (box-active-p (box node))
                             (with-port-deallocate (control (box-fetch-control (box node)))
                               ; We will catch errors later on
                               (fsys-goaway control flags)))))))
