@@ -57,7 +57,6 @@
   "Removes the port 'port' from the bucket 'bucket'."
   (with-accessors ((table table)) bucket
     (remhash (port-right port) table)
-    (set-send-rights port nil)
     (when cleanup
       (port-cleanup port))))
 
@@ -75,7 +74,8 @@
   "Count number of ports with a certain type."
   (loop for key being the hash-keys of (table bucket)
         using (hash-value value)
-        sum (if (typep value this-type) 1 0)))
+        sum (if (typep value this-type)
+              1 0)))
 
 (defmethod bucket-find ((bucket port-bucket) fn)
   "Find a port that satisfies 'fn'."
