@@ -37,7 +37,7 @@
       (t :translator-died))))
 
 (defun fetch-root (box dotdot flags user get-translator-callback fetch-root-callback)
-  (unless (box-translated-p box)
+  (unless (box-active-p box)
     (multiple-value-bind (path uid gid) (funcall get-translator-callback box)
       (unless (and path uid gid)
         (return-from fetch-root path)) ; return error
@@ -49,7 +49,7 @@
         (unless (port-valid-p control)
           (return-from fetch-root control)) ; error
         ; Set the now _active_ translator port
-        (setf (active box) control))))
+        (box-set-active box control t))))
   ; If we have come this far, it means that the box has an active port now!
   (let ((control (active box)))
     (port-mod-refs control :right-send 1)
