@@ -28,7 +28,7 @@
                                                control)))
           (select-error return-code (mem-ref control 'port)))))))
 
-(defun %try-start-translator (box dotdot fetch-root-callback path uid gid)
+(defun %try-start-translator (dotdot fetch-root-callback path uid gid)
   (multiple-value-bind (ret err)
     (%fetch-root dotdot fetch-root-callback uid gid path)
     (cond
@@ -41,8 +41,7 @@
     (multiple-value-bind (path uid gid) (funcall get-translator-callback box)
       (unless (and path uid gid)
         (return-from fetch-root path)) ; return error
-      (let ((control (%try-start-translator box
-                                            dotdot
+      (let ((control (%try-start-translator dotdot
                                             fetch-root-callback
                                             path
                                             uid
