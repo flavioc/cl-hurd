@@ -24,7 +24,7 @@
   (with-lookup protid file
     (let ((node (get-node protid))
           (user (get-user protid)))
-      (let ((arg-list (translator node)))
+      (let ((arg-list (passive (box node))))
         (unless arg-list
           ; No passive translator set. Try to get a short circuited one
           (setf arg-list (%get-translator-list node user)))
