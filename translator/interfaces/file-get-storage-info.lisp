@@ -11,7 +11,8 @@
                                           (num-offsets :pointer)
                                           (data :pointer)
                                           (data-len :pointer))
-  (with-lookup protid file
+  (declare (ignore ports ports-type offsets data))
+  (when (port-exists-p file)
     (setf (mem-ref data-len 'msg-type-number) 0
           (mem-ref num-offsets 'msg-type-number) 0
           (mem-ref num-ports 'msg-type-number) 0)
