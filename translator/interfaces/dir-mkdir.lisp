@@ -2,8 +2,8 @@
 (in-package :hurd-translator)
 
 (def-fs-interface :dir-mkdir ((dir port)
-							  (name :string)
-							  (mode mode-t))
+                              (name :string)
+                              (mode mode-t))
   (with-lookup protid dir
     (let ((node (get-node protid))
           (user (get-user protid)))
@@ -15,8 +15,8 @@
           (set-vtx mode nil)
           (set-type mode :dir)
           (let ((result (create-directory *translator*
-                                          (get-node protid)
-                                          (get-user protid)
+                                          node
+                                          user
                                           name
                                           mode)))
             (if result
