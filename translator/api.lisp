@@ -88,7 +88,8 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
 
 (%add-callback drop-node (node)
   "The 'node' has no more references, drop it."
-  (warn "Dropped node ~s" node)
+  (declare (ignore translator node))
+  ;(warn "Dropped node ~s" node)
   nil)
 
 (%add-callback report-access (node user)
@@ -168,9 +169,6 @@ a list of two elements: a string representing the option and the value, represen
 
 (%add-callback create-socket (node user)
   "Turn 'node' into a socket.")
-
-(%add-callback set-translator (node user arg-list)
-  "Set passive translator 'arg-list' on 'node'.")
 
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
