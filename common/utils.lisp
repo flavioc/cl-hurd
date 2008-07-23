@@ -192,3 +192,11 @@ If you have the list with the length for each string pass it in ls-len."
                                      ptr
                                      item-len)
              (incf-pointer ptr item-len))))
+
+(defmacro remove-declare (body)
+  "Removes a potencial declare directive from body and returns it."
+  `(when (and (>= (length ,body) 1)
+              (eq (first (first ,body)) 'declare))
+     (let ((ret (first ,body)))
+       (setf ,body (rest ,body))
+       ret)))
