@@ -19,9 +19,7 @@
          :accessor box
          :documentation "Node's translator box.")
     (link :initform nil
-          :documentation "If this is symlink, this is the target file.")
-    (translator :initform nil
-                :documentation "Passive translator on this node, if any."))
+          :documentation "If this is symlink, this is the target file."))
    (:documentation "The node class."))
 
 (defmethod pre-drop-node ((node node))
@@ -53,19 +51,6 @@
 (defmethod has-access-p ((node node) (user iouser) flag)
   "Specialize has-access-p for nodes."
   (has-access-p (stat node) user flag))
-
-(defmethod set-passive-translator-node ((node node) new-name)
-  "When setting the new passive translator, change stat information to match."
-  (set-passive-trans (stat node) (if (null new-name) nil t))
-  (setf (slot-value node 'translator) new-name))
-
-(defsetf translator set-passive-translator-node)
-
-(defmethod translator ((node node))
-  (cond
-    ((has-passive-trans-p (stat node))
-     (slot-value node 'translator))
-    (t nil)))
 
 (defmethod set-link-node ((node node) new-link)
   "When defining a new link target, change stat size."
