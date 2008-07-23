@@ -47,7 +47,7 @@
   "Drops a transbox."
   (when (active box)
     (port-deallocate (active box))
-    (setf (active box) nil)))
+    (box-set-active box nil t)))
 
 (defmethod box-set-active ((box transbox) port excl-p)
   "Set a new active port on a box."
