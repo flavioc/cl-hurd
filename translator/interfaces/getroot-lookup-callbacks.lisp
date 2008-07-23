@@ -7,9 +7,8 @@
 (defun get-translator-callback (box)
   (let ((node (node box)))
     (cond
-      ((and (has-passive-trans-p (stat node))
-            (translator node))
-       (values (translator node)
+      ((box-passive-p (box node))
+       (values (passive node)
                (stat-get (stat node) 'uid)
                (stat-get (stat node) 'gid)))
       (t :no-such-file))))
