@@ -209,7 +209,8 @@
            :read-dirent
            :size
            :name
-           :time-value-eq))
+           :time-value-eq
+           :remove-declare))
 
 (defpackage :cl-mach
   (:nicknames :mach)
