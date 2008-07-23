@@ -67,7 +67,7 @@
                         (not (flag-is-p active-flags :orphan)))
                (unless (is-owner-p node user)
                  (return-from set-translator :permission-denied))
-               (when (and (box-translated-p (box node))
+               (when (and (box-active-p (box node))
                           (not (flag-is-p active-flags :excl)))
                  (let* ((control (box-fetch-control (box node)))
                         (away-err (fsys-goaway control
