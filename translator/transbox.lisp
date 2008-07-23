@@ -9,6 +9,7 @@
   (:documentation "Transbox used in nodes."))
 
 (defmethod box-set-active ((box node-transbox) port excl-p)
+  (declare (ignore excl-p))
   (let ((ret (call-next-method)))
     (when ret
       ; Update active-translator node stat field to most updated information.

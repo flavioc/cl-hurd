@@ -5,6 +5,7 @@
   "Run the translator server."
   (let ((*translator* translator))
     (run-server (lambda (port in out)
+                  (declare (ignore port))
                   (translator-demuxer in out))
                 (port-bucket *translator*))))
 
@@ -26,6 +27,7 @@
   (unless (and (zerop seconds)
                (zerop miliseconds))
     (run-server (lambda (port in out)
+                  (declare (ignore port))
                   (translator-demuxer in out))
                 (port-bucket *translator*)
                 (calculate-miliseconds seconds miliseconds))))

@@ -8,8 +8,8 @@
                  (:documentation ,doc))
      (defmethod ,name ((translator translator) ,@args)
        ,@(if (null body)
-           'nil 
-           body))))
+           (list `(declare (ignore translator ,@args)))
+          body))))
 
 (%add-callback make-root-node (underlying-stat)
   "Called when the translator wants to create the root node.
@@ -21,6 +21,7 @@ where the translator is being set up."
   "This is called when the io-pathconf RPC is called.
 'what' refers to the type of information the user wants,
 please see common/pathconf.lisp."
+  (declare (ignore translator node user))
 	(case what
     ((:link-max :max-canon :max-input
                 :pipe-buf :vdisable :sock-maxbuf)
@@ -45,7 +46,7 @@ please see common/pathconf.lisp."
 
 (%add-callback file-utimes (node user atime mtime)
   "The user is attempting to change the access and modification time of the node.
-'atime' or 'mtime' can be :now.
+'atime' or 'mtime' can be +now-time-value+.
 Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both cases.")
 
 (%add-callback dir-lookup (node user filename)
@@ -56,12 +57,13 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
 
 (%add-callback number-of-entries (node user)
   "This must return the number of entries in the directory 'node' from the 'user' point of view."
+  (declare (ignore node user))
   0)
 
 (%add-callback get-entries (node user start end)
   "This sould return a list of dirent objects representing the contents of the directory 'node' from 'start' to 'end' (index is zero based).")
 
-(%add-callback allow-author-change (node user author)
+(%add-callback allow-author-change-p (node user author)
   "User wants to change the file's author, return t if it is ok, nil otherwise.")
 
 (%add-callback create-directory (node user name mode)
@@ -78,6 +80,7 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
 
 (%add-callback file-syncfs (user wait-p do-children-p)
   "User wants to sync the entire filesystem. 'wait-p' indicates the user wants to wait for it. 'do-children-p' indicates we should also sync the children nodes."
+  (declare (ignore translator user wait-p do-children-p))
   t)
 
 (%add-callback file-write (node user offset stream)
@@ -90,26 +93,23 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
 
 (%add-callback report-access (node user)
   "This should return a list of permitted access modes for 'user'.Permitted modes are:
-:read :write :exec."
-  nil)
+:read :write :exec.")
 
 (%add-callback refresh-statfs (user)
   "The statfs translator field must be updated for 'user'.
-Return t for success, nil for unsupported operation."
-  nil)
+Return t for success, nil for unsupported operation.")
 
 (%add-callback file-change-size (node user new-size)
   "The user wants to change node size to 'new-size'.
-Return t on success, nil for unsupported operation."
-  nil)
+Return t on success, nil for unsupported operation.")
 
 (%add-callback file-rename (user old-dir old-name new-dir new-name)
   "Rename file 'old-name' from 'old-dir' to 'new-name' in 'new-dir'.
-Return T for success, nil for unsupported, or other error code for other errors."
-  nil)
+Return T for success, nil for unsupported, or other error code for other errors.")
 
 (%add-callback shutdown ()
   "Shutdown the translator."
+  (declare (ignore translator))
   t)
 
 (%add-callback create-anonymous-file (node user mode)
@@ -122,15 +122,18 @@ Return nil for unsupported operation.")
 (%add-callback block-read (node user)
   "Block until we can read data from node.
 Return T when this is possible, nil otherwise."
+  (declare (ignore translator node user))
   t)
 
 (%add-callback block-write (node user)
   "Block until we can write data to node.
 Return T when this is possible, nil otherwise."
+  (declare (ignore translator node user))
   t)
 
 (%add-callback get-options ()
   "Return a list of translator options similar to --arguments."
+  (declare (ignore translator))
   (if (null (options translator))
     nil
     (get-translator-options (options translator))))
@@ -148,32 +151,27 @@ a list of two elements: a string representing the option and the value, represen
   "Indicates that translator options have changed. You don't need to implement this if you implement 'set-options'.")
 
 (%add-callback create-symlink (node user target)
-  "Turn 'node' into a symlink to 'target'."
-  nil)
+  "Turn 'node' into a symlink to 'target'.")
 
 (%add-callback allow-link-p (node user)
   "Return T to allow reading from the symlink 'node' to 'user'."
+  (declare (ignore translator node user))
   t)
 
 (%add-callback create-block (node user device)
-  "Turn 'node' into a block device with device-id 'device'."
-  nil)
+  "Turn 'node' into a block device with device-id 'device'.")
 
 (%add-callback create-character (node user device)
-  "Turn 'node' into a character device with device-id 'device'."
-  nil)
+  "Turn 'node' into a character device with device-id 'device'.")
 
 (%add-callback create-fifo (node user)
-  "Turn 'node' into a fifo."
-  nil)
+  "Turn 'node' into a fifo.")
 
 (%add-callback create-socket (node user)
-  "Turn 'node' into a socket."
-  nil)
+  "Turn 'node' into a socket.")
 
 (%add-callback set-translator (node user arg-list)
-  "Set passive translator 'arg-list' on 'node'."
-  nil)
+  "Set passive translator 'arg-list' on 'node'.")
 
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
