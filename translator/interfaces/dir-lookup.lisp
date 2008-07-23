@@ -4,6 +4,7 @@
 (defun %has-node-p (table node)
   (multiple-value-bind (foo found-p)
     (gethash node table)
+    (declare (ignore foo))
     found-p))
 
 (defun %put-node (table node)
