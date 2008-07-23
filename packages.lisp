@@ -361,6 +361,8 @@
            :restrict-iouser
            :iouser
            :retry-type
+           :box-active-p
+           :box-passive-p
            :box-translated-p
            :make-transbox
            :port-info
@@ -384,6 +386,8 @@
            :is-owner-p
            :box-drop
            :box-set-active
+           :box-set-passive
+           :passive
            :nowait
            :nosync
            :force
