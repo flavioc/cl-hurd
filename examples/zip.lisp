@@ -14,10 +14,23 @@
   (:documentation "Zip translator."))
 
 (defclass zip-entry (entry)
-  ((data-sequence :initarg :data
+  ((name :initarg :name
+         :accessor name)
+   (data-sequence :initarg :data
                   :accessor data
                   :documentation "The zip data associated with this file."))
   (:documentation "Extends entry with a zip-entry."))
+
+(defclass zip-dir-entry (dir-entry)
+  ((name :initarg :name
+         :initform nil
+         :accessor name)))
+
+(defmethod print-object ((entry zip-dir-entry) stream)
+  (format stream "#<zip-dir-entry name=~s>" (name entry)))
+
+(defmethod print-object ((entry zip-entry) stream)
+  (format stream "#<zip-entry name=~s>" (name entry)))
 
 (define-callback allow-open-p zip-translator (node user flags is-new-p)
   (declare (ignore node user flags is-new-p))
@@ -78,6 +91,7 @@
                               :stat (make-stat (stat node)
                                                :mode mode)
                               :parent node
+                              :name filename
                               :data (make-array 0))))
     (setup-entry entry)
     (add-entry node entry filename)
@@ -144,13 +158,6 @@
   (set-type (stat node) :sock)
   t)
 
-(define-callback set-translator zip-translator
-                 (node user arg-list)
-  (declare (ignore user))
-  (warn "setting passive translator ~s" arg-list)
-  (setf (translator node) arg-list)
-  t)
-
 (defun %create-zip-file (parent entry)
   "Create a new zip entry."
   (let ((data-stream
@@ -171,10 +178,11 @@
       (setup-entry obj)
       obj)))
 
-(defun %create-zip-dir (parent)
+(defun %create-zip-dir (parent name)
   "Create a new zip directory."
-  (make-instance 'dir-entry
+  (make-instance 'zip-dir-entry
                  :stat (make-stat (stat parent))
+                 :name name
                  :parent parent))
 
 (defun add-zip-file (node name zip-entry)
@@ -195,7 +203,7 @@
           (let ((new-dir (add-entry node
                                     (if final-p
                                       (%create-zip-file node zip-entry)
-                                      (%create-zip-dir node))
+                                      (%create-zip-dir node this-name))
                                     this-name)))
             ;(warn "new-dir ~s" new-dir)
             (unless final-p
