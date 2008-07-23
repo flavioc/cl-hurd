@@ -10,7 +10,11 @@
   ((active :initarg :active
            :accessor active
            :initform nil
-           :documentation "Is the box active?"))
+           :documentation "Is the box active?")
+   (passive :initarg :active
+            :reader passive
+            :initform nil
+            :documentation "Passive translator path."))
   (:documentation "The transbox class"))
 
 (defmethod initialize-instance :after ((transbox transbox) &key)
@@ -19,14 +23,22 @@
                             (port-deallocate (active transbox)))))
   transbox)
 
-(defmethod box-translated-p ((box transbox))
+(defmethod box-active-p ((box transbox))
   "Is there an active translator on this box?"
-  (with-accessors ((port active)) box
-    (port-valid-p port)))
+  (port-valid-p (active box)))
+
+(defmethod box-passive-p ((box transbox))
+  "Is there an passive translator on this box?"
+  (not (null (passive box))))
+
+(defmethod box-translated-p ((box transbox))
+  "Is there an active or passive translator on this box?"
+  (or (box-active-p box)
+      (box-passive-p box)))
 
 (defmethod box-fetch-control ((box transbox))
   "Fetch a new control port from a translator box."
-  (assert (box-translated-p box))
+  (assert (box-active-p box))
   (warn "box: active refs ~s" (port-get-refs (active box) :right-dead-name))
   (port-mod-refs (active box) :right-send 1)
   (active box))
@@ -49,5 +61,16 @@
     (warn "box: deallocate old active")
     (port-deallocate (active box)))
   (warn "box: setting new ~s" port)
-  (setf (active box) port)
+  (setf (slot-value box 'active) port)
   t)
+
+(defmethod box-set-passive ((box transbox) path)
+  (setf (slot-value box 'passive) path)
+  t)
+
+(defsetf passive box-set-passive)
+
+(defmethod box-set-active-foo ((box transbox) port)
+  (box-set-active box port t))
+
+(defsetf active box-set-active-foo)
