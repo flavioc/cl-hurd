@@ -5,12 +5,18 @@
   "Defines a new interface callback of type 'what' and name 'name'."
   (with-gensyms (result)
 	  `(define-hurd-interface ,what ,name ,params
-		  ;(warn "enter at ~s ~s~%" (quote ,what) (quote ,name))
-		  (let ((,result (when *translator*
-                       ,@body)))
-			(if (null ,result)
-        :operation-not-supported
-        ,result)))))
+       ; Remove 'declare' declarative clauses first.
+       ,(when (and (>= (length body) 1)
+                   (eq (first (first body)) 'declare))
+          (let ((ret (first body)))
+            (setf body (rest body))
+            ret))
+		   ;(warn "enter at ~s ~s~%" (quote ,what) (quote ,name))
+		   (let ((,result (when *translator*
+                        ,@body)))
+			 (if (null ,result)
+         :operation-not-supported
+         ,result)))))
 
 ;; Specialize define-interface for the various stub modules.
 
