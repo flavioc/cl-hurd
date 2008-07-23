@@ -86,11 +86,9 @@
                 (not (flag-is-p flags :notrans))))))
 
 (defun %must-handle-translator (node flags rest-path)
-  (and node
-       (or (not (flag-is-p flags :notrans))
+  (and (or (not (flag-is-p flags :notrans))
            rest-path) ; This is not the path end, so we must continue
-       (or (has-passive-trans-p (stat node)) ; Must be passive
-           (box-translated-p (box node))))) ; ... or active.
+       (box-translated-p (box node))))
 
 (defun %dir-lookup (open-node user node path-ls flags mode table)
   (let ((this-path (first path-ls))
