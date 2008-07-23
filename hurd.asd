@@ -17,6 +17,7 @@
                (:file "paths")
                (:module common
                         :components ((:file "utils")
+                                     (:file "constants")
                                      (:file "error"
                                             :depends-on ("utils"))
                                      (:file "types")
@@ -145,6 +146,19 @@
                                      (:file "macros")
                                      (:module io
                                               :components ((:file "server-version")
+                                                           (:file "open-modes")
+                                                           (:file "duplicate")
+                                                           (:file "get-owner")
+                                                           (:file "identity")
+                                                           (:file "mod-owner")
+                                                           (:file "pathconf")
+                                                           (:file "read")
+                                                           (:file "readable")
+                                                           (:file "restrict-auth")
+                                                           (:file "revoke")
+                                                           (:file "seek")
+                                                           (:file "select")
+                                                           (:file "write")
                                                            (:file "stat")))
                                      (:module fs
                                               :components ((:file "trans-flags")
