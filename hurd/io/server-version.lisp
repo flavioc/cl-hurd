@@ -17,13 +17,14 @@
       (dotimes (i 3)
         (setf (mem-aref version :int i) 0))
       (setf (mem-aref server-name :char 0) 0)
-      (let ((error-code (%io-server-version port
-                                            server-name
-                                            version
-                                            (inc-pointer version 1)
-                                            (inc-pointer version 2))))
-        (select-error error-code
-                      (list (foreign-string-to-lisp server-name)
-                            (mem-aref version :int 0)
-                            (mem-aref version :int 1)
-                            (mem-aref version :int 2)))))))
+      (let ((error-code (%io-server-version
+                          port
+                          server-name
+                          version
+                          (inc-pointer version 1)
+                          (inc-pointer version 2))))
+        (select-error
+          error-code
+          (append (list (foreign-string-to-lisp server-name))
+                  (loop for i from 0 below 3
+                        collect (mem-aref version :int i))))))))
