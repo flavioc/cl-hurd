@@ -84,7 +84,7 @@
            (and (not (flag-is-p flags :nolink))
                 (not (flag-is-p flags :notrans))))))
 
-(defun %must-handle-translator (node user flags rest-path)
+(defun %must-handle-translator (node flags rest-path)
   (and node
        (or (not (flag-is-p flags :notrans))
            rest-path) ; This is not the path end, so we must continue
@@ -103,7 +103,7 @@
     (let ((found-node (dir-lookup *translator* node user this-path)))
       (cond
         (found-node ; File exists.
-          (when (%must-handle-translator found-node user flags rest-path)
+          (when (%must-handle-translator found-node flags rest-path)
             (let* ((empty-user (make-empty-iouser))
                    (new-open-node (make-open-node node
                                                   nil
