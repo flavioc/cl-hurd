@@ -8,6 +8,5 @@
 
 (defun io-stat (port)
   "Returns a stat object from a IO port."
-  (let* ((stat (make-stat))
-         (return-code (%io-stat port stat)))
-    (select-error return-code stat)))
+  (let ((stat (make-stat)))
+    (select-error (%io-stat port stat) stat)))
