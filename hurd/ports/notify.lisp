@@ -38,6 +38,7 @@
   "Defines a new notify callback."
   (with-gensyms (result)
 	  `(define-hurd-interface notify-routine ,name ,params
+       ,(remove-declare body)
        (let ((,result (progn ,@body)))
          (if (null ,result)
            :operation-not-supported
