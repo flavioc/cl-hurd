@@ -14,7 +14,7 @@
 (defun dir-lookup (dir file-name &key (flags '()) (mode (make-mode)))
   (declare (type fixnum dir)
            (type string file-name)
-           (type cons flags)
+           (type list flags)
            (type mode mode))
   (with-foreign-pointer (do-retry (foreign-type-size 'retry-type))
     (with-foreign-pointer (retry-name 1024) ; Same as libc's hurdlookup.c

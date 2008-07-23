@@ -35,7 +35,7 @@
 (defun file-remove-translator (file &optional (flags '(:set)))
   "Remove an active translator from 'file'."
   (declare (type fixnum file)
-           (type cons flags))
+           (type list flags))
   (select-error (%file-set-translator file
                                       nil
                                       flags

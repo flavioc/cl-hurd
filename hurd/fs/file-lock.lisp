@@ -8,5 +8,5 @@
 
 (defun file-lock (file flags)
   (declare (type fixnum file)
-           (type cons flags))
+           (type list flags))
   (select-error (%file-lock file flags) t))
