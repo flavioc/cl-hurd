@@ -34,6 +34,7 @@ root node."
 
 (define-callback dir-lookup tree-translator
 				 (node user filename)
+  (declare (ignore user))
   (cond
     ((string= filename ".")
      node)
@@ -44,10 +45,12 @@ root node."
 
 (define-callback number-of-entries tree-translator
 				 (node user)
+  (declare (ignore user))
   (dir-size node))
 
 (define-callback get-entries tree-translator
 				(node user start end)
+  (declare (ignore user))
   (let* ((return-list nil)
          (real-start (max 0 (- start 2))))
     (when (and (<= start 1) (>= end 1))
@@ -63,6 +66,7 @@ root node."
 
 (define-callback create-directory tree-translator
                  (node user name mode)
+  (declare (ignore user))
   (let ((old (get-entry node name)))
     (cond
       (old
@@ -75,4 +79,5 @@ root node."
 
 (define-callback remove-directory-entry tree-translator
 				 (node user name directory-p)
+  (declare (ignore user directory-p))
   (remove-dir-entry node name))
