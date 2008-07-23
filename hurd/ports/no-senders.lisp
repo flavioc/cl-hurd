@@ -12,8 +12,7 @@
     (when (listp port-data)
       (let ((port-info (first port-data))
             (bucket (second port-data)))
-        (when (has-send-rights port-info)
-          ;; Remove it from the bucket
-          (remove-port bucket port-info)
-          ;; Also from the *all-ports* table
-          (remhash port *all-ports*))))))
+        ;; Remove it from the bucket
+        (remove-port bucket port-info)
+        ;; Also from the *all-ports* table
+        (remhash port *all-ports*)))))
