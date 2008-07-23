@@ -10,7 +10,7 @@
                  (user (get-user protid)))
              (unless (is-owner-p node user)
                (return-from file-get-translator-cntl :permission-denied))
-             (unless (box-translated-p (box node))
+             (unless (box-active-p (box node))
                (return-from file-get-translator-cntl :no-such-device-address))
              (setf (mem-ref cntl 'port) (box-fetch-control (box node))
                    (mem-ref cntl-type 'msg-type-name) :move-send)
