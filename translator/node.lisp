@@ -35,10 +35,11 @@
 
 (defmethod print-object ((node node) stream)
   "Print a node to stream."
-  (format stream "#<node owner=~s link=~s translator=~s>"
+  (format stream "#<node owner=~s link=~s box="
           (owner node)
-          (link node)
-          (translator node)))
+          (link node))
+  (print-object (box node) stream)
+  (format stream ">"))
 
 (defmethod is-controller-p ((node node) (user iouser))
   "Specialize is-controller-p for nodes."
