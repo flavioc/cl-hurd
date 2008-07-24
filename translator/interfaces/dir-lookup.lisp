@@ -15,6 +15,9 @@
   "Creates a new protid."
   (let ((new-flags (disable-flags flags +open-flags+)))
     (when (allow-open-p *translator* node user new-flags newnode-p)
+      (when (flag-is-p flags :trunc)
+        (unless (file-change-size *translator* node user 0)
+          (return-from %create-new-protid :not-permitted)))
       (let* ((new-user (make-iouser :old user))
              (new-open-node (make-open-node
                               node
@@ -181,8 +184,7 @@
                    mode
                    (make-hash-table))
       (cond
-        ((null ret-retry-name)
-         ret-do-retry) ;; some error ocurred
+        ((null ret-retry-name) ret-do-retry) ;; Some error ocurred
         (t
           (setf (mem-ref do-retry 'retry-type) ret-do-retry)
           (lisp-string-to-foreign ret-retry-name retry-name (+ 1 (length ret-retry-name)))
