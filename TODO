@@ -1,6 +1,33 @@
 TODO list:
 
 - find... why?
-- fsys set options on other translators
 - more callbacks:
   - file-exec -- (broken)
+- translator with write support
+- translator that checks for changes in the underlying node
+
+CLIENT RPCS:
+- file_chflags (not used)
+- file_notice_changes (not used)
+- io_get_icky_async_id (deprecated)
+
+= not urgent:
+- file_get_storage_info
+- file_getfh
+- dir_notice_changes
+- io_async
+- io_reauthenticate
+- io_map
+- io_map_cntl
+- io-get-conch
+- io-release-conch
+- io-eofnotify
+- io-prenotify
+- io-postnotify
+- io-readnotify
+- io-readsleep
+- io-sigio
+- fsys-getfile
+- fsys-getpriv
+- fsys-init
+- fsys-forward
