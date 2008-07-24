@@ -70,6 +70,10 @@
   "Create a new bucket with the cleanup function 'cleanup'."
   (make-instance 'port-bucket))
 
+(defmethod bucket-count ((bucket port-bucket))
+  "Count total number of ports in bucket."
+  (hash-table-count (table bucket)))
+
 (defmethod bucket-count-type ((bucket port-bucket) this-type)
   "Count number of ports with a certain type."
   (loop for key being the hash-keys of (table bucket)
