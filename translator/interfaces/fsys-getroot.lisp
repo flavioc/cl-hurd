@@ -11,6 +11,9 @@
 (defun %handle-normal-file (node flags dotdot user)
   (cond
     ((allow-open-p *translator* node user flags t)
+     (when (flag-is-p flags :trunc)
+       (unless (file-change-size *translator* node user 0)
+         (return-from %handle-normal-file :not-permitted)))
      (let* ((new-open-node (make-open-node
                              node
                              (disable-flags flags +open-flags+)
@@ -97,12 +100,13 @@
                                         gen-gids gen-gids-count)))
              (multiple-value-bind (retry-type0 file0 file-poly0 retry-name0)
                (%fsys-getroot node flags dotdot user)
-               ;(warn "got from %fsys-getroot ~s ~s ~s ~s"
-               ;      retry-type0 file0 file-poly0 retry-name0)
-               (setf (mem-ref retry-type 'retry-type) retry-type0
-                     (mem-ref file 'port) file0
-                     (mem-ref file-poly 'msg-type-name) file-poly0)
-               (lisp-string-to-foreign retry-name0
-                                       retry-name
-                                       (1+ (length retry-name0)))
-               t)))))
+               (cond
+                 ((null retry-name0) retry-type0) ; Some error ocurred
+                 (t
+                   (setf (mem-ref retry-type 'retry-type) retry-type0
+                         (mem-ref file 'port) file0
+                         (mem-ref file-poly 'msg-type-name) file-poly0)
+                   (lisp-string-to-foreign retry-name0
+                                           retry-name
+                                           (1+ (length retry-name0)))
+                   t)))))))
