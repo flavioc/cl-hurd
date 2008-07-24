@@ -8,8 +8,7 @@
 (defun %io-read-link (node user start out-stream)
   (let ((size (stat-get (stat node) 'size)))
     (cond
-      ((> start size)
-       t) ; Everything is read by now.
+      ((> start size) t) ; Everything is read by now.
       (t
         (when (and (link node)
                    (allow-link-p *translator* node user))
@@ -29,6 +28,8 @@
                  amount
                  out-stream))))
 
+(defconstant +default-chunk-size+ 2048 "Default size when amount is ANY amount.")
+
 (defun %io-read (open-node node user amount offset)
   "Returns an array of bytes read and total, nil otherwise."
   (let* ((current-offset-p (%use-current-offset-p offset))
@@ -36,7 +37,9 @@
                   (file-offset open-node)
                   offset)))
     (with-stream (out-stream (make-in-memory-output-stream))
-      (when (%try-read node user start amount out-stream)
+      (let ((err (%try-read node user start amount out-stream)))
+        (when (eq err nil)
+          (return-from %io-read :not-permitted))
         (let* ((data-read (get-output-stream-sequence out-stream))
                (total-read (length data-read)))
           (cond
@@ -70,7 +73,7 @@
                          node
                          user
                          (if (%is-minus-one-p amount)
-                           nil
+                           +default-chunk-size+
                            amount)
                          offset)
                (when (null total)
@@ -80,12 +83,14 @@
                               (if (null data-read)
                                 t
                                 data-read)))
-               (let ((needs-allocate-p (> total (mem-ref datalen 'msg-type-number))))
+               (let ((needs-allocate-p (>=
+                                         total
+                                         (mem-ref datalen 'msg-type-number))))
                  (when needs-allocate-p
                    ; We need to grow the pointer to copy all the data we have.
                    (setf (mem-ref data :pointer)
                          (mmap (null-pointer)
-                               total
+                               (1+ total)
                                '(:prot-read :prot-write)
                                '(:map-anon)
                                0 0)))
