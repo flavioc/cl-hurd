@@ -10,36 +10,21 @@
 
 (define-callback make-root-node link-translator
                  (underlying-stat)
-  (set-trans underlying-stat nil)
-  (set-active-trans underlying-stat t)
-  (let ((obj (make-instance 'node :stat underlying-stat)))
+  (let ((obj (make-instance 'node
+                            :stat (make-stat underlying-stat
+                                             :type :lnk))))
     (setf (link obj) +target-link+)
-    (warn "stat ~s" (stat obj))
     obj))
 
-(define-callback allow-open-p link-translator (node user flags is-new-p) t)
+(define-callback report-access link-translator
+                 (node user)
+  (when (has-access-p node user 'read)
+    '(:read)))
 
-(define-callback dir-lookup link-translator
-				 (node user filename)
-  nil)
+(defun main ()
+  (run-translator (make-instance 'link-translator)))
 
-(define-callback number-of-entries link-translator
-				 (node user)
-  0)
+(main)
 
-(define-callback get-entries link-translator
-				(node user start end)
-  nil)
-
-(define-callback create-directory link-translator
-                 (node user name mode)
-  nil)
-
-(define-callback remove-directory-entry link-translator
-				 (node user name directory-p)
-  nil)
-
-(defvar *link-translator*
-  (make-instance 'link-translator))
-
-(run-translator *link-translator*)
+;; TODO:
+;; echo /mydir/a/b > foo = linking now to /mydir/a/b
