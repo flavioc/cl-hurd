@@ -57,12 +57,11 @@
          (flag-is-p flags :exec))))
 
 (defun %must-follow-translator-p (node flags)
-  (and (flag-is-p flags :notrans)
+  (and (not (flag-is-p flags :notrans))
        (box-translated-p (box node))))
 
 (defun %fsys-getroot (node flags dotdot user)
   (when (%must-follow-translator-p node flags)
-    (warn "has translator in root!")
     (let* ((*current-node* node)
            (*current-dotdot* dotdot))
       (multiple-value-bind (retry retry-name port)
@@ -70,7 +69,6 @@
                     dotdot flags user
                     #'get-translator-callback
                     (callback fetch-root-callback))
-        ;(warn "fetch-root returned ~s ~s ~s" retry retry-name port)
         (unless (eq retry :no-such-file)
           (return-from %fsys-getroot (values retry port :move-send retry-name))))))
   (when (%unsupported-root-file-p (stat node) flags)
