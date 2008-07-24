@@ -14,6 +14,8 @@
   (when (running-p translator)
     (let* ((under (underlying-node translator))
            (stat (io-stat under)))
+      (set-trans stat nil)
+      (set-root stat t)
       (setf (root translator)
             (make-root-node translator (make-stat stat))))
     (inner-run translator)))
