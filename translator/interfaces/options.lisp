@@ -3,7 +3,8 @@
 
 (defun %get-options-callback (port data data-len)
   (when (port-exists-p port)
-    (let* ((args0 (get-options *translator*))
+    (let* ((opts (options *translator*))
+           (args0 (when opts (get-translator-options opts)))
            (args (cons
                    (name *translator*) args0))
            (len-args (string-list-len args))
