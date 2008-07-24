@@ -2,9 +2,10 @@
 (in-package :hurd-tree-translator)
 
 ;;
-;; This file a special kind of translator:
+;; This file contains a special kind of translator:
 ;; the tree-translator
-;; It exposes without much work the directory structure.
+;; It implements without much hassle the directory callbacks
+;; and maintains a structured directory hierarchy.
 ;;
 
 (defclass tree-translator (translator)
@@ -34,23 +35,27 @@ root node."
 
 (define-callback dir-lookup tree-translator
 				 (node user filename)
-  (declare (ignore user))
-  (cond
-    ((string= filename ".")
-     node)
-    ((string= filename "..")
-     (parent node))
-    (t
-      (get-entry node filename))))
+  (unless (has-access-p node user 'read)
+    (return-from dir-lookup nil))
+  (let ((found (cond
+                ((string= filename ".") node)
+                ((string= filename "..") (parent node))
+                (t (get-entry node filename)))))
+    (when (and found
+               (has-access-p found user 'read))
+      found)))
 
 (define-callback number-of-entries tree-translator
 				 (node user)
-  (declare (ignore user))
-  (dir-size node))
+  (cond
+    ((has-access-p node user 'read)
+     (dir-size node))
+    (t 0)))
 
 (define-callback get-entries tree-translator
 				(node user start end)
-  (declare (ignore user))
+  (unless (has-access-p node user 'read)
+    (return-from get-entries nil))
   (let* ((return-list nil)
          (real-start (max 0 (- start 2))))
     (when (and (<= start 1) (>= end 1))
@@ -66,18 +71,40 @@ root node."
 
 (define-callback create-directory tree-translator
                  (node user name mode)
-  (declare (ignore user))
+  (unless (is-owner-p node user)
+    (return-from create-directory nil))
   (let ((old (get-entry node name)))
     (cond
-      (old
-        nil)
+      (old nil)
       (t
-        (add-entry node (make-instance 'dir-entry
-                                       :stat (make-stat (stat node) :mode mode)
-                                       :parent node)
+        (add-entry node (make-instance
+                          'dir-entry
+                          :stat (make-stat (stat node) :mode mode)
+                          :parent node)
                    name)))))
 
 (define-callback remove-directory-entry tree-translator
 				 (node user name directory-p)
-  (declare (ignore user directory-p))
-  (remove-dir-entry node name))
+  (declare (ignore directory-p))
+  (let ((found (get-entry node name)))
+    (when found
+      (cond
+        ((is-owner-p found user)
+         (remove-dir-entry node name)
+         t)
+        (t nil)))))
+
+(define-callback create-hard-link tree-translator
+                 (dir user file name)
+  (when (is-owner-p dir user)
+    (add-entry dir file name)
+    t))
+
+(define-callback file-rename tree-translator
+                 (user old-dir old-name new-dir new-name)
+  (let ((old-entry (get-entry old-dir old-name)))
+    (when (and (is-owner-p old-entry user)
+               (is-owner-p new-dir user)
+               (has-access-p new-dir user 'write))
+      (rename-dir-entry old-dir old-name new-dir new-name)
+      t)))
