@@ -116,6 +116,11 @@
            :open-modes
            :set-types
            :set-spare
+           :set-owner
+           :set-group
+           :set-others
+           :set-unknown
+           :copy-perms
            :gid-t
            :+gid-t-size+
            :uid-t
@@ -360,7 +365,6 @@
            :+hurd-fifo+
            :+hurd-ifsock+
            :file-name-lookup
-           :touch
            :io-stat
            :io-server-version
            :make-iouser
@@ -505,6 +509,7 @@
            :add-entry
            :get-entry
            :rename-dir-entry
+           :remove-dir-entry
            :setup-entry))
 
 (defpackage :cl-hurd.translator.examples
