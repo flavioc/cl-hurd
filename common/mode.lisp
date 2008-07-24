@@ -30,21 +30,25 @@
 (defconstant +irusr+ #o0400 "Read for owner")
 (defconstant +iwusr+ #o0200 "Write for owner")
 (defconstant +ixusr+ #o0100 "Execute for owner")
+(defconstant +iusr+  #o0700 "Bits for owner")
 
 ;; group
 (defconstant +irgrp+ (ash +irusr+ -3) "Read for group")
 (defconstant +iwgrp+ (ash +iwusr+ -3) "Write for group")
 (defconstant +ixgrp+ (ash +ixusr+ -3) "Execute for group")
+(defconstant +igrp+ (ash +iusr+ -3) "Bits for group")
 
 ;; others
 (defconstant +iroth+ (ash +irusr+ -6) "Read for others")
 (defconstant +iwoth+ (ash +iwusr+ -6) "Write for others")
 (defconstant +ixoth+ (ash +ixusr+ -6) "Execute for others")
+(defconstant +ioth+ (ash +iusr+ -6) "Bits for others")
 
 ;; unknown
 (defconstant +irunk+ (ash +irusr+ 12) "Read for unknown")
 (defconstant +iwunk+ (ash +iwusr+ 12) "Write for unknown")
 (defconstant +ixunk+ (ash +ixusr+ 12) "Execute for unknown")
+(defconstant +iunknown+ #o000007000000 "Mask for unknown permissions")
 
 ;;
 ;; These are read-only bits.
@@ -68,10 +72,17 @@
 
 (defconstant +iuseunk+ #o000000400000 "Use unknown bits")
 
-(defconstant +iunknown+ #o000007000000 "Mask for unknown permissions")
+;; All permission bits.
+(defconstant +permission+
+  (chained-bit-op boole-ior
+                  +iusr+
+                  +igrp+
+                  +ioth+
+                  +iunknown+
+                  +iuseunk+))
 
 ;; Unused bits.
-(defconstant +ispare+ (boole boole-andc2
+(defconstant +ispare+ (boole boole-xor
                              #xffffffff
                              (chained-bit-op boole-ior
                                              +ifmt+
@@ -80,6 +91,7 @@
                                              +immap0+
                                              +iuseunk+
                                              +iunknown+
+                                             +permission+
                                              #o7777)))
 
 ;; Define generic functions for accessing and setfing the mode-bits
@@ -114,6 +126,10 @@
   "Translate a foreign bitfield to a mode object."
   (make-instance 'mode :mode-bits value))
 
+(defun %disable-bits (val bits) (boole boole-andc2 val bits))
+(defun %only-bits (val bits) (boole boole-and val bits))
+(defun %enable-bits (val bits) (boole boole-ior val bits))
+
 (defmacro define-mode-meth (name extra-args doc &body body)
   "Define a new base-mode method with arguments the base-mode object and extra-args.
 'val' is accessible, representing the mode bitfield."
@@ -126,7 +142,7 @@
   "Defines a new is type method."
   `(define-mode-meth ,name nil
      ,doc
-     (eq (boole boole-and val +ifmt+) ,bits)))
+     (eq (%only-bits val +ifmt+) ,bits)))
 
 (define-is-type-meth is-dir-p +ifdir+ "Is a directory?")
 (define-is-type-meth is-chr-p +ifchr+ "Is a character device?")
@@ -167,8 +183,8 @@
   "Changes type of mode. Possible values for new-type are:
 dir, reg, chr, blk, lnk, sock."
   (setf (mode-bits mode)
-        (boole boole-ior
-               (boole boole-andc2 val +ifmt+) ; disable all the other type bits
+        (%enable-bits
+               (%disable-bits val +ifmt+)
                (%get-type-bits new-type)))
   new-type)
 
@@ -238,20 +254,20 @@ You can also ignore user-type and the bits will be for all the user types.
         (bits (%get-perm-bits perm-type user-type useunk-p)))
     (and (plusp bits)
          (eq bits
-             (boole boole-and val bits)))))
+             (%only-bits val bits)))))
 
 (define-mode-meth set-perms (perm-type &optional user-type)
   "Activates permission bits for perm-type/user-type."
   (setf (mode-bits mode)
-	(boole boole-ior
-         val
-         (%get-perm-bits perm-type user-type t)))
+        (%enable-bits
+          val
+          (%get-perm-bits perm-type user-type t)))
   t)
 
 (define-mode-meth clear-perms (perm-type &optional user-type)
   "Clears permission bits for perm-type/user-type."
   (setf (mode-bits mode)
-        (boole boole-andc2
+        (%disable-bits
                val
                (%get-perm-bits perm-type user-type t)))
   t)
@@ -262,11 +278,19 @@ You can also ignore user-type and the bits will be for all the user types.
     (set-perms mode perm-type user-type)
     (clear-perms mode perm-type user-type)))
 
+(defmethod copy-perms ((mode1 base-mode) (mode2 base-mode))
+  "Copy all the permission bits from mode1 to mode2."
+  (setf (mode-bits mode2)
+        (%enable-bits
+               (%disable-bits (mode-bits mode2) +permission+)
+               (%only-bits (mode-bits mode1) +permission+)))
+  mode2)
+
 (defmacro define-mode-query-meth (name bits doc)
   "Defines a new predicate based on 'bits'."
   `(define-mode-meth ,name nil
      ,doc
-     (eq ,bits (boole boole-and val ,bits))))
+     (= ,bits (%only-bits val ,bits))))
 
 (define-mode-query-meth has-passive-trans-p +iptrans+ "Has a passive translator?")
 (define-mode-query-meth has-active-trans-p +iatrans+ "Has an active translator?")
@@ -284,8 +308,8 @@ You can also ignore user-type and the bits will be for all the user types.
      ,doc
      (setf (mode-bits mode)
            (if yes
-             (boole boole-ior val ,bits)
-             (boole boole-andc2 val ,bits)))
+             (%enable-bits val ,bits)
+             (%disable-bits val ,bits)))
      t))
 
 (define-mode-switcher-meth set-uid +isuid+ "Sets uid bit")
@@ -300,6 +324,10 @@ You can also ignore user-type and the bits will be for all the user types.
 (define-mode-switcher-meth set-root +iroot+ "Sets root bit")
 (define-mode-switcher-meth set-types +ifmt+ "Sets all the type bits")
 (define-mode-switcher-meth set-spare +ispare+ "Sets all the spare bits")
+(define-mode-switcher-meth set-owner +iusr+ "Set all the owner perm bits")
+(define-mode-switcher-meth set-group +igrp+ "Set all the group perm bits")
+(define-mode-switcher-meth set-others +ioth+ "Set all the others perm bits")
+(define-mode-switcher-meth set-unknown +iunknown+ "Set all the unknown perm bits")
 
 (defun make-mode-clone (bits)
   "Makes a mode object based on 'bits' bitfield."
