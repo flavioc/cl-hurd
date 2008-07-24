@@ -7,7 +7,8 @@
 
 (defun valid-id-p (id)
   "Checks if the ID (uid or gid) is valid."
-  (and (numberp id)
+  (and id
+       (numberp id)
        (>= id 0)))
 
 (defconstant +uid-t-size+ (foreign-type-size 'uid-t))
