@@ -32,7 +32,7 @@
         (setf (mem-ref dataptr :pointer) data)
         (with-foreign-pointer (amount (foreign-type-size :int))
           (select-error
-			(%dir-readdir dir data-ptr data-cnt
+			(%dir-readdir dir dataptr data-cnt
 						  entry nentries bufsiz amount)
 			(let ((ptr (mem-ref dataptr :pointer))
 				  (total (mem-ref data-cnt 'msg-type-number)))
