@@ -189,7 +189,10 @@ Return T when this is possible, nil otherwise."
   "Indicates that translator options have changed. You don't need to implement this if you implement 'set-options'.")
 
 (%add-callback create-symlink (node user target)
-  "Turn 'node' into a symlink to 'target'.")
+  "Turn 'node' into a symlink to 'target'."
+  (when (is-owner-p node user)
+    (setf (link node) target)
+    t))
 
 (%add-callback allow-link-p (node user)
   "Return T to allow reading from the symlink 'node' to 'user'."
