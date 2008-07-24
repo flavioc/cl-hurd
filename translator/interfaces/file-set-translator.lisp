@@ -69,13 +69,11 @@
                  (return-from set-translator :permission-denied))
                (when (and (box-active-p (box node))
                           (not (flag-is-p active-flags :excl)))
-                 (let* ((control (box-fetch-control (box node)))
-                        (away-err (fsys-goaway control
-                                               killtrans-flags)))
-                   (unless (or (eq t away-err)
-                               (eq :server-died away-err)
-                               (eq :send-invalid-dest away-err))
-                     (return-from set-translator away-err)))))
+                 (let ((control (box-fetch-control (box node))))
+                   (multiple-value-bind (ret err)
+                     (fsys-goaway control killtrans-flags)
+                     (when err
+                       (return-from set-translator err))))))
              (when (and (flag-is-p passive-flags '(:set :excl))
                         (box-passive-p (box node)))
                (return-from set-translator :resource-busy))
