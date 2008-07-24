@@ -30,10 +30,13 @@
                                 (total (mem-ref len 'msg-type-number)))
                             (with-cleanup (unless (pointer-eq new-ptr data)
                                             (munmap new-ptr total))
-                              (let ((ret (make-array total :fill-pointer 0
-                                                     :element-type '(unsigned-byte 8))))
-                                (loop for i from 0 below total
-                                      do (vector-push
-                                           (mem-aref new-ptr :unsigned-char i)
-                                           ret))
-                                ret))))))))))
+                              (cond
+                                ((= total 0) nil)
+                                (t
+                                  (let ((ret (make-array total :fill-pointer 0
+                                                         :element-type '(unsigned-byte 8))))
+                                    (loop for i from 0 below total
+                                          do (vector-push
+                                               (mem-aref new-ptr :unsigned-char i)
+                                               ret))
+                                    ret))))))))))))
