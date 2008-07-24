@@ -409,6 +409,7 @@
            :fsys-goaway-flags
            :fsys-goaway-reply
            :bucket-count-type
+           :bucket-count
            :bucket-iterate
            :bucket-find
            :remove-port
@@ -429,6 +430,16 @@
            :transbox
            :+honored-open-modes+
            :+honored-get-modes+
+           :make-translator-options
+           :get-translator-options
+           :has-translator-option-p
+           :get-translator-option
+           :set-translator-options
+           :get-foreign-options
+           :translator-options
+           :add-option
+           :iterate-options
+           :fsys-set-options
            ))
 
 (defpackage :cl-hurd.translator
@@ -472,14 +483,8 @@
            :create-hard-link
            :block-read
            :block-write
-           :get-options
            :set-options
            :options-changed
-           :make-translator-options
-           :get-translator-options
-           :has-translator-option-p
-           :get-translator-option
-           :set-translator-options
            :create-symlink
            :link
            :allow-link-p
