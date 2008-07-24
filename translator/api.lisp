@@ -36,18 +36,50 @@ please see common/pathconf.lisp."
       32)))
 
 (%add-callback allow-open-p (node user flags is-new-p)
-  "'user' wants to open 'node' with flags 'flags', 'is-new-p' indicates that this is a newly created node. This should return nil when we don't wanna open the node.")
+  "'user' wants to open 'node' with flags 'flags', 'is-new-p' indicates that this is a newly created node. This should return nil when we don't wanna open the node."
+  (declare (ignore is-new-p))
+  (when (flag-is-p flags :read)
+    (unless (has-access-p node user 'read)
+      (return-from allow-open-p nil)))
+  (when (flag-is-p flags :write)
+    (unless (has-access-p node user 'write)
+      (return-from allow-open-p nil)))
+  (when (flag-is-p flags :exec)
+    (unless (has-access-p node user 'exec)
+      (return-from allow-open-p nil)))
+  t)
 
 (%add-callback file-chmod (node user mode)
-  "The user is attempting to 'chmod' node with the mode permission bits.")
+  "The user is attempting to 'chmod' node with the mode permission bits."
+  (cond
+    ((is-owner-p node user)
+     (copy-perms mode (stat node))
+     t)
+    (t nil)))
 
 (%add-callback file-chown (node user uid gid)
-  "The user is attempting to 'chown' node with uid and gid.")
+  "The user is attempting to 'chown' node with uid and gid."
+  (cond
+    ((is-owner-p node user)
+     (when (valid-id-p uid)
+       (setf (stat-get (stat node) 'uid) uid))
+     (when (valid-id-p gid)
+       (setf (stat-get (stat node) 'gid) gid))
+     t)
+    (t nil)))
 
 (%add-callback file-utimes (node user atime mtime)
   "The user is attempting to change the access and modification time of the node.
 'atime' or 'mtime' can be +now-time-value+.
-Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both cases.")
+Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both cases."
+  (cond
+    ((is-owner-p node user)
+     (when atime
+       (setf (stat-get (stat node) 'atime) atime))
+     (when mtime
+       (setf (stat-get (stat node) 'mtime) mtime))
+     t)
+    (t nil)))
 
 (%add-callback dir-lookup (node user filename)
   "This must return the node with the name 'filename' in the directory 'node', nil when it is not found.")
@@ -64,7 +96,9 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
   "This sould return a list of dirent objects representing the contents of the directory 'node' from 'start' to 'end' (index is zero based).")
 
 (%add-callback allow-author-change-p (node user author)
-  "User wants to change the file's author, return t if it is ok, nil otherwise.")
+  "User wants to change the file's author, return t if it is ok, nil otherwise."
+  (declare (ignore author))
+  (is-owner-p node user))
 
 (%add-callback create-directory (node user name mode)
   "The user wants to create a directory in the directory 'node' with 'name' and 'mode', return nil if don't permitted.")
@@ -76,7 +110,9 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
   "User wants to read 'amount' bytes starting at 'start'. These bytes should be written to the stream 'stream'. Return t in case of success, nil otherwise.")
 
 (%add-callback file-sync (node user wait-p omit-metadata-p)
-  "User wants to sync the contents in node. 'wait-p' indicates the user wants to wait. 'omit-metadata-p' indicates we must omit the update of the file metadata (like stat information).")
+  "User wants to sync the contents in node. 'wait-p' indicates the user wants to wait. 'omit-metadata-p' indicates we must omit the update of the file metadata (like stat information)."
+  (declare (ignore translator node user wait-p omit-metadata-p))
+  t)
 
 (%add-callback file-syncfs (user wait-p do-children-p)
   "User wants to sync the entire filesystem. 'wait-p' indicates the user wants to wait for it. 'do-children-p' indicates we should also sync the children nodes."
@@ -94,11 +130,21 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
 
 (%add-callback report-access (node user)
   "This should return a list of permitted access modes for 'user'.Permitted modes are:
-:read :write :exec.")
+:read :write :exec."
+  (let ((ret))
+    (when (has-access-p node user 'read)
+      (push :read ret))
+    (when (has-access-p node user 'write)
+      (push :write ret))
+    (when (has-access-p node user 'exec)
+      (push :exec ret))
+    ret))
 
 (%add-callback refresh-statfs (user)
   "The statfs translator field must be updated for 'user'.
-Return t for success, nil for unsupported operation.")
+Return t for success, nil for unsupported operation."
+  (declare (ignore translator user))
+  t)
 
 (%add-callback file-change-size (node user new-size)
   "The user wants to change node size to 'new-size'.
@@ -147,8 +193,7 @@ Return T when this is possible, nil otherwise."
 
 (%add-callback allow-link-p (node user)
   "Return T to allow reading from the symlink 'node' to 'user'."
-  (declare (ignore translator node user))
-  t)
+  (has-access-p node user 'read))
 
 (%add-callback create-block (node user device)
   "Turn 'node' into a block device with device-id 'device'.")
