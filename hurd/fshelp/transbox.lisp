@@ -52,11 +52,10 @@
 (defmethod box-set-active ((box transbox) port excl-p)
   "Set a new active port on a box."
   (when (and excl-p
-             (active box))
-    (warn "box: excl and active! refs ~s" (port-get-refs (active box) :right-dead-name))
+             (active box)
+             (zerop (port-get-refs (active box) :right-dead-name)))
     ; See if the active name is dead
-    (if (zerop (port-get-refs (active box) :right-dead-name))
-      (return-from box-set-active nil)))
+    (return-from box-set-active nil))
   (when (active box)
     (warn "box: deallocate old active")
     (port-deallocate (active box)))
