@@ -114,12 +114,12 @@
 (define-callback options-changed zip-translator
                  ()
   (warn "Options changed:")
-  (if (has-translator-option-p (options *translator*) "readonly")
+  (if (has-translator-option-p (options *translator*) :readonly)
     (warn "READONLY activated"))
-  (if (has-translator-option-p (options *translator*) "coolness-level")
+  (if (has-translator-option-p (options *translator*) :coolness-level)
     (warn "COOLNESS LEVEL ~s"
           (get-translator-option (options *translator*)
-                                 "coolness-level")))
+                                 :coolness-level)))
   t)
 
 (define-callback create-symlink zip-translator
@@ -253,7 +253,7 @@
 (defun main ()
   (let ((trans (make-instance 'zip-translator
                               :options (make-translator-options
-                                         '(("coolness-level" 20) "fast")))))
+                                         '((:coolness-level 20) :fast)))))
     (run-translator trans)))
 
 (main)
