@@ -8,4 +8,4 @@
 
 (defun file-chauthor (file new)
   (declare (type fixnum file new))
-  (select (%file-chautor file new)))
+  (select-error (%file-chauthor file new)))
