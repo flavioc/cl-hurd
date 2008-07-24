@@ -144,6 +144,7 @@
                                      (:file "functions"
                                             :depends-on ("types"))
                                      (:file "macros")
+                                     (:file "translator-options")
                                      (:module io
                                               :components ((:file "server-version")
                                                            (:file "open-modes")
@@ -190,7 +191,7 @@
                                                            (:file "dir-mkdir")
                                                            (:file "dir-link")
                                                            (:file "storage"))
-                                              :depends-on ("retry" "fsys"))
+                                              :depends-on ("retry" "fsys" "translator-options"))
                                      (:module iohelp
                                               :components ((:file "utils")
                                                            (:file "iouser"
@@ -212,8 +213,11 @@
                                                            (:file "goaway-reply")
                                                            (:file "goaway"
                                                                   :depends-on ("goaway-flags"))
+                                                           (:file "set-options")
+                                                           (:file "syncfs")
+                                                           (:file "get-options")
                                                            (:file "getroot"))
-                                              :depends-on ("iohelp" "retry"))
+                                              :depends-on ("iohelp" "retry" "translator-options"))
                                      (:module ports
                                               :components ((:file "port")
                                                            (:file "bucket"
@@ -266,13 +270,11 @@
                                      (:file "protid"
                                             :depends-on ("open"
                                                          "globals"))
-                                     (:file "options")
                                      (:file "class"
                                             :depends-on ("debug"
                                                          "node"
                                                          "open"
-                                                         "protid"
-                                                         "options"))
+                                                         "protid"))
                                      (:file "api"
                                             :depends-on ("class"))
                                      (:file "macros")
