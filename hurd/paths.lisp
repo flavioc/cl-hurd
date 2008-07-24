@@ -3,7 +3,7 @@
 
 (defun %concat-downcase (path str)
   "Concatenates path and str and then returns that downcased."
-  (string-downcase (concatenate 'string path str)))
+  (string-downcase (concatenate-string path str)))
 
 (defconstant +servers+ "/servers/" "Servers path.")
 
