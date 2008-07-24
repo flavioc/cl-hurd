@@ -7,12 +7,6 @@ Definition can be found at mach/time_value.h"
   (seconds :int)
   (microseconds :int))
 
-(define-foreign-type time-value-type ()
-  ()
-  (:documentation "CFFI type for thye time-value-struct.")
-  (:actual-type :pointer)
-  (:simple-parser time-value-t))
-
 (defclass time-value ()
   ((ptr :reader ptr
         :initarg :ptr
@@ -29,6 +23,25 @@ Definition can be found at mach/time_value.h"
       (tg:finalize obj (lambda () (foreign-free ptr)))
       obj)))
 
+(defconstant +now-time-value+ (make-time-value))
+
+(define-foreign-type time-value-type ()
+  ()
+  (:documentation "CFFI type for thye time-value-struct.")
+  (:actual-type :pointer)
+  (:simple-parser time-value-t))
+
+(defmethod translate-from-foreign (value (type time-value-type))
+  "Translate a time-value pointer to a time-value object."
+  (if (= -1 (foreign-slot-value value 'time-value-struct
+                                'microseconds))
+    +now-time-value+
+    (make-instance 'time-value :ptr value)))
+
+(defmethod translate-to-foreign (value (type time-value-type))
+  "Translate a time-value object to a foreign time-value pointer."
+  (ptr value))
+
 (defmethod seconds ((time time-value))
   (let ((ret (foreign-slot-value (ptr time)
                                  'time-value-struct
@@ -36,7 +49,6 @@ Definition can be found at mach/time_value.h"
     (if (= -1 ret)
       (maptime-seconds *mapped-time*)
       ret)))
-
 
 (defmethod microseconds ((time time-value))
   (let ((ret (foreign-slot-value (ptr time)
@@ -52,23 +64,10 @@ Definition can be found at mach/time_value.h"
        (= (microseconds time1)
           (microseconds time2))))
 
-(defconstant +now-time-value+ (make-time-value))
-
 (defmethod print-object ((time time-value) stream)
   (if (time-value-eq time +now-time-value+)
     (format stream "#<time-value NOW>")
     (format stream "#<time-value seconds=~s microseconds=~s"
             (seconds time)
             (microseconds time))))
-
-(defmethod translate-from-foreign (value (type time-value-type))
-  "Translate a time-value pointer to a time-value object."
-  (if (= -1 (foreign-slot-value value 'time-value-struct
-                                'microseconds))
-    +now-time-value+
-    (make-instance 'time-value :ptr value)))
-
-(defmethod translate-to-foreign (value (type time-value-type))
-  "Translate a time-value object to a foreign time-value pointer."
-  (ptr value))
 

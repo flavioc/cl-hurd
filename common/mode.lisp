@@ -98,6 +98,22 @@
               :initarg :mode-bits))
   (:documentation "Mode class for saving a mode_t bitfield"))
 
+(define-foreign-type mode-type ()
+  ()
+  (:documentation "CFFI mode type.")
+  (:actual-type :unsigned-int)
+  (:simple-parser mode-t))
+
+(defmethod translate-to-foreign (mode (type mode-type))
+  "Translate a mode object to a foreign bit field."
+  (if (null mode)
+    0
+    (mode-bits mode)))
+
+(defmethod translate-from-foreign (value (type mode-type))
+  "Translate a foreign bitfield to a mode object."
+  (make-instance 'mode :mode-bits value))
+
 (defmacro define-mode-meth (name extra-args doc &body body)
   "Define a new base-mode method with arguments the base-mode object and extra-args.
 'val' is accessible, representing the mode bitfield."
@@ -366,19 +382,3 @@ You can also ignore user-type and the bits will be for all the user types.
   (if (is-useunk-p mode)
     (format stream " useunk"))
   (format stream ">"))
-
-(define-foreign-type mode-type ()
-  ()
-  (:documentation "CFFI mode type.")
-  (:actual-type :unsigned-int)
-  (:simple-parser mode-t))
-
-(defmethod translate-to-foreign (mode (type mode-type))
-  "Translate a mode object to a foreign bit field."
-  (if (null mode)
-    0
-    (mode-bits mode)))
-
-(defmethod translate-from-foreign (value (type mode-type))
-  "Translate a foreign bitfield to a mode object."
-  (make-instance 'mode :mode-bits value))
