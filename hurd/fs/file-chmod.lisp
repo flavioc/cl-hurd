@@ -9,5 +9,4 @@
 (defun file-chmod (file new-mode)
   (declare (type fixnum file)
            (type mode new-mode))
-  (let ((err (%file-chmod file new-mode)))
-    (select-error err t)))
+  (select-error (%file-chmod file new-mode)))

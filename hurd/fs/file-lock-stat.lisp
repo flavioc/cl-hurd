@@ -11,8 +11,7 @@
   (declare (type fixnum file))
   (with-foreign-pointer (mystatus (foreign-type-size 'lock-flags))
     (with-foreign-pointer (otherstatus (foreign-type-size 'lock-flags))
-      (let ((err (%file-lock-stat file mystatus otherstatus)))
-        (select-error err
-                      (list
-                        (mem-ref mystatus 'lock-flags)
-                        (mem-ref otherstatus 'lock-flags)))))))
+      (select-error (%file-lock-stat file mystatus otherstatus)
+					(list
+					  (mem-ref mystatus 'lock-flags)
+					  (mem-ref otherstatus 'lock-flags))))))

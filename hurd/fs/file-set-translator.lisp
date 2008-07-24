@@ -22,15 +22,15 @@
          (total (sum-list ls-len)))
     (with-foreign-pointer (ptr total)
       (list-to-foreign-string-zero-separated path ptr ls-len)
-      (let ((err (%file-set-translator file
-                                       flags
-                                       nil
-                                       oldtrans-flags
-                                       ptr
-                                       total
-                                       nil
-                                       :make-send))) ; Can be anything.
-        (select-error err)))))
+        (select-error (%file-set-translator file
+											flags
+											nil
+											oldtrans-flags
+											ptr
+											total
+											nil
+											; Can be anything.
+											:make-send)))))
 
 (defun file-remove-translator (file &optional (flags '(:set)))
   "Remove an active translator from 'file'."

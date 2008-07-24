@@ -11,7 +11,6 @@
 (defun file-check-access (file)
   (declare (type fixnum file))
   (with-foreign-pointer (allowed (foreign-type-size 'open-flags))
-    (let ((err (%file-check-access file allowed)))
-      (select-error err
-                    (only-flags (mem-ref allowed 'open-flags)
-                                +allowed-file-check-access-flags+)))))
+    (select-error (%file-check-access file allowed)
+				  (only-flags (mem-ref allowed 'open-flags)
+							  +allowed-file-check-access-flags+))))

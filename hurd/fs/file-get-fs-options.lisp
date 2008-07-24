@@ -12,10 +12,9 @@
   (with-foreign-pointer (options (foreign-type-size :pointer))
     (with-foreign-pointer (options-len (foreign-type-size 'msg-type-number))
       (setf (mem-ref options-len 'msg-type-number) 0)
-      (let ((err (%file-get-fs-options file
-                                       options
-                                       options-len)))
-        (select-error err
-                      (foreign-string-zero-separated-to-list
+        (select-error (%file-get-fs-options file
+											options
+											options-len)
+					  (foreign-string-zero-separated-to-list
                         (mem-ref options :pointer)
-                        (mem-ref options-len 'msg-type-number)))))))
+                        (mem-ref options-len 'msg-type-number))))))

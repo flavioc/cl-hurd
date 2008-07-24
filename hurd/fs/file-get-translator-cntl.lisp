@@ -8,6 +8,5 @@
 
 (defun file-get-translator-cntl (file)
   (with-foreign-pointer (control (foreign-type-size 'port))
-    (let ((err (%file-get-translator-cntl file control)))
-      (select-error err
-                    (mem-ref control 'port)))))
+    (select-error (%file-get-translator-cntl file control)
+				  (mem-ref control 'port))))

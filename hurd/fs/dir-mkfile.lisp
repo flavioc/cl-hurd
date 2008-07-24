@@ -13,7 +13,6 @@
            (type list flags)
            (type mode mode))
   (with-foreign-pointer (newnode (foreign-type-size 'port))
-    (let ((err (%dir-mkfile dir flags mode newnode)))
-      (select-error err
-                    (mem-ref newnode 'port)))))
+    (select-error (%dir-mkfile dir flags mode newnode)
+				  (mem-ref newnode 'port))))
 

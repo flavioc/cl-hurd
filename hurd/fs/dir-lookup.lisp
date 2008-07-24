@@ -19,11 +19,10 @@
   (with-foreign-pointer (do-retry (foreign-type-size 'retry-type))
     (with-foreign-pointer (retry-name 1024) ; Same as libc's hurdlookup.c
       (with-foreign-pointer (result (foreign-type-size 'port))
-        (let ((err (%dir-lookup dir file-name flags mode
-                                do-retry retry-name result)))
-          (select-error err
-                        (values
-                          (mem-ref do-retry 'retry-type)
-                          (mem-ref retry-name :string)
-                          (mem-ref result 'port))))))))
+        (select-error (%dir-lookup dir file-name flags mode
+								   do-retry retry-name result)
+					  (values
+						(mem-ref do-retry 'retry-type)
+						(mem-ref retry-name :string)
+						(mem-ref result 'port)))))))
 

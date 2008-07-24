@@ -15,6 +15,5 @@
     (setf atime +now-time-value+))
   (when (eq mtime :now)
     (setf mtime +now-time-value+))
-  (let ((err (%file-utimes file atime mtime)))
-    (select-error err t)))
+  (select-error (%file-utimes file atime mtime)))
 

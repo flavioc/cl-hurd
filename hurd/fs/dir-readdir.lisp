@@ -31,13 +31,12 @@
       (with-foreign-pointer (dataptr (foreign-type-size :pointer))
         (setf (mem-ref dataptr :pointer) data)
         (with-foreign-pointer (amount (foreign-type-size :int))
-          (let ((err (%dir-readdir dir dataptr
-                                   data-cnt entry nentries bufsiz amount)))
-            (select-error
-              err
-              (let ((ptr (mem-ref dataptr :pointer))
-                    (total (mem-ref data-cnt 'msg-type-number)))
-                (with-cleanup (unless (pointer-eq ptr data)
-                                (munmap ptr total))
-                  (%get-entries ptr (mem-ref amount :int)))))))))))
+          (select-error
+			(%dir-readdir dir data-ptr data-cnt
+						  entry nentries bufsiz amount)
+			(let ((ptr (mem-ref dataptr :pointer))
+				  (total (mem-ref data-cnt 'msg-type-number)))
+			  (with-cleanup (unless (pointer-eq ptr data)
+							  (munmap ptr total))
+			    (%get-entries ptr (mem-ref amount :int))))))))))
 

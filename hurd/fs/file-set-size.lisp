@@ -9,6 +9,5 @@
 (defun file-set-size (file new-size)
   (declare (type fixnum file)
            (type integer new-size)) ; new-size may be bigger than fixnum (long long)
-  (let ((err (%file-set-size file new-size)))
-    (select-error err t)))
+  (select-error (%file-set-size file new-size)))
 

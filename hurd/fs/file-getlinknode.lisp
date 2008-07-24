@@ -9,6 +9,5 @@
 (defun file-getlinknode (file)
   (declare (type fixnum file))
   (with-foreign-pointer (linknode (foreign-type-size 'port))
-    (let ((err (%file-getlinknode file linknode)))
-      (select-error err
-                    (mem-ref linknode 'port)))))
+    (select-error (%file-getlinknode file linknode)
+				  (mem-ref linknode 'port))))

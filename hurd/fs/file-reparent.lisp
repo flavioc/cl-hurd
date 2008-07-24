@@ -10,6 +10,5 @@
 (defun file-reparent (file parent)
   (declare (type fixnum file parent))
   (with-foreign-pointer (new-file (foreign-type-size 'port))
-    (let ((err (%file-reparent file parent new-file)))
-      (select-error err
-                    (mem-ref new-file 'port)))))
+    (select-error (%file-reparent file parent new-file)
+				  (mem-ref new-file 'port))))

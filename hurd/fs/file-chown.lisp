@@ -9,5 +9,4 @@
 
 (defun file-chown (file new-owner new-group)
   (declare (type fixnum file new-owner new-group))
-  (let ((err (%file-chown file new-owner new-group)))
-    (select-error err t)))
+  (select-error (%file-chown file new-owner new-group)))
