@@ -243,9 +243,6 @@
                                                            (:file "checkdirmod")
                                                            (:file "isowner")
                                                            (:file "iscontroller")
-                                                           (:file "fshelp")
-                                                           (:file "touch"
-                                                                  :depends-on ("fshelp"))
                                                            (:file "transbox")
                                                            (:file "fetch-root"
                                                                   :depends-on ("transbox"))
@@ -366,7 +363,8 @@
                         :depends-on ("packages" "paths" "common" "mach" "hurd" "translator"))
                (:module examples
                         :components (
-                                     (:file "zip")
-                                     ;(:file "link")
+                                     ;(:file "zip")
+                                     (:file "link")
+                                     ;(:file "tmp")
                                      )
                         :depends-on ("packages" "paths" "common" "mach" "hurd" "translator" "tree-translator"))))
