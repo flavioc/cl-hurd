@@ -17,6 +17,7 @@
   ((name :initarg :name
          :accessor name)
    (data-sequence :initarg :data
+                  :initform (make-array 0)
                   :accessor data
                   :documentation "The zip data associated with this file."))
   (:documentation "Extends entry with a zip-entry."))
@@ -32,83 +33,27 @@
 (defmethod print-object ((entry zip-entry) stream)
   (format stream "#<zip-entry name=~s>" (name entry)))
 
-(define-callback allow-open-p zip-translator (node user flags is-new-p)
-  (declare (ignore node user flags is-new-p))
-  t)
-
 (define-callback file-read zip-translator
                  (node user start amount stream)
   (declare (ignore user))
   (let* ((size (stat-get (stat node) 'size))
          (size-res (- size start)))
     (cond
-      ((not (plusp size-res))
-       nil)
+      ((not (plusp size-res)) t)
       (t
-        (let* ((total (if (null amount)
-                        size-res
-                        (min size-res amount)))
+        (let* ((total (min size-res amount))
                (end (+ start total)))
         (write-sequence (subseq (data node) start end)
                         stream)
-        ;(if (eq end size)
-        ;  (write-byte #xA0 stream))
         t)))))
 
 (define-callback report-access zip-translator
                  (node user)
-  (declare (ignore node user))
-  '(:read))
+  (when (has-access-p node user 'read)
+    '(:read)))
 
-(define-callback refresh-statfs zip-translator
-                 (user)
-  (declare (ignore user))
-  (setf (statfs-get (get-statfs *translator*) 'bfree) 1)
-  t)
-
-(define-callback file-change-size zip-translator
-                 (node user new-size)
-  (warn "user ~s wants to change ~s to size ~s"
-        user node new-size)
-  nil)
-
-(define-callback shutdown zip-translator
-                 ()
+(define-callback shutdown zip-translator ()
   (warn "Going down...~%")
-  t)
-
-(define-callback file-rename zip-translator
-                 (user old-dir old-name new-dir new-name)
-  (declare (ignore user))
-  (rename-dir-entry old-dir old-name new-dir new-name)
-  t)
-
-(define-callback create-file zip-translator
-                 (node user filename mode)
-  (declare (ignore user))
-  (warn "Create file ~s in ~s" filename node)
-  (let ((entry (make-instance 'zip-entry
-                              :stat (make-stat (stat node)
-                                               :mode mode)
-                              :parent node
-                              :name filename
-                              :data (make-array 0))))
-    (setup-entry entry)
-    (add-entry node entry filename)
-    entry))
-
-(define-callback create-anonymous-file zip-translator
-                 (node user mode)
-  (declare (ignore user))
-  (make-instance 'zip-entry
-                 :stat (make-stat (stat node) :mode mode)
-                 :parent node
-                 :data (make-array 0)))
-
-(define-callback create-hard-link zip-translator
-                 (dir user file name)
-  (declare (ignore user))
-  (add-entry dir file name)
   t)
 
 (define-callback options-changed zip-translator
@@ -122,16 +67,10 @@
                                  :coolness-level)))
   t)
 
-(define-callback create-symlink zip-translator
-                 (node user target)
-  (declare (ignore user))
-  (setf (link node) target)
-  t)
-
+"
 (define-callback create-block zip-translator
                  (node user device)
   (declare (ignore user))
-  (warn "create-block")
   (set-type (stat node) :blk)
   (setf (stat-get (stat node) 'rdev) device)
   t)
@@ -139,7 +78,6 @@
 (define-callback create-character zip-translator
                  (node user device)
   (declare (ignore user))
-  (warn "create character.")
   (set-type (stat node) :chr)
   (setf (stat-get (stat node) 'rdev) device)
   t)
@@ -147,16 +85,15 @@
 (define-callback create-fifo zip-translator
                  (node user)
   (declare (ignore user))
-  (warn "create fifo.")
   (set-type (stat node) :fifo)
   t)
 
 (define-callback create-socket zip-translator
                  (node user)
   (declare (ignore user))
-  (warn "create socket.")
   (set-type (stat node) :sock)
   t)
+"
 
 (defun %create-zip-file (parent entry)
   "Create a new zip entry."
@@ -175,7 +112,6 @@
                               :stat stat
                               :parent parent
                               :data seq)))
-      (setup-entry obj)
       obj)))
 
 (defun %create-zip-dir (parent name)
@@ -214,46 +150,9 @@
   (do-zipfile-entries (name entry *zip*)
                       (add-zip-file node (split-path name) entry)))
 
-
-;; to be removed
-;;
-(define-callback file-utimes zip-translator
-				 (node user atime mtime)
-  (declare (ignore user))
-  (when atime
-    (setf (stat-get (stat node) 'atime) atime))
-  (when mtime
-    (setf (stat-get (stat node) 'mtime) mtime))
-  t)
-
-(define-callback file-chmod zip-translator
-				 (node user mode)
-  (declare (ignore user))
-  (set-perms-if (stat node)
-                (has-perms-p mode 'exec 'owner)
-                'exec 'owner)
-  (set-perms-if (stat node)
-                (has-perms-p mode 'read 'others)
-                'read 'others))
-
-(define-callback file-chown zip-translator
-				 (node user uid gid)
-  (declare (ignore user))
-  (when (valid-id-p uid)
-    (setf (stat-get (stat node) 'uid) uid))
-  (when (valid-id-p gid)
-    (setf (stat-get (stat node) 'gid) gid))
-  t)
-
-(define-callback allow-author-change-p zip-translator
-				 (node user author)
-  (declare (ignore node user author))
-  t)
-
 (defun main ()
-  (let ((trans (make-instance 'zip-translator
-                              :options (make-translator-options
-                                         '((:coolness-level 20) :fast)))))
-    (run-translator trans)))
+  (run-translator (make-instance 'zip-translator
+                                 :options (make-translator-options
+                                            '((:coolness-level 20) :fast)))))
 
 (main)
