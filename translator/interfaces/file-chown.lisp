@@ -5,8 +5,12 @@
 							   (owner uid-t)
 							   (group gid-t))
   (with-lookup protid file
-    (file-chown *translator*
-                (get-node protid)
-                (get-user protid)
-                owner
-                group)))
+    (let ((err (file-chown *translator*
+                           (get-node protid)
+                           (get-user protid)
+                           owner
+                           group)))
+      (cond
+        ((eq err nil) :not-permitted)
+        ((eq err t) t)
+        (t err)))))

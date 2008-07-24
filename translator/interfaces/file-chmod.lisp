@@ -9,7 +9,11 @@
     (set-spare mode nil)
     (set-types mode nil)
     (set-trans mode nil)
-    (file-chmod *translator*
-                (get-node protid)
-                (get-user protid)
-                mode)))
+    (let ((err (file-chmod *translator*
+                           (get-node protid)
+                           (get-user protid)
+                           mode)))
+      (cond
+        ((eq err t) t)
+        ((eq err nil) :not-permitted)
+        (t err)))))

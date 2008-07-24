@@ -26,8 +26,6 @@
                    ((eq ret-code t)
                      (deallocate-send-right file-protid)
                      t)
-                   ((eq ret-code nil)
-                    nil)
-                   (t
-                     ret-code))))))))
+                   ((eq ret-code nil) :not-permitted)
+                   (t ret-code))))))))
 

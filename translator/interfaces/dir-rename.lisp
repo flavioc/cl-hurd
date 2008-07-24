@@ -31,6 +31,9 @@
                                                  new-name)))
                    (when (eq t return-code)
                      (deallocate-send-right new-dir-protid))
-                   return-code)))))))
+                   (cond
+                     ((eq t return-code) t)
+                     ((eq nil return-code) :permission-denied)
+                     (t return-code)))))))))
 
 
