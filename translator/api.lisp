@@ -132,17 +132,9 @@ Return T when this is possible, nil otherwise."
   (declare (ignore translator node user))
   t)
 
-(%add-callback get-options ()
-  "Return a list of translator options similar to --arguments."
-  (if (null (options translator))
-    nil
-    (get-translator-options (options translator))))
-
-(%add-callback set-options (option-list)
-  "Define a new set of translator options. 'option-list' is a list with two kinds of elements:
-a string: defines a new activated option, something like --option.
-a list of two elements: a string representing the option and the value, representing the option value. Option values can be strings, integers, nils, etc."
-  (set-translator-options (options translator) option-list)
+(%add-callback set-options (new-options)
+  "Define a new set of translator options."
+  (setf (options translator) new-options)
   ; Inform translator about option changes.
   (options-changed translator)
   t)
