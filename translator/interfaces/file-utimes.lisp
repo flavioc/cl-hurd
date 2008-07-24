@@ -5,9 +5,13 @@
                                 (atimein time-value-t)
                                 (mtimein time-value-t))
   (with-lookup protid file
-    (file-utimes *translator*
-                 (get-node protid)
-                 (get-user protid)
-                 atimein
-                 mtimein)))
+    (let ((err (file-utimes *translator*
+                            (get-node protid)
+                            (get-user protid)
+                            atimein
+                            mtimein)))
+      (cond
+        ((eq err t) t)
+        ((eq err nil) :not-permitted)
+        (t err)))))
 
