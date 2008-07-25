@@ -497,7 +497,8 @@
            :create-character
            :create-fifo
            :create-socket
-           :storage))
+           :storage
+           :refresh-node))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)
