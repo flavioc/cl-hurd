@@ -148,7 +148,9 @@ Return t for success, nil for unsupported operation."
 
 (%add-callback file-change-size (node user new-size)
   "The user wants to change node size to 'new-size'.
-Return t on success, nil for unsupported operation.")
+Return t on success, nil for unsupported operation."
+  (declare (ignore translator node user new-size))
+  t)
 
 (%add-callback file-rename (user old-dir old-name new-dir new-name)
   "Rename file 'old-name' from 'old-dir' to 'new-name' in 'new-dir'.
