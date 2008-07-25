@@ -8,6 +8,7 @@
 (defctype auth-t port "auth_t type")
 (defctype fsys-t port "fsys_t type")
 (defctype io-t port "io_t type")
+(defctype file-t port "file_t type")
 (defctype process-t port "process_t type")
 (defctype socket-t port "socket_t type")
 (defctype pf-t port "pf_t type")
@@ -15,4 +16,6 @@
 (defctype startup-t port "startup_t type")
 (defctype fs-notify-t port "fs_notify_t type")
 (defctype proccoll-t port "proccoll_t type")
+(defctype host-priv-t port "host_priv_t type")
+(defctype device-t port "device_t type")
 
