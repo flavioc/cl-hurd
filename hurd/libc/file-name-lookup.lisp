@@ -15,7 +15,8 @@
   (mode mode-t))
 
 (defun file-name-lookup (name &key
-                              (flags '(:read)) (mode nil)
+                              (flags nil)
+                              (mode nil)
                               (under nil))
   "Open a port to file 'name'."
   (cond
