@@ -364,7 +364,9 @@
                (:module examples
                         :components (
                                      ;(:file "zip")
-                                     (:file "link")
+                                     ;(:file "link")
                                      ;(:file "tmp")
+                                     ;(:file "null")
+                                     (:file "zero")
                                      )
                         :depends-on ("packages" "paths" "common" "mach" "hurd" "translator" "tree-translator"))))
