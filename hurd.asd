@@ -150,7 +150,6 @@
                                                            (:file "getauth")
                                                            (:file "getcrdir")
                                                            (:file "getcttyid")
-                                                           (:file "getcwdir")
                                                            (:file "geteuids")
                                                            (:file "getproc")
                                                            (:file "getumask")
