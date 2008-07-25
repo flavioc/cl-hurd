@@ -3,7 +3,6 @@ TODO list:
 - find... why?
 - more callbacks:
   - file-exec -- (broken)
-- translator with write support
 - translator that checks for changes in the underlying node
 
 CLIENT RPCS:
