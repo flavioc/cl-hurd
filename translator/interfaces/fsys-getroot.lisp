@@ -49,16 +49,6 @@
      (%handle-symlink node dotdot))
     (t (%handle-normal-file node flags dotdot user))))
 
-(defun %unsupported-root-file-p (stat flags)
-  (and (or (is-sock-p stat)
-           (is-blk-p stat)
-           (is-chr-p stat)
-           (is-fifo-p stat))
-       (or
-         (flag-is-p flags :read)
-         (flag-is-p flags :write)
-         (flag-is-p flags :exec))))
-
 (defun %must-follow-translator-p (node flags)
   (and (not (flag-is-p flags :notrans))
        (box-translated-p (box node))))
@@ -74,8 +64,6 @@
                     (callback fetch-root-callback))
         (unless (eq retry :no-such-file)
           (return-from %fsys-getroot (values retry port :move-send retry-name))))))
-  (when (%unsupported-root-file-p (stat node) flags)
-    (return-from %fsys-getroot nil))
   (%fsys-getroot-normal node flags dotdot user))
 
 (def-fsys-interface :fsys-getroot ((fsys port)
