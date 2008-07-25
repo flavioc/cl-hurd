@@ -212,6 +212,9 @@ Return T when this is possible, nil otherwise."
 (%add-callback create-socket (node user)
   "Turn 'node' into a socket.")
 
+(%add-callback refresh-node (node user)
+  "'node' will be accessed by 'user'.")
+
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
   `(defmethod ,name ((translator ,trans-type) ,@args)
