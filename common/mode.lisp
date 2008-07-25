@@ -248,13 +248,13 @@ You can also ignore user-type and the bits will be for all the user types.
         0))
     (otherwise 0))))
 
-(define-mode-meth has-perms-p (perm-type user-type)
+(define-mode-meth has-perms-p (perm-type &optional user-type)
   "Predicate telling if the mode bitfield has certain permissions. Same combinations as get-perm-bits."
   (let* ((useunk-p (is-useunk-p mode))
         (bits (%get-perm-bits perm-type user-type useunk-p)))
     (and (plusp bits)
-         (eq bits
-             (%only-bits val bits)))))
+         (= bits
+            (%only-bits val bits)))))
 
 (define-mode-meth set-perms (perm-type &optional user-type)
   "Activates permission bits for perm-type/user-type."
