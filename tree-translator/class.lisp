@@ -21,10 +21,8 @@
   (when (not (is-dir-p underlying-stat))
     (propagate-read-to-execute underlying-stat))
   (set-trans underlying-stat nil)
-  (set-active-trans underlying-stat t)
   (let ((obj (make-instance 'dir-entry
-                            :stat underlying-stat
-                            :parent nil)))
+                            :stat underlying-stat)))
     (fill-root-node translator obj)
     obj))
 
