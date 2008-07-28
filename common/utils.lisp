@@ -200,3 +200,9 @@ If you have the list with the length for each string pass it in ls-len."
      (let ((ret (first ,body)))
        (setf ,body (rest ,body))
        ret)))
+
+(defun microsecs->nanosecs (microsecs)
+  (* microsecs 1000))
+
+(defun nanosecs->microsecs (nanosecs)
+  (/ nanosecs 1000))
