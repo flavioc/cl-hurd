@@ -1,7 +1,8 @@
 
 (in-package :hurd-example-translators)
 
-(defconstant +target-link+ "../cl-hurd")
+(assert (= (length ext:*args*) 1))
+(defconstant +target-link+ (first ext:*args*))
 
 (defclass link-translator (translator)
   ((name :initform "link-translator"
