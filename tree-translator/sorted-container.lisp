@@ -72,7 +72,12 @@
                 :test #'equal))
   container)
 
+(defmethod iterate-elements ((container sorted-container) fun)
+  "Runs 'fun' for each key-value pair."
+  (maphash fun (table container)))
+
 (defmethod get-element ((container sorted-container) key)
+  "Gets an element using 'key'."
   (gethash key (table container)))
 
 ;(defvar *a* (make-sorted-container #'string< #'first))
