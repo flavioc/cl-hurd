@@ -72,6 +72,7 @@
                  (let ((control (box-fetch-control (box node))))
                    (multiple-value-bind (ret err)
                      (fsys-goaway control killtrans-flags)
+                     (declare (ignore ret))
                      (when err
                        (return-from set-translator err))))))
              (when (and (flag-is-p passive-flags '(:set :excl))
