@@ -6,7 +6,8 @@
 ;; Right now it supports file and directory listing.
 ;;
 
-(defvar *zip* (open-zipfile "tmp.zip") "The zip handle.")
+(assert (= (length ext:*args*) 1))
+(defvar *zip* (open-zipfile (first ext:*args*)) "The zip handle.")
 
 (defclass zip-translator (tree-translator)
   ((name :initform "zip-translator"
@@ -67,34 +68,6 @@
                                  :coolness-level)))
   t)
 
-"
-(define-callback create-block zip-translator
-                 (node user device)
-  (declare (ignore user))
-  (set-type (stat node) :blk)
-  (setf (stat-get (stat node) 'rdev) device)
-  t)
-
-(define-callback create-character zip-translator
-                 (node user device)
-  (declare (ignore user))
-  (set-type (stat node) :chr)
-  (setf (stat-get (stat node) 'rdev) device)
-  t)
-
-(define-callback create-fifo zip-translator
-                 (node user)
-  (declare (ignore user))
-  (set-type (stat node) :fifo)
-  t)
-
-(define-callback create-socket zip-translator
-                 (node user)
-  (declare (ignore user))
-  (set-type (stat node) :sock)
-  t)
-"
-
 (defun %create-zip-file (parent entry)
   "Create a new zip entry."
   (let ((data-stream
@@ -151,8 +124,6 @@
                       (add-zip-file node (split-path name) entry)))
 
 (defun main ()
-  (run-translator (make-instance 'zip-translator
-                                 :options (make-translator-options
-                                            '((:coolness-level 20) :fast)))))
+  (run-translator (make-instance 'zip-translator)))
 
 (main)
