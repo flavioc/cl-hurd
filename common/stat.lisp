@@ -59,8 +59,9 @@
 
 (defun %stat-time-get (ptr what)
   "Access from a 'ptr' stat struct the 'sec' field from the timespec field 'what'."
-  (foreign-slot-value (foreign-slot-value ptr 'stat-struct what)
-                      'timespec-struct 'sec))
+  (let ((ptr (foreign-slot-value ptr 'stat-struct what)))
+    (make-time-value :seconds (foreign-slot-value ptr 'timespec-struct 'sec)
+                     :microseconds (nanosecs->microsecs (foreign-slot-value ptr 'timespec-struct 'nsec)))))
 
 (defmethod stat-get ((stat stat) what)
   "Gets specific information from a stat object.
@@ -98,8 +99,7 @@ uid, gid, size, atim, mtim, ctim, blksize, blocks, author, flags."
        (setf (foreign-slot-value timespec 'timespec-struct 'sec)
              (seconds new-value)
              (foreign-slot-value timespec 'timespec-struct 'nsec)
-             (* 1000
-                (microseconds new-value)))
+             (microsecs->nanosecs (microseconds new-value)))
        t)
       (t
         ; For everything else just copy the value to seconds.
