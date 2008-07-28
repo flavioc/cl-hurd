@@ -58,8 +58,7 @@
                                             :depends-on ("error")))
                         :depends-on ("packages" "paths"))
                (:module mach
-                        :components ((:file "mach")
-                                     (:file "msg-type-name")
+                        :components ((:file "msg-type-name")
                                      (:file "task-special-ports")
                                      (:file "port-right")
                                      (:file "port-type"
@@ -69,8 +68,7 @@
                                      (:file "msg-option")
                                      (:file "msg-type")
                                      (:file "types"
-                                            :depends-on ("mach"
-                                                         "port-type"
+                                            :depends-on ("port-type"
                                                          "msg-type-name"
                                                          "port-right"
                                                          "port"
@@ -137,8 +135,7 @@
                                             :depends-on ("types")))
                         :depends-on ("packages" "common" "paths"))
                (:module hurd
-                        :components ((:file "libs")
-                                     (:file "types")
+                        :components ((:file "types")
                                      (:file "paths")
                                      (:file "retry")
                                      (:file "macros")
@@ -214,15 +211,15 @@
                                                                   :depends-on ("utils"))
                                                            (:file "reauth"
                                                                   :depends-on ("iouser")))
-                                              :depends-on ("libs" "types"))
+                                              :depends-on ("types"))
                                      (:module auth
                                               :components ((:file "getids"))
-                                              :depends-on ("types" "libs" "iohelp"))
+                                              :depends-on ("types" "iohelp"))
                                      (:module exec
                                               :components ((:file "flags")
                                                            (:file "exec"
                                                                   :depends-on ("flags")))
-                                              :depends-on ("types" "libs"))
+                                              :depends-on ("types"))
                                      (:module fsys
                                               :components ((:file "startup")
                                                            (:file "goaway-flags")
@@ -379,10 +376,11 @@
                         :depends-on ("packages" "paths" "common" "mach" "hurd" "translator"))
                (:module examples
                         :components (
-                                     (:file "zip")
+                                     ;(:file "zip")
                                      ;(:file "link")
                                      ;(:file "tmp")
                                      ;(:file "null")
                                      ;(:file "zero")
+                                     (:file "mod")
                                      )
                         :depends-on ("packages" "paths" "common" "mach" "hurd" "translator" "tree-translator"))))
