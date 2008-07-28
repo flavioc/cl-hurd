@@ -1,0 +1,25 @@
+Index: start-translator.c
+===================================================================
+RCS file: /sources/hurd/hurd/libfshelp/start-translator.c,v
+retrieving revision 1.5
+diff -u -r1.5 start-translator.c
+--- start-translator.c	30 Jan 2001 23:45:32 -0000	1.5
++++ start-translator.c	28 Jul 2008 20:01:50 -0000
+@@ -20,6 +20,8 @@
+ 
+ #include "fshelp.h"
+ #include <unistd.h>
++#include <fcntl.h>
++#include <paths.h>
+ #include <string.h>
+ #include <hurd.h>
+ 
+@@ -43,6 +45,8 @@
+   ports[INIT_PORT_CWDIR] = getcwdir ();
+   ports[INIT_PORT_CRDIR] = getcrdir ();
+   ports[INIT_PORT_AUTH] = getauth ();
++  fds[STDIN_FILENO] = file_name_lookup (_PATH_DEVNULL, O_READ, 0);
++  fds[STDOUT_FILENO] = file_name_lookup (_PATH_DEVNULL, O_WRITE, 0);
+   fds[STDERR_FILENO] = getdport (STDERR_FILENO);
+ 
+   err = fshelp_start_translator_long (underlying_open_fn, cookie,
