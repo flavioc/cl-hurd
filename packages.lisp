@@ -217,6 +217,7 @@
            :size
            :name
            :time-value-eq
+           :time-value-newer-p
            :remove-declare
            :getpid))
 
@@ -498,7 +499,8 @@
            :create-fifo
            :create-socket
            :storage
-           :refresh-node))
+           :refresh-node
+           :root))
 
 (defpackage :cl-hurd.translator.tree
   (:nicknames :hurd-tree-translator)
@@ -511,7 +513,11 @@
            :get-entry
            :rename-dir-entry
            :remove-dir-entry
-           :setup-entry))
+           :setup-entry
+           :iterate-entries
+           :iterate-entries-deep
+           :has-entry-p
+           :parent))
 
 (defpackage :cl-hurd.translator.examples
   (:nicknames :hurd-example-translators)
