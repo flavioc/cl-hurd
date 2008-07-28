@@ -1,8 +1,8 @@
 
 (in-package :hurd-example-translators)
 
-(assert (= (length ext:*args*) 1))
-(defconstant +file+ (first ext:*args*))
+(assert (= (length *args*) 1))
+(defconstant +file+ (first *args*))
 
 (defclass mod-translator (tree-translator)
   ((name :initform "mod-translator")

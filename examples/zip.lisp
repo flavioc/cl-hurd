@@ -6,8 +6,8 @@
 ;; Right now it supports file and directory listing.
 ;;
 
-(assert (= (length ext:*args*) 1))
-(defvar *zip* (open-zipfile (first ext:*args*)) "The zip handle.")
+(assert (= (length *args*) 1))
+(defvar *zip* (open-zipfile (first *args*)) "The zip handle.")
 
 (defclass zip-translator (tree-translator)
   ((name :initform "zip-translator"
