@@ -1,7 +1,8 @@
 
 (in-package :hurd-example-translators)
 
-(defconstant +file+ "tmp.lisp")
+(assert (= (length ext:*args*) 1))
+(defconstant +file+ (first ext:*args*))
 
 (defclass mod-translator (tree-translator)
   ((name :initform "mod-translator")
