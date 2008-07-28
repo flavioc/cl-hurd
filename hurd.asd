@@ -373,14 +373,4 @@
                                             :depends-on ("sorted-container"))
                                      (:file "class"
                                             :depends-on ("dir")))
-                        :depends-on ("packages" "paths" "common" "mach" "hurd" "translator"))
-               (:module examples
-                        :components (
-                                     ;(:file "zip")
-                                     ;(:file "link")
-                                     ;(:file "tmp")
-                                     ;(:file "null")
-                                     ;(:file "zero")
-                                     (:file "mod")
-                                     )
-                        :depends-on ("packages" "paths" "common" "mach" "hurd" "translator" "tree-translator"))))
+                        :depends-on ("packages" "paths" "common" "mach" "hurd" "translator"))))
