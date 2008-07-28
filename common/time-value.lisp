@@ -64,6 +64,14 @@ Definition can be found at mach/time_value.h"
        (= (microseconds time1)
           (microseconds time2))))
 
+(defmethod time-value-newer-p ((time1 time-value) (time2 time-value))
+  (cond
+    ((time-value-eq time1 +now-time-value+) t)
+    ((> (seconds time1) (seconds time2)) t)
+    ((< (seconds time1) (seconds time2)) nil)
+    (t
+      (> (microseconds time1) (microseconds time2)))))
+
 (defmethod print-object ((time time-value) stream)
   (if (time-value-eq time +now-time-value+)
     (format stream "#<time-value NOW>")
