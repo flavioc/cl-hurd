@@ -1,4 +1,7 @@
 
+(asdf:operate 'asdf:load-op 'hurd)
+(use-package 'hurd)
+
 ;; 
 ;; This file tries to mimick in Lisp the copy.c program
 ;; from The Hurd Hacking Guide (http://www.gnu.org/software/hurd/hacking-guide/hhg.html)
