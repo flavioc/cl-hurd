@@ -10,9 +10,23 @@
 (defclass entry (node)
   ((parent :initform nil
            :initarg :parent
-           :accessor parent
            :documentation "Parent node."))
   (:documentation "An entry, with a name and a parent."))
+
+(defmethod set-parent ((entry entry) new-val)
+  (unless (null new-val)
+    (setf (slot-value entry 'parent)
+          (if (tg:weak-pointer-p new-val)
+            new-val
+            (tg:make-weak-pointer new-val)))))
+
+(defsetf parent set-parent)
+
+(defmethod parent ((entry entry))
+  (with-slots ((parent parent)) entry
+    (when (and parent
+               (tg:weak-pointer-p parent))
+      (tg:weak-pointer-value parent))))
 
 (defmethod print-object ((node entry) stream)
   "Print an entry to stream."
@@ -37,14 +51,14 @@
 
 (defun %new-ino-val (stat)
   "Sets and increments the ino value of a stat struct."
+  (warn "new-ino-val ~s" (1+ *ino-value*))
   (setf (stat-get stat 'ino) (incf *ino-value*)))
 
 (defmethod add-entry ((dir dir-entry) (entry entry) (name string))
   "Adds a new entry to the directory node 'dir'."
   (let ((found (get-entry dir name)))
     (cond
-      (found
-        found)
+      (found found)
       (t
         (incf (stat-get (stat dir) 'nlink)) ; New entry.
         (insert-element (entries dir)
@@ -66,6 +80,12 @@
   entry)
 
 (defmethod initialize-instance :after ((entry entry) &key)
+  (with-slots ((parent parent)) entry
+    (when (and parent
+               (not (tg:weak-pointer-p parent)))
+      ; Install a weak pointer instead
+      (setf (slot-value entry 'parent)
+            (tg:make-weak-pointer parent))))
   (setup-entry entry))
 
 (defmethod dir-size ((dir dir-entry))
@@ -83,9 +103,18 @@
 (defmethod get-entry ((foo entry) (entry string))
   nil)
 
+(defmethod has-entry-p ((dir dir-entry) (entry string))
+  "Determines if 'dir' has 'entry'."
+  (let ((found (get-element (entries dir) entry)))
+    (if found
+      t
+      nil)))
+
 (defmethod remove-dir-entry ((dir dir-entry) (entry string))
   "Removes a directory entry with name 'entry'."
-  (remove-element (entries dir) entry))
+  (remove-element (entries dir) entry)
+  ; Decrease link count.
+  (decf (stat-get (stat dir) 'nlink)))
 
 (defmethod get-dir-entries ((dir dir-entry) start n)
   "Get directory entries from start to start + n."
@@ -97,3 +126,20 @@
     (remove-dir-entry dir old-name)
     (setf (parent entry) new-dir)
     (add-entry new-dir entry new-name)))
+
+(defmethod iterate-entries ((dir dir-entry) fun)
+  "Runs 'fun' for each entry in 'dir'. Arguments are entry name + entry node."
+  (iterate-elements (entries dir)
+                    (lambda (key value)
+                      (funcall fun
+                               key
+                               (node value)))))
+
+(defmethod iterate-entries-deep ((dir dir-entry) fun)
+  "Runs 'fun' for each entry in 'dir', recursively. If 'fun' returns T and the node is a directory, 'fun' will be run for the node's leafs, when it returns NIL the leafs will not be visited."
+  (iterate-entries dir
+                   (lambda (name node)
+                     (when (and (funcall fun name node)
+                                (typep node 'dir-entry))
+                       (iterate-entries-deep node fun)))))
+
