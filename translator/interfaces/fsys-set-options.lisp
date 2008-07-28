@@ -7,7 +7,7 @@
                                        (data :pointer)
                                        (data-len msg-type-number)
                                        (do-children :boolean))
-  (declare (ignore reply reply-type do-children))
+  (declare (ignore reply reply-type))
   (when (port-exists-p fsys)
     (let ((new-options (get-foreign-options data data-len)))
       (when do-children
