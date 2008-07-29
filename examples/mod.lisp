@@ -1,8 +1,13 @@
 
-(in-package :hurd-example-translators)
+(defpackage :mod-translator
+  (:use :cl :hurd-common :mach
+        :hurd :hurd-translator
+        :hurd-tree-translator))
 
-(assert (= (length *args*) 1))
-(defconstant +file+ (first *args*))
+(in-package :mod-translator)
+
+(assert (= (length ext:*args*) 1))
+(defconstant +file+ (first ext:*args*))
 
 (defclass mod-translator (tree-translator)
   ((name :initform "mod-translator")
@@ -33,13 +38,13 @@
   (when (flag-is-p flags :write)
     (return-from allow-open-p nil))
   (when (flag-is-p flags :read)
-    (unless (has-access-p node user 'read)
+    (unless (has-access-p node user :read)
       (return-from allow-open-p nil)))
   t)
 
 (define-callback file-read mod-translator
                  (node user start amount stream)
-  (when (has-access-p node user 'read)
+  (when (has-access-p node user :read)
     (let* ((size (stat-get (stat node) 'size))
            (size-res (- size start)))
       (unless (plusp size-res)
@@ -161,13 +166,13 @@
   (let ((data (%read-lisp-file)))
     (setf (file-stat translator)
           (make-stat (stat node)
-                     :mode (make-mode :perms '((owner read)
-                                               (group read)))
+                     :mode (make-mode :perms '((:owner :read)
+                                               (:group :read)))
                      :type :reg))
     (setf (dir-stat translator)
           (make-stat (stat node)
-                     :mode (make-mode :perms '((owner read exec)
-                                               (group read exec)))
+                     :mode (make-mode :perms '((:owner :read :exec)
+                                               (:group :read :exec)))
                      :type :dir))
     (%fill-node translator data node)))
 
