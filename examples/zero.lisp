@@ -1,5 +1,9 @@
 
-(in-package :hurd-example-translators)
+(defpackage :zero-translator
+  (:use :cl :hurd-common :mach
+        :hurd :hurd-translator))
+
+(in-package :zero-translator)
 
 (defclass zero-translator (translator)
   ((name :initform "zero-translator"))
@@ -7,9 +11,9 @@
 
 (define-callback make-root-node zero-translator
                  (underlying-stat)
-  (let ((mode (make-mode :perms '((owner read write)
-                                  (group read write)
-                                  (others read write))
+  (let ((mode (make-mode :perms '((:owner :read :write)
+                                  (:group :read :write)
+                                  (:others :read :write))
                          :type :chr)))
     (make-instance 'node
                    :stat (make-stat underlying-stat
