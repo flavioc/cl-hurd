@@ -20,7 +20,7 @@
                   (incf-pointer ptr (size entry))
                   entry)))
 
-(defun dir-readdir (dir &optional (entry 0) (nentries -1) (bufsiz 0))
+(defun dir-readdir (dir &key (entry 0) (nentries -1) (bufsiz 0))
   (declare (type fixnum dir entry nentries bufsiz))
   (when (or (zerop nentries)
             (< nentries -1))
