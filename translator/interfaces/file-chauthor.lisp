@@ -8,5 +8,5 @@
                                  (get-node protid)
                                  (get-user protid)
                                  author)
-      (setf (stat-get (stat (get-node protid)) 'author) author))
+      (setf (stat-get (stat (get-node protid)) 'st-author) author))
     t))

@@ -10,7 +10,7 @@
       (:seek-cur
         (incf offset (file-offset (open-node protid))))
       (:seek-end
-        (incf offset (stat-get (stat (get-node protid)) 'size))))
+        (incf offset (stat-get (stat (get-node protid)) 'st-size))))
     (cond
       ((plusp offset)
        (setf (mem-ref newoffset 'loff-t) offset

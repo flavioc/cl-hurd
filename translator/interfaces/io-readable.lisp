@@ -11,7 +11,7 @@
                (return-from io-readable :invalid-argument))
              (setf (mem-ref amount 'vm-size)
                    (max 0
-                        (- (stat-get (stat node) 'size)
+                        (- (stat-get (stat node) 'st-size)
                            (file-offset open))))
              t))))
 
