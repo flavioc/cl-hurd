@@ -59,7 +59,7 @@
 
 (defmethod set-link-node ((node node) new-link)
   "When defining a new link target, change stat size."
-  (setf (stat-get (stat node) 'size)
+  (setf (stat-get (stat node) 'st-size)
         (if (null new-link) 0 (length new-link)))
   (when new-link
     (set-type (stat node) :lnk))
