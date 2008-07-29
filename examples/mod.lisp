@@ -42,13 +42,13 @@
       (return-from allow-open-p nil)))
   t)
 
-(define-callback file-read mod-translator
+(define-callback read-file mod-translator
                  (node user start amount stream)
   (when (has-access-p node user :read)
-    (let* ((size (stat-get (stat node) 'size))
+    (let* ((size (stat-get (stat node) 'st-size))
            (size-res (- size start)))
       (unless (plusp size-res)
-        (return-from file-read t))
+        (return-from read-file t))
       (let* ((total (min size-res amount))
              (end (+ start total)))
         (write-sequence (subseq (data node) start end)
@@ -62,7 +62,7 @@
   (declare (ignore node user))
   (with-port-deallocate (port (file-name-lookup +file+ :flags '(:read :notrans)))
     (let* ((stat (io-stat port))
-           (new-timestamp (stat-get stat 'mtime)))
+           (new-timestamp (stat-get stat 'st-mtime)))
       (when (time-value-newer-p new-timestamp (timestamp translator))
         ; Mark every node as un-visited.
         (iterate-entries-deep (root translator)
@@ -118,7 +118,7 @@
                                  :parent node))
             (add-entry node found name))
           ; Update file size.
-          (setf (stat-get (stat found) 'size) (length data))
+          (setf (stat-get (stat found) 'st-size) (length data))
           ; Update byte array.
           (setf (data found) (%read-file-data data)))))
     ; Flag this node as visited.
@@ -185,7 +185,7 @@
   (with-port-deallocate (port (file-name-lookup +file+ :flags '(:read)))
     (let ((translator
             (make-instance 'mod-translator
-                           :timestamp (stat-get (io-stat port) 'mtime))))
+                           :timestamp (stat-get (io-stat port) 'st-mtime))))
       (run-translator translator))))
 
 (main)
