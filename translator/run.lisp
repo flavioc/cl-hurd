@@ -9,15 +9,16 @@
         (setf (slot-value translator 'underlying-node)
               (fsys-startup bootstrap flags right :copy-send))))))
 
-(defmethod inner-run ((translator translator))
+(defmethod inner-run ((translator translator) demuxer)
   "Run the translator server."
   (let ((*translator* translator))
     (run-server (lambda (port in out)
                   (declare (ignore port))
-                  (translator-demuxer in out))
+                  (funcall demuxer in out))
                 (port-bucket *translator*))))
 
-(defmethod run-translator ((translator translator) &key flags)
+(defmethod run-translator ((translator translator)
+                           &key flags (demuxer #'translator-demuxer))
   "Setup the translator and the run it."
   (configure translator flags)
   (when (running-p translator)
@@ -29,7 +30,7 @@
             (make-root-node translator
                             (underlying-node translator)
                             (make-stat stat))))
-    (inner-run translator)))
+    (inner-run translator demuxer)))
 
 (defun calculate-miliseconds (seconds miliseconds)
   (+ (* 1000 seconds) miliseconds))
