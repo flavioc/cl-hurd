@@ -1,9 +1,11 @@
 TODO list:
 
 - find... why?
-- more callbacks:
-  - file-exec -- (broken)
-- translator that checks for changes in the underlying node
+- fix file_exec, fsys_getroot, fetch_root
+- documentation
+- testing
+- FIXME/XXX/TODO
+- export new symbols
 
 CLIENT RPCS:
 - file_chflags (not used)
