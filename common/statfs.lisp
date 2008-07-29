@@ -13,22 +13,22 @@
 (defconstant +statfs-size+ 88)
 
 (defcstruct (statfs-struct :size 88)
-  (type fs-type) ; Type of filesystem.
-  (bsize :unsigned-int) ; Optimal transfer block.
+  (f-type fs-type) ; Type of filesystem.
+  (f-bsize :unsigned-int) ; Optimal transfer block.
 
-  (blocks blkcnt) ; Total data blocks.
-  (bfree blkcnt) ; Total blocks free.
-  (bavail blkcnt) ; Total blocks available.
-  (files blkcnt) ; Total file nodes.
-  (ffree blkcnt) ; Free file nodes.
+  (f-blocks blkcnt) ; Total data blocks.
+  (f-bfree blkcnt) ; Total blocks free.
+  (f-bavail blkcnt) ; Total blocks available.
+  (f-files blkcnt) ; Total file nodes.
+  (f-ffree blkcnt) ; Free file nodes.
 
-  (fsid :long-long) ; File system id.
-  (namelen :unsigned-int) ; Maximum file name length.
+  (f-fsid :long-long) ; File system id.
+  (f-namelen :unsigned-int) ; Maximum file name length.
 
-  (favail filcnt) ; Total number of free file nodes (inodes) available to non-privileged processes.
+  (f-favail filcnt) ; Total number of free file nodes (inodes) available to non-privileged processes.
 
-  (frsize :unsigned-int) ; Fundamental file system block size (fragment size).
-  (flags statfs-flags))
+  (f-frsize :unsigned-int) ; Fundamental file system block size (fragment size).
+  (f-flags statfs-flags))
 
 (defclass statfs ()
   ((ptr :initform nil
@@ -45,10 +45,6 @@
       (when ptr-null-p
         (tg:finalize obj (lambda () (foreign-free ptr))))
       obj)))
-
-(defmethod statfs-clean ((stat statfs))
-  "Zeroes the statfs memory."
-  (bzero (ptr stat) (foreign-type-size 'statfs-struct)))
 
 (defmethod statfs-get ((stat statfs) what)
   (foreign-slot-value (ptr stat) 'statfs-struct what))
