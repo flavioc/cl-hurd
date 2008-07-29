@@ -1,5 +1,10 @@
 
-(in-package :hurd-example-translators)
+(defpackage :tmp-translator
+  (:use :cl :hurd-common :mach
+        :hurd :hurd-translator
+        :hurd-tree-translator))
+
+(in-package :tmp-translator)
 
 ;;
 ;; This is a simple tmpfs translator.
@@ -21,7 +26,7 @@
 
 (define-callback create-file tmp-translator
                  (node user filename mode)
-  (unless (has-access-p node user 'write)
+  (unless (has-access-p node user :write)
     (return-from create-file nil))
   (let ((entry (make-instance 'tmp-entry
                               :stat (make-stat (stat node)
@@ -33,7 +38,7 @@
 
 (define-callback file-read tmp-translator
                  (node user start amount stream)
-  (when (has-access-p node user 'read)
+  (when (has-access-p node user :read)
     (let* ((size (stat-get (stat node) 'size))
            (size-res (- size start)))
       (unless (plusp size-res)
@@ -52,7 +57,7 @@
 
 (define-callback file-write tmp-translator
                  (node user offset stream)
-  (unless (has-access-p node user 'write)
+  (unless (has-access-p node user :write)
     (return-from file-write nil))
   (let* ((size (stat-get (stat node) 'size))
          (arr (%read-sequence stream))
@@ -81,7 +86,7 @@
 
 (define-callback create-anonymous-file tmp-translator
                  (node user mode)
-  (unless (has-access-p node user 'write)
+  (unless (has-access-p node user :write)
     (return-from create-anonymous-file nil))
   (make-instance 'tmp-entry
                  :stat (make-stat (stat node) :mode mode)
@@ -95,3 +100,4 @@
   (run-translator (make-instance 'tmp-translator)))
 
 (main)
+
