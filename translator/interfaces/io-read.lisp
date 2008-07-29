@@ -6,7 +6,7 @@
   (= -1 offset))
 
 (defun %io-read-link (node user start out-stream)
-  (let ((size (stat-get (stat node) 'size)))
+  (let ((size (stat-get (stat node) 'st-size)))
     (cond
       ((> start size) t) ; Everything is read by now.
       (t
@@ -23,7 +23,7 @@
     (:lnk
       (%io-read-link node user start out-stream))
     (otherwise
-      (file-read *translator*
+      (read-file *translator*
                  node user start
                  amount
                  out-stream))))
@@ -66,7 +66,7 @@
              (when (< offset -1)
                (return-from io-read :invalid-argument))
              (when (and (not (%use-current-offset-p offset))
-                        (> offset (stat-get (stat node) 'size)))
+                        (> offset (stat-get (stat node) 'st-size)))
                (return-from io-read :invalid-argument))
              (multiple-value-bind (data-read total)
                (%io-read open-node
