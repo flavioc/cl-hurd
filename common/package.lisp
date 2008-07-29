@@ -27,6 +27,7 @@
            :stat
            :make-stat
            :stat-t
+           :st-type
            :st-fstype
            :st-fsid
            :st-ino
@@ -100,6 +101,8 @@
            :join-path
            :pathconf-type
            :dirent-type
+           :dirent-name
+           :dirent-size
            :off-t
            :loff-t
            :ino-t
