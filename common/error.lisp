@@ -9,17 +9,10 @@
 ;; and is a particular case we deal in the translate-*-foreign functions.
 ;;
 
-;;
-;; The error library defines the get_hurd_error_code function.
-;; 
-(define-helper-library error)
-
-;;
-;; Wraps the _HURD_ERRNO() macro around a callable function.
-;; _HURD_ERRNO can be found at bits/errno.h
-;;
-(defcfun ("get_hurd_error_code" %get-hurd-error-code)
-  :int (id :int))
+(defun %get-hurd-error-code (code)
+  (boole boole-ior
+         (ash #x10 26)
+         (boole boole-and code #x3fff)))
 
 (define-foreign-type error-type ()
   ()
