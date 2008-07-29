@@ -13,6 +13,6 @@
       (let ((port-info (first port-data))
             (bucket (second port-data)))
         ;; Remove it from the bucket
-        (remove-port bucket port-info)
+        (bucket-remove-port bucket port-info)
         ;; Also from the *all-ports* table
         (remhash port *all-ports*)))))
