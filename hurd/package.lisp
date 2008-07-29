@@ -18,7 +18,7 @@
            :run-server
            :bucket-add-port
            :bucket-add-control-port
-           :bucket-has-port
+           :bucket-has-port-p
            :bucket-lookup-port
            :+servers+
            :+servers-exec+
@@ -113,6 +113,7 @@
            :box-active-p
            :box-passive-p
            :box-translated-p
+           :passive
            :make-transbox
            :port-info
            :define-hurd-interface
