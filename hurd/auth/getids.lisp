@@ -22,7 +22,6 @@
         (num-eff-gids (foreign-alloc :unsigned-int :initial-element 0))
         (avail-gids (foreign-alloc :pointer))
         (num-avail-gids (foreign-alloc :unsigned-int :initial-element 0)))
-    (warn "alloced")
     (with-cleanup (free-memory-list
                     (list eff-uids
                           num-eff-uids
@@ -32,7 +31,6 @@
                           num-avail-gids
                           eff-gids
                           num-eff-gids))
-      (warn "going to auth-getids")
       (let ((ret (%auth-getids handle
                                eff-uids
                                num-eff-uids
@@ -42,7 +40,6 @@
                                num-eff-gids
                                avail-gids
                                num-avail-gids)))
-        (warn "done --- ret ~s" ret)
         (select-error ret
                       (let ((eff-uids-ptr (mem-ref eff-uids :pointer))
                             (num-eff-uids (mem-ref num-eff-uids :unsigned-int))
