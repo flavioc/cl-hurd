@@ -4,23 +4,23 @@
 (defclass device-id ()
   ((major :initform nil
           :initarg :major
-          :accessor major
+          :accessor device-major
           :documentation "Major device number.")
    (minor :initform nil
           :initarg :minor
-          :accessor minor
+          :accessor device-minor
           :documentation "Minor device number."))
   (:documentation "Pair of major/minor device numbers representing some resources."))
 
 (defmethod get-device-integer ((device device-id))
   (boole boole-ior
-         (ash (major device) 8)
-         (minor device)))
+         (ash (device-major device) 8)
+         (device-minor device)))
 
 (defmethod print-object ((device device-id) stream)
   (format stream "#<device-id major=~s minor=~s>"
-          (major device)
-          (minor device)))
+          (device-major device)
+          (device-minor device)))
 
 (defun get-major-dev (int)
   "Get the major device number from an integer, as major(dev) from sys/sysmacros.h"
