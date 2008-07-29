@@ -1,6 +1,8 @@
 
 (in-package :hurd-common)
 
-(defconstant +minus-one-ll+ #xffffffffffffffff)
+(defconstant +minus-one-ll+ (largest-representable-number
+                              (num-bits (foreign-type-size :unsigned-long-long))))
 
-(defconstant +minus-one+ #xffffffff)
+(defconstant +minus-one+ (largest-representable-number
+                           (num-bits (foreign-type-size :unsigned-int))))
