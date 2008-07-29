@@ -95,5 +95,6 @@
            :user
            :translator-demuxer
            :node-transbox
-           :port-exists-p))
+           :port-exists-p
+           :wait))
 
