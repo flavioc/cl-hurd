@@ -12,7 +12,7 @@
                            (when (and (typep port 'protid)
                                       (eq this-node (get-node port)))
                              (unless (eq port protid)
-                               (remove-port bucket port)))))
+                               (bucket-remove-port bucket port)))))
          t)
         (t
           :not-permitted)))))
