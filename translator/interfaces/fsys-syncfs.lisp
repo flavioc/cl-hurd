@@ -10,9 +10,10 @@
   (declare (ignore reply reply-type))
   (when (port-exists-p control)
     (let ((root-user (make-iouser-root)))
-      (file-syncfs *translator*
+      (if (sync-fs *translator*
                    root-user
                    wait
                    children)
-      t)))
+        t
+        nil))))
 
