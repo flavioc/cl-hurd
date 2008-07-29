@@ -2,7 +2,7 @@
 (in-package :hurd-common)
 
 ;;
-;; File system types for the stat's fsid field.
+;; File system types for the stat's st-fsid field.
 ;; Can be found at hurd/hurd_types.h.
 ;;
 
