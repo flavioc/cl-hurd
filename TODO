@@ -5,7 +5,7 @@ TODO list:
 - documentation
 - testing
 - FIXME/XXX/TODO
-- export new symbols
+- setting translators and the unsetting problem
 
 CLIENT RPCS:
 - file_chflags (not used)
