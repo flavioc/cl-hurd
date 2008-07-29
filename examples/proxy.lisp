@@ -48,7 +48,7 @@
     (let ((entries (dir-readdir (port node)
                                 :nentries +max-dir-entries+)))
       (loop for dirent in entries
-            do (let ((name (name dirent)))
+            do (let ((name (dirent-name dirent)))
                  (unless (or (string= name ".")
                              (string= name ".."))
                    (let* ((port (file-name-lookup name
