@@ -264,7 +264,7 @@ the Mach Message, Mig, Kernel and Device errors.")
     ; Zero indicates operation was successfull, and so we return T.
     ((zerop value) t)
     (t
-      (unless-return (translate-foreign-list value +recognized-error-codes+ 'from)
+      (unless-return (translate-foreign-list value +recognized-error-codes+ :from)
                      (warn "Identifier ~a not recognized" value)))))
 
 (defmethod translate-to-foreign (value (type error-type))
@@ -273,5 +273,5 @@ the Mach Message, Mig, Kernel and Device errors.")
     ; When the lisp value is T we give back the success error code.
     ((eq value t) 0)
     (t
-      (unless-return (translate-foreign-list value +recognized-error-codes+ 'to)
+      (unless-return (translate-foreign-list value +recognized-error-codes+ :to)
                      (error 'unrecognized-error-code :code value)))))
