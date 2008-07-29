@@ -60,10 +60,6 @@
   (when (has-access-p node user :read)
     '(:read)))
 
-(define-callback shutdown zip-translator ()
-  (warn "Going down...~%")
-  t)
-
 (define-callback options-changed zip-translator
                  ()
   (warn "Options changed:")
