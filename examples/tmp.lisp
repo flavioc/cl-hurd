@@ -36,13 +36,13 @@
     (add-entry node entry filename)
     entry))
 
-(define-callback file-read tmp-translator
+(define-callback read-file tmp-translator
                  (node user start amount stream)
   (when (has-access-p node user :read)
-    (let* ((size (stat-get (stat node) 'size))
+    (let* ((size (stat-get (stat node) 'st-size))
            (size-res (- size start)))
       (unless (plusp size-res)
-        (return-from file-read t))
+        (return-from read-file t))
       (let* ((total (min size-res amount))
              (end (+ start total)))
         (write-sequence (subseq (data node) start end)
@@ -55,11 +55,11 @@
           do (vector-push-extend c arr))
     arr))
 
-(define-callback file-write tmp-translator
+(define-callback write-file tmp-translator
                  (node user offset stream)
   (unless (has-access-p node user :write)
-    (return-from file-write nil))
-  (let* ((size (stat-get (stat node) 'size))
+    (return-from write-file nil))
+  (let* ((size (stat-get (stat node) 'st-size))
          (arr (%read-sequence stream))
          (amount (length arr))
          (final-size (max (+ amount offset) size)))
@@ -71,7 +71,7 @@
           for i from offset
           do (setf (aref (data node) i) octet))
     ; Update stat size.
-    (setf (stat-get (stat node) 'size) final-size)
+    (setf (stat-get (stat node) 'st-size) final-size)
     t))
 
 (define-callback file-change-size tmp-translator
