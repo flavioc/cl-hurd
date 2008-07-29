@@ -12,5 +12,5 @@
   :author "Flavio Cruz"
   :license "GPL v3.0"
   :description "Translator that watches for changes in the underlying node."
-  :depends-on (:hurd :ext)
+  :depends-on (:hurd)
   :components ((:file "mod")))
