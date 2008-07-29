@@ -5,7 +5,7 @@
 								(wait :boolean)
 								(do-children :boolean))
   (with-lookup protid port
-    (if (file-syncfs *translator*
+    (if (sync-fs *translator*
                      (get-user protid)
                      wait
                      do-children)
