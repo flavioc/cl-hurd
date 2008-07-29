@@ -46,13 +46,13 @@
          (t
            ,@body)))))
 
-(defun translate-foreign-list (value ls &optional (order 'from))
+(defun translate-foreign-list (value ls &optional (order :from))
   "In a list with key/values finds a value using first/second as key, returning second/first from the item found."
-  (let ((item (find value ls :key (if (eq order 'from)
+  (let ((item (find value ls :key (if (eq order :from)
                                     #'first
                                     #'second))))
     (when item
-      (if (eq order 'from)
+      (if (eq order :from)
         (second item)
         (first item)))))
 
