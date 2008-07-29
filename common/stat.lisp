@@ -76,7 +76,7 @@ st-blksize, st-blocks, st-author, st-flags."
       (st-mtime (%stat-time-get ptr 'st-mtim))
       (st-ctime (%stat-time-get ptr 'st-ctim))
       ; Get type from the mode bits.
-      (type (get-type stat))
+      (st-type (get-type stat))
       ; 'st-dev' is an alias to 'st-fsid'.
       (st-dev (foreign-slot-value ptr 'stat-struct 'st-fsid))
       ; We return a mode object here
