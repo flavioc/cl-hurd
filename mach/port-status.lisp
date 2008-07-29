@@ -36,6 +36,26 @@
   "Return T if the port from port-status has requested a no-senders notification."
   (port-status-get status 'no-senders-notification-requested))
 
+(defmethod port-status-get-set ((status port-status))
+  "Get the port-set field."
+  (port-status-get status 'port-set))
+
+(defmethod port-status-get-mscount ((status port-status))
+  "Get make send count from a status."
+  (port-status-get status 'mscount))
+
+(defmethod port-status-get-queue-limit ((status port-status))
+  "Get queue limit from a port status."
+  (port-status-get status 'queue-limit))
+
+(defmethod port-status-get-msgcount ((status port-status))
+  "Get msgcount field from status."
+  (port-status-get status 'msgcount))
+
+(defmethod port-status-get-so-rights ((status port-status))
+  "Get send once rights from a port status."
+  (port-status-get status 'so-rights))
+
 (defun make-port-status (ptr)
   "Creates a new port-status using ptr as the status structure."
   (let ((mem (foreign-alloc 'port-status-struct)))
