@@ -9,4 +9,5 @@
 (defun file-get-translator-cntl (file)
   (with-foreign-pointer (control (foreign-type-size 'port))
     (select-error (%file-get-translator-cntl file control)
-				  (mem-ref control 'port))))
+                  (mem-ref control 'port))))
+

@@ -10,4 +10,5 @@
   (declare (type fixnum file))
   (with-foreign-pointer (control (foreign-type-size 'port))
     (select-error (%file-getcontrol file control)
-				  (mem-ref control 'port))))
+                  (mem-ref control 'port))))
+

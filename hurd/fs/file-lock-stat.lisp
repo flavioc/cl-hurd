@@ -12,6 +12,6 @@
   (with-foreign-pointer (mystatus (foreign-type-size 'lock-flags))
     (with-foreign-pointer (otherstatus (foreign-type-size 'lock-flags))
       (select-error (%file-lock-stat file mystatus otherstatus)
-					(list
-					  (mem-ref mystatus 'lock-flags)
-					  (mem-ref otherstatus 'lock-flags))))))
+                    (list
+                      (mem-ref mystatus 'lock-flags)
+                      (mem-ref otherstatus 'lock-flags))))))

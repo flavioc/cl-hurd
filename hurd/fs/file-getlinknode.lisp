@@ -10,4 +10,4 @@
   (declare (type fixnum file))
   (with-foreign-pointer (linknode (foreign-type-size 'port))
     (select-error (%file-getlinknode file linknode)
-				  (mem-ref linknode 'port))))
+                  (mem-ref linknode 'port))))
