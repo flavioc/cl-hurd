@@ -23,11 +23,11 @@
                (when (flag-is-p (flags open) :append)
                  ;; Move file offset to the end of the file!
                  (setf (file-offset open)
-                       (stat-get (stat node) 'size)))
+                       (stat-get (stat node) 'st-size)))
                (setf offset (file-offset open)))
              (let ((data-array (%foreign-vector-to-array data datalen)))
                (with-input-from-sequence (stream data-array)
-                 (let* ((ret (file-write *translator* node user offset stream))
+                 (let* ((ret (write-file *translator* node user offset stream))
                         (total (file-position stream)))
                    (cond
                      ((eq ret nil) :not-permitted)
