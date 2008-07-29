@@ -17,7 +17,7 @@
 (defun %get-entries (ptr total)
   (loop for i from 0 below total
         collect (let ((entry (read-dirent ptr)))
-                  (incf-pointer ptr (size entry))
+                  (incf-pointer ptr (dirent-size entry))
                   entry)))
 
 (defun dir-readdir (dir &key (entry 0) (nentries -1) (bufsiz 0))
