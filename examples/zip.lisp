@@ -41,10 +41,10 @@
 (defmethod print-object ((entry zip-entry) stream)
   (format stream "#<zip-entry name=~s>" (name entry)))
 
-(define-callback file-read zip-translator
+(define-callback read-file zip-translator
                  (node user start amount stream)
   (declare (ignore user))
-  (let* ((size (stat-get (stat node) 'size))
+  (let* ((size (stat-get (stat node) 'st-size))
          (size-res (- size start)))
     (cond
       ((not (plusp size-res)) t)
