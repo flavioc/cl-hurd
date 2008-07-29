@@ -199,19 +199,19 @@ You can also ignore user-type and the bits will be for all the user types.
 "
   (if (null user-type)
     (case perm-type
-      (read
+      (:read
         (chained-bit-op boole-ior
                         +irusr+
                         +irgrp+
                         +iroth+
                         (if useunk-p +irunk+ 0)))
-      (write
+      (:write
         (chained-bit-op boole-ior
                         +iwusr+
                         +iwgrp+
                         +iwoth+
                         (if useunk-p +iwunk+ 0)))
-      (exec
+      (:exec
         (chained-bit-op boole-ior
                         +ixusr+
                         +ixgrp+
@@ -220,30 +220,30 @@ You can also ignore user-type and the bits will be for all the user types.
       (otherwise
         0))
   (case user-type
-    (owner
+    (:owner
       (case perm-type
-        (read +irusr+)
-        (write +iwusr+)
-        (exec +ixusr+)
+        (:read +irusr+)
+        (:write +iwusr+)
+        (:exec +ixusr+)
         (otherwise 0)))
-    (group
+    (:group
       (case perm-type
-        (read +irgrp+)
-        (write +iwgrp+)
-        (exec +ixgrp+)
+        (:read +irgrp+)
+        (:write +iwgrp+)
+        (:exec +ixgrp+)
         (otherwise 0)))
-    (others
+    (:others
       (case perm-type
-        (read +iroth+)
-        (write +iwoth+)
-        (exec +ixoth+)
+        (:read +iroth+)
+        (:write +iwoth+)
+        (:exec +ixoth+)
         (otherwise 0)))
-    (unknown
+    (:unknown
       (if useunk-p
         (case perm-type
-          (read +irunk+)
-          (write +iwunk+)
-          (exec +ixunk+)
+          (:read +irunk+)
+          (:write +iwunk+)
+          (:exec +ixunk+)
           (otherwise 0))
         0))
     (otherwise 0))))
@@ -334,7 +334,8 @@ You can also ignore user-type and the bits will be for all the user types.
   (make-instance 'mode :mode-bits bits))
 
 (defun make-mode (&key (type :reg)
-                       (perms '((owner read write) (group read))) ; starting permissions
+                       (perms '((:owner :read :write)
+                                (:group :read))) ; default permissions
                        (uid nil) ; activate uid bit
                        (gid nil) ; activate gid bit
                        (vtx nil) ; activate sticky bit
@@ -363,9 +364,9 @@ You can also ignore user-type and the bits will be for all the user types.
 (defun %perm-char (type)
   "Returns the associated character with 'type' permission type."
   (case type
-    (read #\r)
-    (write #\w)
-    (exec #\x)
+    (:read #\r)
+    (:write #\w)
+    (:exec #\x)
     (otherwise #\-)))
 
 (defun %type-char (type)
@@ -386,12 +387,12 @@ You can also ignore user-type and the bits will be for all the user types.
                          (mapcar (lambda (perm-type)
                                    (format stream "~c"
                                            (cond
-                                             ((and (eq perm-type 'exec)
-                                                   (eq user-type 'owner)
+                                             ((and (eq perm-type :exec)
+                                                   (eq user-type :owner)
                                                    (is-uid-p mode))
                                               #\s)
-                                             ((and (eq perm-type 'exec)
-                                                   (eq user-type 'group)
+                                             ((and (eq perm-type :exec)
+                                                   (eq user-type :group)
                                                    (is-gid-p mode))
                                               #\s)
                                              ((has-perms-p mode perm-type user-type)
@@ -399,7 +400,7 @@ You can also ignore user-type and the bits will be for all the user types.
                                              (t
                                                #\-))
                                            #\-))
-                                 '(read write exec))))
+                                 '(:read :write :exec))))
     (mapcar #'show-perm-bits '(owner group others)))
   (if (is-vtx-p mode)
     (format stream " vtx"))
