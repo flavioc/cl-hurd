@@ -315,6 +315,8 @@
            :+hurd-ifsock+
            :file-name-lookup
            :io-stat
+           :io-read
+           :dir-readdir
            :io-server-version
            :make-iouser
            :make-iouser-mem
@@ -448,6 +450,7 @@
            :create-socket
            :storage
            :refresh-node
+           :underlying-node
            :root))
 
 (defpackage :cl-hurd.translator.tree
