@@ -20,9 +20,9 @@
 
 (defmethod translate-from-foreign (value (type port-special-port-type))
   "Translate a foreign code into a symbol."
-  (translate-foreign-list value +special-port-type-codes+ 'from))
+  (translate-foreign-list value +special-port-type-codes+ :from))
 
 (defmethod translate-to-foreign (value (type port-special-port-type))
   "Translate a symbol into a foreign value."
-  (translate-foreign-list value +special-port-type-codes+ 'to))
+  (translate-foreign-list value +special-port-type-codes+ :to))
 

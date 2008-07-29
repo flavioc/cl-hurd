@@ -27,9 +27,9 @@
 
 (defmethod translate-from-foreign (value (type port-right-type))
   "Translate a foreign value into a symbol."
-  (translate-foreign-list value +port-right-codes+ 'from))
+  (translate-foreign-list value +port-right-codes+ :from))
 
 (defmethod translate-to-foreign (value (type port-right-type))
   "Translate a symbol into a foreign value."
-  (translate-foreign-list value +port-right-codes+ 'to))
+  (translate-foreign-list value +port-right-codes+ :to))
 

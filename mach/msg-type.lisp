@@ -27,10 +27,10 @@
     (,+msg-type-string+ :type-string)))
 
 (defun translate-msg-type-bits (value)
-  (translate-foreign-list value +msg-type-codes+ 'to))
+  (translate-foreign-list value +msg-type-codes+ :to))
 
 (defun translate-msg-type-symbol (value)
-  (translate-foreign-list value +msg-type-codes+ 'from))
+  (translate-foreign-list value +msg-type-codes+ :from))
 
 (defconstant +msg-type-name-bits+ #xff)
 (defconstant +max-msg-type-name+ #xff)

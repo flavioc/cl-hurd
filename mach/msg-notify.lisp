@@ -25,9 +25,9 @@
 
 (defmethod translate-from-foreign (value (type msg-notify-type))
   "Translate a foreign value into a symbol."
-  (translate-foreign-list value +msg-notify-codes+ 'from))
+  (translate-foreign-list value +msg-notify-codes+ :from))
 
 (defmethod translate-to-foreign (value (type msg-notify-type))
   "Translate a symbol into a foreign value."
-  (translate-foreign-list value +msg-notify-codes+ 'to))
+  (translate-foreign-list value +msg-notify-codes+ :to))
 
