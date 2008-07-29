@@ -12,5 +12,5 @@
   :author "Flavio Cruz"
   :license "GPL v3.0"
   :description "Simple tmpfs like translator."
-  :depends-on (:hurd)
+  :depends-on (:tree-translator)
   :components ((:file "tmp")))

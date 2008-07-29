@@ -12,5 +12,6 @@
   :author "Flavio Cruz"
   :license "GPL v3.0"
   :description "/dev/null translator."
-  :depends-on (:hurd)
+  :depends-on (:hurd-translator)
   :components ((:file "null")))
+
