@@ -37,7 +37,7 @@
 
 (defmacro with-lookup (name port &body body)
   "Lookups 'port' on the translator bucket and assigns it to 'name'."
-  `(let ((,name (lookup-port (port-bucket *translator*)
+  `(let ((,name (bucket-lookup-port (port-bucket *translator*)
                              ,port)))
      (refresh-node *translator* (get-node ,name) (get-user ,name))
      ,@body))
