@@ -11,10 +11,11 @@
            (list `(declare (ignore translator ,@args)))
           body))))
 
-(%add-callback make-root-node (underlying-stat)
+(%add-callback make-root-node (underlying-node underlying-stat)
   "Called when the translator wants to create the root node.
 'underlying-stat' refers to the stat structure from the file
-where the translator is being set up."
+where the translator is being set up. 'underlying-node' is the port to that file."
+  (declare (ignore underlying-node))
   (make-instance 'node :stat underlying-stat))
 
 (%add-callback pathconf (node user what)
