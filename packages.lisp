@@ -12,7 +12,6 @@
            :define-stub-library
            :error->string
            :err
-           :unless-return
            :translate-foreign-list
            :with-gensyms
            :select-error
@@ -21,38 +20,10 @@
            :disable-flags
            :only-flags
            :free-memory-list
-           :read
-           :write
-           :exec
-           :norw
-           :largefile
-           :excl
-           :creat
-           :nolink
-           :notrans
-           :nofollow
-           :directory
-           :append
-           :async
-           :fsync
-           :sync
-           :noatime
-           :shlock
-           :exlock
-           :dsync
-           :rsync
-           :nonblock
-           :hurd
-           :trunc
-           :cloexec
            :mode-t
-           :mode-bits
            :stat
-           :stat-struct
            :make-stat
            :stat-t
-           :stat-clean
-           :ptr
            :fstype
            :fsid
            :ino
@@ -85,19 +56,6 @@
            :set-perms
            :set-perms-if
            :clear-perms
-           :read
-           :write
-           :exec
-           :owner
-           :group
-           :others
-           :unknown
-           :reg
-           :lnk
-           :dir
-           :chr
-           :blk
-           :sock
            :is-dir-p
            :is-reg-p
            :is-lnk-p
@@ -153,13 +111,6 @@
            :pathconf-type
            :dirent-type
            :unknown
-           :fifo
-           :chr
-           :dir
-           :blk
-           :reg
-           :lnk
-           :sock
            :wht
            :off-t
            :loff-t
@@ -167,8 +118,6 @@
            :pid-t
            :get-type
            :type
-           :from
-           :to
            :statfs-t
            :make-statfs
            :statfs-get
@@ -189,7 +138,6 @@
            :maptime-seconds
            :maptime-microseconds
            :maptime-check-seconds
-           :*mapped-time*
            :select-type
            :foreign-string-zero-separated-to-list
            :is-uid-p
@@ -400,7 +348,6 @@
            :is-controller-p
            :has-access-p
            :can-modify-dir-p
-           :can-modify-file-in-dir-p
            :is-owner-p
            :box-drop
            :box-set-active
@@ -449,7 +396,8 @@
 
 (defpackage :cl-hurd.translator
   (:nicknames :hurd-translator)
-  (:use :cl :cffi :mach :hurd-common :hurd :tg :flexi-streams)
+  (:use :cl :cffi :mach :hurd-common
+        :hurd :tg :flexi-streams)
   (:export :translator
            :make-root-node
            :pathconf
@@ -518,12 +466,3 @@
            :iterate-entries-deep
            :has-entry-p
            :parent))
-
-(defpackage :cl-hurd.translator.examples
-  (:nicknames :hurd-example-translators)
-  (:use :cl :hurd-common :mach
-        :hurd :hurd-translator
-        :hurd-tree-translator
-        :zip
-        :flexi-streams))
-
