@@ -105,3 +105,4 @@
 (defctype msg-type :unsigned-int)
 
 (defconstant +msg-type-size+ (foreign-type-size 'msg-type))
+
