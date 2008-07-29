@@ -1,8 +1,12 @@
 
-(in-package :hurd-example-translators)
+(defpackage :link-translator
+  (:use :cl :hurd-common :mach
+        :hurd :hurd-translator))
 
-(assert (= (length *args*) 1))
-(defconstant +target-link+ (first *args*))
+(in-package :link-translator)
+
+(assert (= (length ext:*args*) 1))
+(defconstant +target-link+ (first ext:*args*))
 
 (defclass link-translator (translator)
   ((name :initform "link-translator"
@@ -19,7 +23,7 @@
 
 (define-callback report-access link-translator
                  (node user)
-  (when (has-access-p node user 'read)
+  (when (has-access-p node user :read)
     '(:read)))
 
 (defun main ()
