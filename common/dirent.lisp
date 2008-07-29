@@ -33,21 +33,21 @@
 
 (defclass dirent ()
   ((name :initarg :name
-         :accessor name
+         :accessor dirent-name
          :documentation "Entry name")
    (ino :initarg :ino
-        :accessor ino
+        :accessor dirent-ino
         :documentation "Ino value of this entry.")
    (filetype :initarg :file-type
-             :accessor file-type
+             :accessor dirent-file-type
              :documentation "Mode type of this entry.")
    (size :initform nil
          :initarg :size
-         :accessor size
+         :accessor dirent-size
          :documentation "Total foreign size.")
    (name-size :initform nil
               :initarg :name-size
-              :accessor name-size
+              :accessor dirent-name-size
               :documentation "Name lenght."))
   (:documentation "Dirent class with name + node."))
 
@@ -57,23 +57,25 @@
 
 (defmethod initialize-instance :after ((dirent dirent) &key)
   "Automagically fill size fields."
-  (unless (name-size dirent)
-    (setf (name-size dirent) (1+ (length (name dirent)))))
-  (unless (size dirent)
-    (setf (size dirent) (+ (name-size dirent) +dirent-size+)))
+  (unless (dirent-name-size dirent)
+    (setf (dirent-name-size dirent)
+          (1+ (length (dirent-name dirent)))))
+  (unless (dirent-size dirent)
+    (setf (dirent-size dirent)
+          (+ (dirent-name-size dirent) +dirent-size+)))
   dirent)
 
 (defmethod write-dirent ((dirent dirent) ptr)
   "Writes dirent object to ptr."
-  (setf (foreign-slot-value ptr 'dirent-struct 'ino) (ino dirent)
-        (foreign-slot-value ptr 'dirent-struct 'reclen) (size dirent)
+  (setf (foreign-slot-value ptr 'dirent-struct 'ino) (dirent-ino dirent)
+        (foreign-slot-value ptr 'dirent-struct 'reclen) (dirent-size dirent)
         (foreign-slot-value ptr 'dirent-struct 'type)
-        (foreign-enum-value 'dirent-type (file-type dirent))
-        (foreign-slot-value ptr 'dirent-struct 'namlen) (name-size dirent))
-  (lisp-string-to-foreign (name dirent)
+        (foreign-enum-value 'dirent-type (dirent-file-type dirent))
+        (foreign-slot-value ptr 'dirent-struct 'namlen) (dirent-name-size dirent))
+  (lisp-string-to-foreign (dirent-name dirent)
                           (inc-pointer ptr +dirent-size+)
-                          (name-size dirent))
-  (size dirent))
+                          (dirent-name-size dirent))
+  (dirent-size dirent))
 
 (defun read-dirent (ptr)
   "Read dirent object from foreign pointer 'ptr'."
@@ -93,7 +95,7 @@
 
 (defmethod print-object ((dirent dirent) stream)
   (format stream "#<dirent name=~s ino=~s filetype=~s>"
-          (name dirent)
-          (ino dirent)
-          (file-type dirent)))
+          (dirent-name dirent)
+          (dirent-ino dirent)
+          (dirent-file-type dirent)))
 
