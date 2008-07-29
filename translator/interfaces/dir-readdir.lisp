@@ -6,7 +6,7 @@
   (let ((current 0)
         (nitens 0))
     (loop for dirent in entries
-          do (let* ((this-size (size dirent))
+          do (let* ((this-size (dirent-size dirent))
                     (newval (+ this-size current)))
                (cond
                  ((and limit (> newval limit)) (return))
