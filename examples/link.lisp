@@ -14,7 +14,8 @@
   (:documentation "The link-translator."))
 
 (define-callback make-root-node link-translator
-                 (underlying-stat)
+                 (underlying-node underlying-stat)
+  (declare (ignore underlying-node))
   (let ((obj (make-instance 'node
                             :stat (make-stat underlying-stat
                                              :type :lnk))))

@@ -11,7 +11,8 @@
   (:documentation "The null-translator."))
 
 (define-callback make-root-node null-translator
-                 (underlying-stat)
+                 (underlying-node underlying-stat)
+  (declare (ignore underlying-node))
   (let ((mode (make-mode :perms '((:owner :read :write)
                                   (:group :read :write)
                                   (:others :read :write))

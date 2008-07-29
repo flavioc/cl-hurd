@@ -10,7 +10,8 @@
   (:documentation "The zero-translator."))
 
 (define-callback make-root-node zero-translator
-                 (underlying-stat)
+                 (underlying-node underlying-stat)
+  (declare (ignore underlying-node))
   (let ((mode (make-mode :perms '((:owner :read :write)
                                   (:group :read :write)
                                   (:others :read :write))

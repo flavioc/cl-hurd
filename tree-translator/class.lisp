@@ -27,7 +27,8 @@
 ;; and calls the function fill-root-node to fill the directory
 ;; structure.
 (define-callback make-root-node tree-translator
-                 (underlying-stat)
+                 (underlying-node underlying-stat)
+  (declare (ignore underlying-node))
   (when (not (is-dir-p underlying-stat))
     (propagate-read-to-execute underlying-stat))
   (set-trans underlying-stat nil)
