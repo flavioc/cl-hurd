@@ -42,10 +42,10 @@
 root node."
   nil)
 
-(define-callback dir-lookup tree-translator
+(define-callback directory-lookup tree-translator
 				 (node user filename)
   (unless (has-access-p node user :read)
-    (return-from dir-lookup nil))
+    (return-from directory-lookup nil))
   (let ((found (cond
                 ((string= filename ".") node)
                 ((string= filename "..") (parent node))
