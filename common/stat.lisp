@@ -20,23 +20,23 @@
 
 (defcstruct (stat-struct :size 128)
   "The stat struct."
-	(fstype :unsigned-int) ; File system type
-	(fsid :long-long) ; File system ID
-	(ino ino-t) ; File number
-	(gen :unsigned-int) ; To detect reuse of file numbers
-	(rdev :unsigned-int) ; Device if special file
-	(mode :unsigned-int) ; File mode
-	(nlink :unsigned-int) ; Number of links
-	(uid uid-t) ; Owner
-	(gid gid-t) ; Owning group
-	(size :long-long) ; Size in bytes
-	(atim timespec-struct) ; Time of last access
-	(mtim timespec-struct) ; Time of last modification
-	(ctim timespec-struct) ; Time of last status change
-	(blksize :unsigned-int) ; Optimal size of IO
-	(blocks :long-long) ; Number of 512-byte blocks allocated
-	(author uid-t) ; File author
-	(flags :unsigned-int)) ; User defined flags
+	(st-fstype :unsigned-int) ; File system type
+	(st-fsid :long-long) ; File system ID
+	(st-ino ino-t) ; File number
+	(st-gen :unsigned-int) ; To detect reuse of file numbers
+	(st-rdev :unsigned-int) ; Device if special file
+	(st-mode :unsigned-int) ; File mode
+	(st-nlink :unsigned-int) ; Number of links
+	(st-uid uid-t) ; Owner
+	(st-gid gid-t) ; Owning group
+	(st-size :long-long) ; Size in bytes
+	(st-atim timespec-struct) ; Time of last access
+	(st-mtim timespec-struct) ; Time of last modification
+	(st-ctim timespec-struct) ; Time of last status change
+	(st-blksize :unsigned-int) ; Optimal size of IO
+	(st-blocks :long-long) ; Number of 512-byte blocks allocated
+	(st-author uid-t) ; File author
+	(st-flags :unsigned-int)) ; User defined flags
 
 (defclass stat (base-mode)
   ((ptr :initform nil
@@ -47,11 +47,11 @@
 
 (defmethod mode-bits ((stat stat))
   "Returns the mode bits from a stat."
-  (foreign-slot-value (ptr stat) 'stat-struct 'mode))
+  (foreign-slot-value (ptr stat) 'stat-struct 'st-mode))
 
 (defmethod (setf mode-bits) (new-value (stat stat))
   "Sets the mode bits from a stat."
-  (setf (foreign-slot-value (ptr stat) 'stat-struct 'mode) new-value))
+  (setf (foreign-slot-value (ptr stat) 'stat-struct 'st-mode) new-value))
 
 (defun stat-copy (stat-dest stat-src)
   "Copies to 'stat-dest' all the stat information from 'stat-src'."
@@ -66,23 +66,25 @@
 (defmethod stat-get ((stat stat) what)
   "Gets specific information from a stat object.
 'what' can be:
-atime, mtime, ctime, dev, mode, fstype, fsid, ino, gen, rdev, nlink,
-uid, gid, size, atim, mtim, ctim, blksize, blocks, author, flags."
+st-atime, st-mtime, st-ctime, st-ev, st-mode, st-fstype,
+st-fsid, st-ino, st-gen, st-rdev, st-nlink,
+st-uid, st-gid, st-size, st-atim, st-mtim, st-ctim,
+st-blksize, st-blocks, st-author, st-flags."
   (with-slots ((ptr ptr)) stat
     (case what
-      (atime (%stat-time-get ptr 'atim))
-      (mtime (%stat-time-get ptr 'mtim))
-      (ctime (%stat-time-get ptr 'ctim))
+      (st-atime (%stat-time-get ptr 'st-atim))
+      (st-mtime (%stat-time-get ptr 'st-mtim))
+      (st-ctime (%stat-time-get ptr 'st-ctim))
       ; Get type from the mode bits.
       (type (get-type stat))
-      ; 'dev' is an alias to 'fsid'.
-      (dev (foreign-slot-value ptr 'stat-struct 'fsid))
+      ; 'st-dev' is an alias to 'st-fsid'.
+      (st-dev (foreign-slot-value ptr 'stat-struct 'st-fsid))
       ; We return a mode object here
-      (mode (make-mode-clone
-              (foreign-slot-value ptr 'stat-struct 'mode)))
-      ; With rdev, we return a device-id object.
-      (rdev
-        (let ((field (foreign-slot-value ptr 'stat-struct 'rdev)))
+      (st-mode (make-mode-clone
+                 (foreign-slot-value ptr 'stat-struct 'st-mode)))
+      ; With st-rdev, we return a device-id object.
+      (st-rdev
+        (let ((field (foreign-slot-value ptr 'stat-struct 'st-rdev)))
           (make-instance 'device-id
                          :major (get-major-dev field)
                          :minor (get-minor-dev field))))
@@ -97,9 +99,9 @@ uid, gid, size, atim, mtim, ctim, blksize, blocks, author, flags."
        ; Copy the time-value seconds
        ; and convert the microseconds to nanoseconds.
        (setf (foreign-slot-value timespec 'timespec-struct 'sec)
-             (seconds new-value)
+             (time-value-seconds new-value)
              (foreign-slot-value timespec 'timespec-struct 'nsec)
-             (microsecs->nanosecs (microseconds new-value)))
+             (microsecs->nanosecs (time-value-microseconds new-value)))
        t)
       (t
         ; For everything else just copy the value to seconds.
@@ -113,21 +115,23 @@ uid, gid, size, atim, mtim, ctim, blksize, blocks, author, flags."
 'what' can have the same values as 'stat-get'."
   (with-slots ((ptr ptr)) stat
     (case what
-      (atime (%stat-time-set ptr 'atim new-value))
-      (mtime (%stat-time-set ptr 'mtim new-value))
-      (ctime (%stat-time-set ptr 'ctim new-value))
-      ; Just an alias to fsid
-      (dev (setf (foreign-slot-value ptr 'stat-struct 'fsid) new-value))
+      (st-atime (%stat-time-set ptr 'st-atim new-value))
+      (st-mtime (%stat-time-set ptr 'st-mtim new-value))
+      (st-ctime (%stat-time-set ptr 'st-ctim new-value))
+      ; Just an alias to st-fsid
+      (st-dev
+        (setf (foreign-slot-value ptr 'stat-struct 'st-fsid)
+              new-value))
       ; We can use device-id objects here.
-      (rdev
-        (setf (foreign-slot-value ptr 'stat-struct 'rdev)
+      (st-rdev
+        (setf (foreign-slot-value ptr 'stat-struct 'st-rdev)
               (if (typep new-value 'device-id)
                  (get-device-integer new-value)
                   new-value))) ; We treat 'new-value' as a simple integer value
-      (mode
+      (st-mode
         ; If 'new-value' is a mode object, copy its bits
         ; else it must be the mode bitfield itself.
-        (setf (foreign-slot-value ptr 'stat-struct 'mode)
+        (setf (foreign-slot-value ptr 'stat-struct 'st-mode)
               (if (typep new-value 'mode)
                 (mode-bits new-value)
                 new-value)))
@@ -160,34 +164,30 @@ size: initial size for the size field.
       (case (type-of extra)
         (mode
           ; Copy it to the mode field.
-          (setf (stat-get obj 'mode)
+          (setf (stat-get obj 'st-mode)
                 (mode-bits extra)))
         (stat
           ; Copy the whole thing.
           (memcpy mem (ptr extra) +stat-size+))))
     ; Optional/Key parameters go here:
     (when (numberp size)
-      (setf (stat-get obj 'size) size))
+      (setf (stat-get obj 'st-size) size))
     (when mode
-      (setf (stat-get obj 'mode) mode))
+      (setf (stat-get obj 'st-mode) mode))
     (when type
       (set-type obj type))
     (when (valid-id-p uid)
-      (setf (stat-get obj 'uid) uid))
+      (setf (stat-get obj 'st-uid) uid))
     (when (valid-id-p gid)
-      (setf (stat-get obj 'gid) gid))
+      (setf (stat-get obj 'st-gid) gid))
     ; Return the new object
     obj))
-
-(defmethod stat-clean ((stat stat))
-  "Clean the stat struct, putting zeros there."
-  (bzero (ptr stat) (foreign-type-size 'stat-struct)))
 
 (defmethod print-object ((stat stat) stream)
   "Print a stat object."
   (format stream "#<stat: ")
   ; Print the mode object too
-  (print-object (stat-get stat 'mode) stream)
+  (print-object (stat-get stat 'st-mode) stream)
   (format stream ">"))
 
 (define-foreign-type stat-type ()
