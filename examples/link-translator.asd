@@ -12,5 +12,5 @@
   :author "Flavio Cruz"
   :license "GPL v3.0"
   :description "Translator that creates a simple link node."
-  :depends-on (:hurd :ext)
+  :depends-on (:hurd)
   :components ((:file "link")))
