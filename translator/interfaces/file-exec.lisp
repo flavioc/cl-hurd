@@ -1,16 +1,43 @@
 
 (in-package :hurd-translator)
 
-(defun %deallocate-port-array (ptr len)
-  (loop for i from 0 below len
-        do (port-deallocate
-             (mem-aref ptr 'port i))))
-
 (defun print-str-ptr (ptr len)
   (loop for i from 0 below len
         do (format *error-output*
                    "~c" (code-char (mem-aref ptr :char i))))
   (format *error-output* "~%"))
+
+(define-helper-library file-exec)
+
+(defcfun ("do_exec_exec" %do-exec-exec)
+  :pointer
+  (execserver port)
+  (file port)
+  (file-type msg-type-name)
+  (oldtask task)
+  (flags exec-flags)
+  (argv :pointer)
+  (argvlen msg-type-number)
+  (envp :pointer)
+  (envplen msg-type-number)
+  (dtable :pointer)
+  (dtable-type msg-type-name)
+  (dtablelen msg-type-number)
+  (portarray :pointer)
+  (portarray-type msg-type-name)
+  (portarraylen msg-type-number)
+  (intarray :pointer)
+  (intarraylen msg-type-number)
+  (deallocnames :pointer)
+  (deallocnameslen msg-type-number)
+  (destroynames :pointer)
+  (destroynameslen msg-type-number))
+
+(defun %exec-done-p (ptr)
+  (mem-ref ptr :boolean))
+
+(defun %exec-ret-code (ptr)
+  (mem-ref (inc-pointer ptr (foreign-type-size :int)) 'err))
 
 (def-fs-interface :file-exec ((file port)
                               (task task)
@@ -37,7 +64,7 @@
                  (user (get-user protid)))
              (unless (flag-is-p (flags open) :exec)
                (return-from file-exec :bad-fd))
-             (unless (has-access-p node user 'exec)
+             (unless (has-access-p node user :exec)
                (return-from file-exec :permission-denied))
              (when (is-dir-p (stat node))
                (return-from file-exec :permission-denied))
@@ -65,25 +92,24 @@
                        deallocnames deallocnameslen
                        destroynames destroynameslen)
                  (print-str-ptr argv argvlen)
-                 (setf flags (enable-flags flags :newtask))
-                 (let ((ret (exec-exec +exec-server+
-                                       right
-                                       :copy-send
-                                       task
-                                       flags
-                                       argv argvlen
-                                       envp envplen
-                                       fds :copy-send fdslen
-                                       portarray :copy-send portarraylen
-                                       intarray intarray-len
-                                       deallocnames deallocnameslen
-                                       destroynames destroynameslen)))
-                   (warn "exec-exec returned with ~s" ret)
-                   (cond
-                     ((eq t ret)
-                      (port-deallocate task)
-                      (%deallocate-port-array fds fdslen)
-                      (%deallocate-port-array portarray portarraylen)
-                      t)
-                     (t
-                       ret)))))))))
+                 (warn "launching do-exec-exec")
+                 (let ((ptr
+                         (%do-exec-exec +exec-server+
+                                        right
+                                        :copy-send
+                                        task
+                                        (enable-flags flags :newtask)
+                                        argv argvlen
+                                        envp envplen
+                                        fds :copy-send fdslen
+                                        portarray :copy-send portarraylen
+                                        intarray intarray-len
+                                        deallocnames deallocnameslen
+                                        destroynames destroynameslen)))
+                   (warn "do-exec-exec ~s" ptr)
+                   (return-from file-exec nil)
+                   (with-cleanup (foreign-free ptr)
+                     (loop until (%exec-done-p ptr)
+                           do (progn (warn "still not done")
+                                     (wait :miliseconds 200)))
+                     (%exec-ret-code ptr)))))))))
