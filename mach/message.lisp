@@ -90,14 +90,14 @@
 
 (defclass message-spec ()
   ((fields :initform nil
-           :accessor fields
+           :accessor spec-fields
            :initarg :fields)
    (id :initform 0
-       :accessor id
+       :accessor spec-id
        :initarg :id)
    (size :initform 0
          :initarg :size
-         :accessor size)))
+         :accessor spec-size)))
 
 (defun make-message-spec (&key fields (id 0))
   (declare (type fixnum id))
@@ -110,14 +110,14 @@
 
 (defclass message ()
    ((spec :initform nil
-         :accessor spec
+         :accessor msg-spec
          :initarg :spec)
     (ptr :initform nil
         :accessor ptr
         :initarg :ptr)))
 
-(defmethod size ((msg message)) (size (spec msg)))
-(defmethod fields ((msg message)) (fields (spec msg)))
+(defmethod msg-size ((msg message)) (spec-size (msg-spec msg)))
+(defmethod msg-fields ((msg message)) (spec-fields (msg-spec msg)))
 
 (defun msg-type-total-size (field)
   (* (msg-type-size field)
@@ -137,7 +137,7 @@
 (defun make-message (&key spec (ptr nil))
   (let ((ptr-null-p (null ptr)))
     (when ptr-null-p
-      (setf ptr (foreign-alloc :char :count (size spec))))
+      (setf ptr (foreign-alloc :char :count (spec-size spec))))
     (let ((obj (make-instance 'message
                               :spec spec
                               :ptr ptr)))
@@ -190,11 +190,11 @@
 
 (defmethod send-message ((msg message) &key (local nil) remote data
                                        (timeout nil) (notify nil))
-  (validate-data (fields msg) data)
+  (validate-data (msg-fields msg) data)
   (let ((ptr (ptr msg))
-        (size (size msg))
-        (fields (fields msg)))
-    (fill-msg-header ptr size local remote (id (spec msg)))
+        (size (msg-size msg))
+        (fields (msg-fields msg)))
+    (fill-msg-header ptr size local remote (spec-id (msg-spec msg)))
     (incf-pointer ptr +msg-header-size+)
     (loop for field in fields
           for data-field in data
@@ -223,21 +223,21 @@
                            '(:rcv-msg :rcv-timeout)
                            '(:rcv-msg))
                          0
-                         (size msg)
+                         (msg-size msg)
                          source
                          (if timeout-p timeout 0)
                          notify))
       (validate-message msg))))
 
 (defmethod validate-message ((msg message))
-  (unless (eq (size msg) (header-get-size (ptr msg)))
+  (unless (eq (msg-size msg) (header-get-size (ptr msg)))
     (return-from validate-message nil))
-  (when (id (spec msg))
-    (unless (eq (id (spec msg)) (get-message-id msg))
+  (when (spec-id (msg-spec msg))
+    (unless (eq (spec-id (msg-spec msg)) (get-message-id msg))
       (return-from validate-message nil)))
   (let ((ptr (inc-pointer (ptr msg)
                           +msg-header-size+)))
-    (loop for field in (fields msg)
+    (loop for field in (msg-fields msg)
           do (let ((type-val (mem-ref ptr 'msg-type)))
                (unless (eq (get-type-name type-val)
                            (msg-type-to-msg-type field))
@@ -259,7 +259,7 @@
 (defmethod get-message ((msg message))
   (let ((ptr (inc-pointer (ptr msg)
                           +msg-header-size+)))
-    (loop for field in (fields msg)
+    (loop for field in (msg-fields msg)
           collect (progn
                     (incf-pointer ptr +msg-type-size+)
                     (with-cleanup (incf-pointer ptr (msg-type-total-size field))
