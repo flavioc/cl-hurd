@@ -13,6 +13,16 @@
          :documentation "Translator name"))
   (:documentation "The tree-translator."))
 
+(defmethod propagate-read-to-execute ((stat stat))
+  "Enables the execute permission bit if the read bit is on."
+  (if (has-perms-p stat :read :owner)
+    (set-perms stat :exec :owner))
+  (if (has-perms-p stat :read :group)
+    (set-perms stat :exec :group))
+  (if (has-perms-p stat :read :others)
+    (set-perms stat :exec :others))
+  t)
+
 ;; It ensures the root node is a directory
 ;; and calls the function fill-root-node to fill the directory
 ;; structure.
@@ -33,26 +43,26 @@ root node."
 
 (define-callback dir-lookup tree-translator
 				 (node user filename)
-  (unless (has-access-p node user 'read)
+  (unless (has-access-p node user :read)
     (return-from dir-lookup nil))
   (let ((found (cond
                 ((string= filename ".") node)
                 ((string= filename "..") (parent node))
                 (t (get-entry node filename)))))
     (when (and found
-               (has-access-p found user 'read))
+               (has-access-p found user :read))
       found)))
 
 (define-callback number-of-entries tree-translator
 				 (node user)
   (cond
-    ((has-access-p node user 'read)
+    ((has-access-p node user :read)
      (dir-size node))
     (t 0)))
 
 (define-callback get-entries tree-translator
 				(node user start end)
-  (unless (has-access-p node user 'read)
+  (unless (has-access-p node user :read)
     (return-from get-entries nil))
   (let* ((return-list nil)
          (real-start (max 0 (- start 2))))
@@ -103,6 +113,6 @@ root node."
   (let ((old-entry (get-entry old-dir old-name)))
     (when (and (is-owner-p old-entry user)
                (is-owner-p new-dir user)
-               (has-access-p new-dir user 'write))
+               (has-access-p new-dir user :write))
       (rename-dir-entry old-dir old-name new-dir new-name)
       t)))
