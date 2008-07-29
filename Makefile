@@ -1,5 +1,5 @@
 
-TARGET_DIRS = stubs hurd/helper-libs launcher
+TARGET_DIRS = stubs libs launcher
 
 all:
 	@for dir in $(TARGET_DIRS); do \
