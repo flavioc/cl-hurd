@@ -5,7 +5,7 @@
                                 (atimein time-value-t)
                                 (mtimein time-value-t))
   (with-lookup protid file
-    (let ((err (file-utimes *translator*
+    (let ((err (utimes-file *translator*
                             (get-node protid)
                             (get-user protid)
                             atimein
