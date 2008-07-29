@@ -31,7 +31,8 @@
     (return-from %shutdown :resource-busy))
   (unless (flag-is-p flags :nosync)
     (file-syncfs *translator* (make-iouser-root) t t))
-  (shutdown *translator*))
+  (shutdown *translator*)
+  t)
 
 ;;
 ;; Run the fsys-goaway callback terminating the translator.
