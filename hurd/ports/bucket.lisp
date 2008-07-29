@@ -17,17 +17,12 @@
          :documentation "Contains the ports in this bucket"))
   (:documentation "The bucket class."))
 
-(defmethod bucket-cleanup ((bucket port-bucket))
-  "Destroys a port bucket."
-  (with-accessors ((port port-set)) bucket
-    (port-destroy port)))
-
-(defmethod add-control-port ((bucket port-bucket))
+(defmethod bucket-add-control-port ((bucket port-bucket))
   "Adds a new control port to bucket."
-  (add-port bucket
-            (make-instance 'port-info)))
+  (bucket-add-port bucket
+                   (make-instance 'port-info)))
 
-(defmethod add-port ((bucket port-bucket) (port port-info))
+(defmethod bucket-add-port ((bucket port-bucket) (port port-info))
   "Adds port 'port' to bucket 'bucket'."
   (move-receive-right bucket (port-right port))
   (setf (gethash (port-right port) (table bucket)) port)
@@ -41,19 +36,19 @@
   "Moves the receive right to the bucket's port set."
   (port-move-member right (port-set bucket)))
 
-(defmethod has-port ((bucket port-bucket) port)
+(defmethod bucket-has-port-p ((bucket port-bucket) port)
   "Has 'bucket' the port 'port'?"
   (with-accessors ((table table)) bucket
     (multiple-value-bind (val found) (gethash port table)
       (declare (ignore val))
       found)))
 
-(defmethod lookup-port ((bucket port-bucket) port)
+(defmethod bucket-lookup-port ((bucket port-bucket) port)
   "Returns a port-info with port name 'port' from 'bucket'."
   (with-accessors ((table table)) bucket
     (gethash port table)))
 
-(defmethod remove-port ((bucket port-bucket) port &optional (cleanup t))
+(defmethod bucket-remove-port ((bucket port-bucket) port &optional (cleanup t))
   "Removes the port 'port' from the bucket 'bucket'."
   (with-accessors ((table table)) bucket
     (remhash (port-right port) table)
