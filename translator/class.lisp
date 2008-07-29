@@ -35,10 +35,6 @@
             :initarg :storage
             :accessor storage
             :documentation "Translator's storage type.")
-   (flags :initform nil
-          :reader flags
-          :initarg flags
-          :documentation "Startup translator flags to be passed to fsys-startup.")
    (options :initform (make-translator-options)
             :accessor options
             :initarg :options
@@ -51,13 +47,7 @@
             (make-protid user open-node)))
 
 (defmethod initialize-instance :after ((translator translator) &key)
-  "Gets the bootstrap port to call fsys-startup and installs a new control port into the bucket."
-  (with-port-deallocate (bootstrap (task-get-bootstrap-port))
-    (let ((port (add-control-port (port-bucket translator))))
-      (with-port-deallocate (right (get-send-right port))
-        (setf (slot-value translator 'underlying-node)
-              (fsys-startup bootstrap (flags translator) right :copy-send)))))
-  ;; Destroy identity port when translator goes away.
+  "Destroy identity port when translator goes away."
   (with-accessors ((id identity-port)) translator
     (finalize translator (lambda () (port-destroy id)))))
 
