@@ -18,7 +18,7 @@
 
 (defclass proxy-dir-entry (underlying-entry dir-entry) ())
 
-(define-callback file-read proxy-translator
+(define-callback read-file proxy-translator
                  (node user start amount stream)
   (when (has-access-p node user :read)
     (let ((data (io-read (port node)
