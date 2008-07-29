@@ -50,7 +50,7 @@ please see common/pathconf.lisp."
       (return-from allow-open-p nil)))
   t)
 
-(%add-callback file-chmod (node user mode)
+(%add-callback chmod-file (node user mode)
   "The user is attempting to 'chmod' node with the mode permission bits."
   (cond
     ((is-owner-p node user)
@@ -58,31 +58,31 @@ please see common/pathconf.lisp."
      t)
     (t nil)))
 
-(%add-callback file-chown (node user uid gid)
+(%add-callback chown-file (node user uid gid)
   "The user is attempting to 'chown' node with uid and gid."
   (cond
     ((is-owner-p node user)
      (when (valid-id-p uid)
-       (setf (stat-get (stat node) 'uid) uid))
+       (setf (stat-get (stat node) 'st-uid) uid))
      (when (valid-id-p gid)
-       (setf (stat-get (stat node) 'gid) gid))
+       (setf (stat-get (stat node) 'st-gid) gid))
      t)
     (t nil)))
 
-(%add-callback file-utimes (node user atime mtime)
+(%add-callback utimes-file (node user atime mtime)
   "The user is attempting to change the access and modification time of the node.
 'atime' or 'mtime' can be +now-time-value+.
-Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both cases."
+Using (setf (stat-get (stat node) 'st-mtime) mtime) will do it for you in both cases."
   (cond
     ((is-owner-p node user)
      (when atime
-       (setf (stat-get (stat node) 'atime) atime))
+       (setf (stat-get (stat node) 'st-atime) atime))
      (when mtime
-       (setf (stat-get (stat node) 'mtime) mtime))
+       (setf (stat-get (stat node) 'st-mtime) mtime))
      t)
     (t nil)))
 
-(%add-callback dir-lookup (node user filename)
+(%add-callback directory-lookup (node user filename)
   "This must return the node with the name 'filename' in the directory 'node', nil when it is not found.")
 
 (%add-callback create-file (node user filename mode)
@@ -107,20 +107,20 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
 (%add-callback remove-directory-entry (node user name directory-p)
   "The user wants to remove an entry named 'name' from the directory 'node'. 'directory-p' indicates that the entry is a directory.")
 
-(%add-callback file-read (node user start amount stream)
+(%add-callback read-file (node user start amount stream)
   "User wants to read 'amount' bytes starting at 'start'. These bytes should be written to the stream 'stream'. Return t in case of success, nil otherwise.")
 
-(%add-callback file-sync (node user wait-p omit-metadata-p)
+(%add-callback sync-file (node user wait-p omit-metadata-p)
   "User wants to sync the contents in node. 'wait-p' indicates the user wants to wait. 'omit-metadata-p' indicates we must omit the update of the file metadata (like stat information)."
   (declare (ignore translator node user wait-p omit-metadata-p))
   t)
 
-(%add-callback file-syncfs (user wait-p do-children-p)
+(%add-callback sync-fs (user wait-p do-children-p)
   "User wants to sync the entire filesystem. 'wait-p' indicates the user wants to wait for it. 'do-children-p' indicates we should also sync the children nodes."
   (declare (ignore translator user wait-p do-children-p))
   t)
 
-(%add-callback file-write (node user offset stream)
+(%add-callback write-file (node user offset stream)
   "The user wants to write the bytes in the input stream 'stream' starting at 'offset'.")
 
 (%add-callback drop-node (node)
