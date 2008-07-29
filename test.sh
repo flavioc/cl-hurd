@@ -1,4 +1,4 @@
 #!/bin/sh
 
-#clisp hurd
-settrans -ac foo ./launcher/run-lisp-trans --stdout debug hurd.lisp
+cd examples
+settrans --timeout=0 -a ../foo /usr/bin/clisp ../test.lisp $*
