@@ -21,11 +21,9 @@
     (inner-run translator)))
 
 (defun calculate-miliseconds (seconds miliseconds)
-  (+ (* 1000 seconds)
-     miliseconds))
+  (+ (* 1000 seconds) miliseconds))
 
 (defun wait (&key (seconds 0) (miliseconds 0))
-  (warn "waiting for ~s ~s" seconds miliseconds)
   (unless (and (zerop seconds)
                (zerop miliseconds))
     (run-server (lambda (port in out)
