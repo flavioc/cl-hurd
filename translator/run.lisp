@@ -4,7 +4,7 @@
 (defmethod configure ((translator translator) flags)
   "Gets the bootstrap port to call fsys-startup and installs a new control port into the bucket."
   (with-port-deallocate (bootstrap (task-get-bootstrap-port))
-    (let ((port (add-control-port (port-bucket translator))))
+    (let ((port (bucket-add-control-port (port-bucket translator))))
       (with-port-deallocate (right (get-send-right port))
         (setf (slot-value translator 'underlying-node)
               (fsys-startup bootstrap flags right :copy-send))))))
