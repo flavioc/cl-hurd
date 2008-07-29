@@ -39,13 +39,13 @@ please see common/pathconf.lisp."
   "'user' wants to open 'node' with flags 'flags', 'is-new-p' indicates that this is a newly created node. This should return nil when we don't wanna open the node."
   (declare (ignore is-new-p))
   (when (flag-is-p flags :read)
-    (unless (has-access-p node user 'read)
+    (unless (has-access-p node user :read)
       (return-from allow-open-p nil)))
   (when (flag-is-p flags :write)
-    (unless (has-access-p node user 'write)
+    (unless (has-access-p node user :write)
       (return-from allow-open-p nil)))
   (when (flag-is-p flags :exec)
-    (unless (has-access-p node user 'exec)
+    (unless (has-access-p node user :exec)
       (return-from allow-open-p nil)))
   t)
 
@@ -132,11 +132,11 @@ Using (setf (stat-get (stat node) 'mtime) mtime) will do it for you in both case
   "This should return a list of permitted access modes for 'user'.Permitted modes are:
 :read :write :exec."
   (let ((ret))
-    (when (has-access-p node user 'read)
+    (when (has-access-p node user :read)
       (push :read ret))
-    (when (has-access-p node user 'write)
+    (when (has-access-p node user :write)
       (push :write ret))
-    (when (has-access-p node user 'exec)
+    (when (has-access-p node user :exec)
       (push :exec ret))
     ret))
 
@@ -198,7 +198,7 @@ Return T when this is possible, nil otherwise."
 
 (%add-callback allow-link-p (node user)
   "Return T to allow reading from the symlink 'node' to 'user'."
-  (has-access-p node user 'read))
+  (has-access-p node user :read))
 
 (%add-callback create-block (node user device)
   "Turn 'node' into a block device with device-id 'device'.")
