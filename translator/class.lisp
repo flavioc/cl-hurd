@@ -43,8 +43,8 @@
 
 (defmethod new-protid ((trans translator) user (open-node open-node))
   "Creates a new protid and inserts it into the translator bucket."
-  (add-port (port-bucket trans)
-            (make-protid user open-node)))
+  (bucket-add-port (port-bucket trans)
+                   (make-protid user open-node)))
 
 (defmethod initialize-instance :after ((translator translator) &key)
   "Destroy identity port when translator goes away."
