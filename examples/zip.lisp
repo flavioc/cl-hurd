@@ -1,13 +1,20 @@
 
-(in-package :hurd-example-translators)
+(defpackage :zip-translator
+  (:use :cl :hurd-common :mach
+        :hurd :hurd-translator
+        :hurd-tree-translator
+        :flexi-streams
+        :zip))
+
+(in-package :zip-translator)
 
 ;;
 ;; This is a simple zip translator.
 ;; Right now it supports file and directory listing.
 ;;
 
-(assert (= (length *args*) 1))
-(defvar *zip* (open-zipfile (first *args*)) "The zip handle.")
+(assert (= (length ext:*args*) 1))
+(defvar *zip* (open-zipfile (first ext:*args*)) "The zip handle.")
 
 (defclass zip-translator (tree-translator)
   ((name :initform "zip-translator"
@@ -50,7 +57,7 @@
 
 (define-callback report-access zip-translator
                  (node user)
-  (when (has-access-p node user 'read)
+  (when (has-access-p node user :read)
     '(:read)))
 
 (define-callback shutdown zip-translator ()
@@ -80,7 +87,7 @@
           stat (make-stat (stat parent)
                           :size (length seq)
                           :type :reg))
-    (clear-perms stat 'exec) ; Clear exec permissions.
+    (clear-perms stat :exec) ; Clear exec permissions.
     (let ((obj (make-instance 'zip-entry
                               :stat stat
                               :parent parent
