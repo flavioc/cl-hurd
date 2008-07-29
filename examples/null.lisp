@@ -21,12 +21,12 @@
                    :stat (make-stat underlying-stat
                                     :mode mode))))
 
-(define-callback file-read null-translator
+(define-callback read-file null-translator
                  (node user start amount stream)
   (declare (ignore translator node user start amount stream))
   t)
 
-(define-callback file-write null-translator
+(define-callback write-file null-translator
                  (node user offset stream)
   (declare (ignore translator node user offset))
   ; Empty the stream to look like we used it all.
