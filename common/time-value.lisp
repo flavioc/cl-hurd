@@ -42,7 +42,7 @@ Definition can be found at mach/time_value.h"
   "Translate a time-value object to a foreign time-value pointer."
   (ptr value))
 
-(defmethod seconds ((time time-value))
+(defmethod time-value-seconds ((time time-value))
   (let ((ret (foreign-slot-value (ptr time)
                                  'time-value-struct
                                  'seconds)))
@@ -50,7 +50,7 @@ Definition can be found at mach/time_value.h"
       (maptime-seconds *mapped-time*)
       ret)))
 
-(defmethod microseconds ((time time-value))
+(defmethod time-value-microseconds ((time time-value))
   (let ((ret (foreign-slot-value (ptr time)
                                  'time-value-struct
                                  'microseconds)))
@@ -59,23 +59,24 @@ Definition can be found at mach/time_value.h"
       ret)))
 
 (defmethod time-value-eq ((time1 time-value) (time2 time-value))
-  (and (= (seconds time1)
-          (seconds time2))
-       (= (microseconds time1)
-          (microseconds time2))))
+  (and (= (time-value-seconds time1)
+          (time-value-seconds time2))
+       (= (time-value-microseconds time1)
+          (time-value-microseconds time2))))
 
 (defmethod time-value-newer-p ((time1 time-value) (time2 time-value))
   (cond
     ((time-value-eq time1 +now-time-value+) t)
-    ((> (seconds time1) (seconds time2)) t)
-    ((< (seconds time1) (seconds time2)) nil)
+    ((> (time-value-seconds time1) (time-value-seconds time2)) t)
+    ((< (time-value-seconds time1) (time-value-seconds time2)) nil)
     (t
-      (> (microseconds time1) (microseconds time2)))))
+      (> (time-value-microseconds time1)
+         (time-value-microseconds time2)))))
 
 (defmethod print-object ((time time-value) stream)
   (if (time-value-eq time +now-time-value+)
     (format stream "#<time-value NOW>")
     (format stream "#<time-value seconds=~s microseconds=~s"
-            (seconds time)
-            (microseconds time))))
+            (time-value-seconds time)
+            (time-value-microseconds time))))
 
