@@ -51,7 +51,6 @@
 
 (defun %new-ino-val (stat)
   "Sets and increments the ino value of a stat struct."
-  (warn "new-ino-val ~s" (1+ *ino-value*))
   (setf (stat-get stat 'ino) (incf *ino-value*)))
 
 (defmethod add-entry ((dir dir-entry) (entry entry) (name string))
