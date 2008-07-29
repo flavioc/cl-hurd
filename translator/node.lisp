@@ -53,6 +53,10 @@
   "Specialize has-access-p for nodes."
   (has-access-p (stat node) user flag))
 
+(defmethod can-modify-dir-p ((node node) (user iouser))
+  "Specialize can-modify-dir-p."
+  (can-modify-dir-p (stat node) user))
+
 (defmethod set-link-node ((node node) new-link)
   "When defining a new link target, change stat size."
   (setf (stat-get (stat node) 'size)
