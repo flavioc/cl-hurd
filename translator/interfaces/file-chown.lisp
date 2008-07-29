@@ -2,10 +2,10 @@
 (in-package :hurd-translator)
 
 (def-fs-interface :file-chown ((file port)
-							   (owner uid-t)
-							   (group gid-t))
+                               (owner uid-t)
+                               (group gid-t))
   (with-lookup protid file
-    (let ((err (file-chown *translator*
+    (let ((err (chown-file *translator*
                            (get-node protid)
                            (get-user protid)
                            owner
