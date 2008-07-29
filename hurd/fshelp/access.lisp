@@ -14,7 +14,7 @@ flag can be: :read, :write or :exec."
      (has-perms-p stat flag :unknown))
     ((is-owner-p stat user)
      (has-perms-p stat flag :owner))
-    ((contains-gid user (stat-get stat 'gid))
+    ((contains-gid user (stat-get stat 'st-gid))
      (has-perms-p stat flag :group))
     (t
       (has-perms-p stat flag :others))))
