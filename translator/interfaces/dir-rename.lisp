@@ -11,16 +11,16 @@
            (unless (port-exists-p new-dir)
              (return-from dir-rename :invalid-cross-device-link))
            (with-lookup new-dir-protid new-dir
-             (let ((found-old-node (dir-lookup *translator*
-                                               (get-node old-dir-protid)
-                                               (get-user old-dir-protid)
-                                               old-name)))
+             (let ((found-old-node (directory-lookup *translator*
+                                                     (get-node old-dir-protid)
+                                                     (get-user old-dir-protid)
+                                                     old-name)))
                (unless found-old-node
                  (return-from dir-rename :no-such-file))
-               (let ((found-new-node (dir-lookup *translator*
-                                                 (get-node new-dir-protid)
-                                                 (get-user new-dir-protid)
-                                                 new-name)))
+               (let ((found-new-node (directory-lookup *translator*
+                                                       (get-node new-dir-protid)
+                                                       (get-user new-dir-protid)
+                                                       new-name)))
                  (when (and found-new-node excl)
                    (return-from dir-rename :file-exists))
                  (let ((return-code (file-rename *translator*

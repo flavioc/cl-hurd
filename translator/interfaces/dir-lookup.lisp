@@ -102,7 +102,7 @@
     (when (%must-handle-shadow-roots open-node node this-path)
       (return-from %dir-lookup
                    (%handle-shadow-roots open-node node rest-path)))
-    (let ((found-node (dir-lookup *translator* node user this-path)))
+    (let ((found-node (directory-lookup *translator* node user this-path)))
       (cond
         (found-node ; File exists.
           (when (%must-handle-translator found-node flags rest-path)

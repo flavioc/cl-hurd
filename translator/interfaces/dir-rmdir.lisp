@@ -9,7 +9,7 @@
                  (user (get-user protid)))
              (unless (is-dir-p node)
                (return-from rmdir :not-directory))
-             (let ((target (dir-lookup *translator* node user name)))
+             (let ((target (directory-lookup *translator* node user name)))
                (unless target
                  (return-from rmdir :no-such-file))
                (unless (zerop (number-of-entries *translator*
