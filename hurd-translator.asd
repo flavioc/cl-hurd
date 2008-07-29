@@ -17,16 +17,22 @@
   :components ((:file "paths")
                (:module translator
                         :components ((:file "package")
-                                     (:file "io-wrapper")
-                                     (:file "fs-wrapper")
-                                     (:file "fsys-wrapper")
+                                     (:file "io-wrapper"
+                                            :depends-on ("package"))
+                                     (:file "fs-wrapper"
+                                            :depends-on ("package"))
+                                     (:file "fsys-wrapper"
+                                            :depends-on ("package"))
                                      (:file "debug"
                                             :depends-on ("io-wrapper"
                                                          "fs-wrapper"
                                                          "fsys-wrapper"))
-                                     (:file "globals")
-                                     (:file "transbox")
-                                     (:file "node")
+                                     (:file "globals"
+                                            :depends-on ("package"))
+                                     (:file "transbox"
+                                            :depends-on ("package"))
+                                     (:file "node"
+                                            :depends-on ("package"))
                                      (:file "dirent"
                                             :depends-on ("node"))
                                      (:file "open"
@@ -119,5 +125,5 @@
                                                            (:file "file-reparent")
                                                            (:file "file-lock-stat")
                                                            (:file "file-get-storage-info"))
-                                              :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent" "utils")))
+                                              :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent" "utils" "package")))
                         :depends-on ("paths"))))

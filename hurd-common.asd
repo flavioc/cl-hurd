@@ -17,17 +17,24 @@
                         :components ((:file "package")
                                      (:file "utils"
                                             :depends-on ("package"))
-                                     (:file "constants")
+                                     (:file "constants"
+                                            :depends-on ("package"))
                                      (:file "error"
                                             :depends-on ("utils"))
-                                     (:file "types")
+                                     (:file "types"
+                                            :depends-on ("package"))
                                      (:file "dirent"
-                                            :depends-on ("types"))
-                                     (:file "pathconf")
-                                     (:file "seek")
-                                     (:file "select")
-                                     (:file "exit")
-                                     (:file "lock")
+                                            :depends-on ("types" "package"))
+                                     (:file "pathconf"
+                                            :depends-on ("package"))
+                                     (:file "seek"
+                                            :depends-on ("package"))
+                                     (:file "select"
+                                            :depends-on ("package"))
+                                     (:file "exit"
+                                            :depends-on ("package"))
+                                     (:file "lock"
+                                            :depends-on ("package"))
                                      (:file "ids"
                                             :depends-on ("types"))
                                      (:file "flags"
@@ -42,7 +49,8 @@
                                      (:file "time-value"
                                             :depends-on ("types"
                                                          "maptime"))
-                                     (:file "device-id")
+                                     (:file "device-id"
+                                            :depends-on ("package"))
                                      (:file "stat"
                                             :depends-on ("mode"
                                                          "types"

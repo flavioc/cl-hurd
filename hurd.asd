@@ -16,11 +16,16 @@
   :components ((:file "paths")
                (:module hurd
                         :components ((:file "package")
-                                     (:file "types")
-                                     (:file "paths")
-                                     (:file "retry")
-                                     (:file "macros")
-                                     (:file "translator-options")
+                                     (:file "types"
+                                            :depends-on ("package"))
+                                     (:file "paths"
+                                            :depends-on ("package"))
+                                     (:file "retry"
+                                            :depends-on ("package"))
+                                     (:file "macros"
+                                            :depends-on ("package"))
+                                     (:file "translator-options"
+                                            :depends-on ("package"))
                                      (:module libc
                                               :components ((:file "getcwdir")
                                                            (:file "file-name-lookup")
@@ -38,7 +43,7 @@
                                                            (:file "seteuids")
                                                            (:file "setproc")
                                                            (:file "task2pid"))
-                                              :depends-on ("types"))
+                                              :depends-on ("types" "package"))
                                      (:module io
                                               :components ((:file "server-version")
                                                            (:file "open-modes")
@@ -85,22 +90,22 @@
                                                            (:file "dir-mkdir")
                                                            (:file "dir-link")
                                                            (:file "storage"))
-                                              :depends-on ("retry" "fsys" "translator-options"))
+                                              :depends-on ("retry" "fsys" "translator-options" "package"))
                                      (:module iohelp
                                               :components ((:file "utils")
                                                            (:file "iouser"
                                                                   :depends-on ("utils"))
                                                            (:file "reauth"
                                                                   :depends-on ("iouser")))
-                                              :depends-on ("types"))
+                                              :depends-on ("types" "package"))
                                      (:module auth
                                               :components ((:file "getids"))
-                                              :depends-on ("types" "iohelp"))
+                                              :depends-on ("types" "iohelp" "package"))
                                      (:module exec
                                               :components ((:file "flags")
                                                            (:file "exec"
                                                                   :depends-on ("flags")))
-                                              :depends-on ("types"))
+                                              :depends-on ("types" "package"))
                                      (:module fsys
                                               :components ((:file "startup")
                                                            (:file "goaway-flags")
@@ -111,7 +116,7 @@
                                                            (:file "syncfs")
                                                            (:file "get-options")
                                                            (:file "getroot"))
-                                              :depends-on ("iohelp" "retry" "translator-options"))
+                                              :depends-on ("iohelp" "retry" "translator-options" "package"))
                                      (:module ports
                                               :components ((:file "port")
                                                            (:file "bucket"
@@ -131,7 +136,7 @@
                                                                                "no-senders"
                                                                                "notify"
                                                                                "demuxer")))
-                                              :depends-on ("macros"))
+                                              :depends-on ("macros" "package"))
                                      (:module fshelp
                                               :components ((:file "access")
                                                            (:file "checkdirmod")
@@ -141,6 +146,6 @@
                                                            (:file "fetch-root"
                                                                   :depends-on ("transbox"))
                                                            (:file "identity"))
-                                              :depends-on ("iohelp" "fsys" "ports")))
+                                              :depends-on ("iohelp" "fsys" "ports" "package")))
                         :depends-on ("paths"))))
 
