@@ -5,7 +5,8 @@ TARGETS = portset-demuxer.so \
 		  fetch-root.so \
 		  round-page.so \
 			file-utimes.so \
-			file-exec.so
+			file-exec.so \
+			exec-reauth.so
 
 LDFLAGS =
 
@@ -15,9 +16,9 @@ fetch-root.so: fetch-root.o
 	$(CC) -shared -Wl \
 		-o fetch-root.so fetch-root.o $(LDFLAGS) -lfshelp
 
-file-exec.so: file-exec.o
+exec-reauth.so: exec-reauth.o
 	$(CC) -shared -Wl \
-		-o file-exec.so file-exec.o $(LDFLAGS) -lthreads
+		-o exec-reauth.so exec-reauth.o $(LDFLAGS) -lshouldbeinlibc
 
 %.so: %.o
 	$(CC) -shared -Wl\
