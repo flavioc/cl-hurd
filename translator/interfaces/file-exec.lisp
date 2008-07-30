@@ -1,16 +1,10 @@
 
 (in-package :hurd-translator)
 
-(defun print-str-ptr (ptr len)
-  (loop for i from 0 below len
-        do (format *error-output*
-                   "~c" (code-char (mem-aref ptr :char i))))
-  (format *error-output* "~%"))
-
 (define-helper-library file-exec)
 
 (defcfun ("do_exec_exec" %do-exec-exec)
-  :pointer
+  pid-t
   (execserver port)
   (file port)
   (file-type msg-type-name)
@@ -33,11 +27,17 @@
   (destroynames :pointer)
   (destroynameslen msg-type-number))
 
-(defun %exec-done-p (ptr)
-  (mem-ref ptr :boolean))
+(defcfun ("exec_finished" %exec-finished)
+  :boolean
+  (pid pid-t)
+  (status :pointer))
 
-(defun %exec-ret-code (ptr)
-  (mem-ref (inc-pointer ptr (foreign-type-size :int)) 'err))
+(defun exec-finished (pid)
+  (with-foreign-pointer (status (foreign-type-size :int))
+    (let ((err (%exec-finished pid status)))
+      (cond
+        ((null err) nil)
+        (t (mem-ref status 'err))))))
 
 (def-fs-interface :file-exec ((file port)
                               (task task)
@@ -57,7 +57,6 @@
                               (destroynames :pointer)
                               (destroynameslen :unsigned-int))
   (with-lookup protid file
-    (warn "gonna exec..")
     (block file-exec
            (let ((node (get-node protid))
                  (open (open-node protid))
@@ -73,7 +72,6 @@
                (warn "hmm fail")
                ;; Do reauth stuff
              )
-             (warn "creating stuff..")
              (let* ((new-user (make-iouser :old user))
                     (new-open (make-open-node node
                                               '(:read)
@@ -82,18 +80,7 @@
                                             new-user
                                             new-open)))
                (with-port-deallocate (right (get-send-right new-protid))
-                 (warn "going to exec-exec. ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s ~s"
-                       +exec-server+ right :copy-send task flags
-                       argv argvlen
-                       envp envplen
-                       fds :copy-send fdslen
-                       portarray :copy-send portarraylen
-                       intarray intarray-len
-                       deallocnames deallocnameslen
-                       destroynames destroynameslen)
-                 (print-str-ptr argv argvlen)
-                 (warn "launching do-exec-exec")
-                 (let ((ptr
+                 (let ((pid
                          (%do-exec-exec +exec-server+
                                         right
                                         :copy-send
@@ -106,10 +93,11 @@
                                         intarray intarray-len
                                         deallocnames deallocnameslen
                                         destroynames destroynameslen)))
-                   (warn "do-exec-exec ~s" ptr)
-                   (return-from file-exec nil)
-                   (with-cleanup (foreign-free ptr)
-                     (loop until (%exec-done-p ptr)
-                           do (progn (warn "still not done")
-                                     (wait :miliseconds 200)))
-                     (%exec-ret-code ptr)))))))))
+                   (when (zerop pid)
+                     (return-from file-exec :gratuitous-error))
+                   (let (ret)
+                     (loop until ret
+                           do (progn
+                                (wait :miliseconds 200)
+                                (setf ret (exec-finished pid))))
+                     ret))))))))
