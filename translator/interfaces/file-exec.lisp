@@ -32,13 +32,6 @@
   (pid pid-t)
   (status :pointer))
 
-(defun exec-finished (pid)
-  (with-foreign-pointer (status (foreign-type-size :int))
-    (let ((err (%exec-finished pid status)))
-      (cond
-        ((null err) nil)
-        (t (mem-ref status 'err))))))
-
 (def-fs-interface :file-exec ((file port)
                               (task task)
                               (flags exec-flags)
@@ -67,11 +60,10 @@
                (return-from file-exec :permission-denied))
              (when (is-dir-p (stat node))
                (return-from file-exec :permission-denied))
-             (when (or (is-uid-p (stat node))
-                       (is-gid-p (stat node)))
-               (warn "hmm fail")
-               ;; Do reauth stuff
-             )
+             (let ((use-uid-p (is-uid-p (stat node)))
+                   (use-gid-p (is-gid-p (stat node))))
+               (when (or use-uid-p use-gid-p)
+                 (warn "suid/sgid executables not supported.")))
              (let* ((new-user (make-iouser :old user))
                     (new-open (make-open-node node
                                               '(:read)
@@ -95,9 +87,8 @@
                                         destroynames destroynameslen)))
                    (when (zerop pid)
                      (return-from file-exec :gratuitous-error))
-                   (let (ret)
-                     (loop until ret
-                           do (progn
-                                (wait :miliseconds 200)
-                                (setf ret (exec-finished pid))))
-                     ret))))))))
+                   (with-foreign-pointer (status (foreign-type-size :int))
+                     (loop for ret = (%exec-finished pid status)
+                           when ret
+                           return (mem-ref status 'err)
+                           do (wait :miliseconds 200))))))))))
