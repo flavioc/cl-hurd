@@ -13,24 +13,33 @@
   (avail-gids :pointer)
   (num-avail-gids :pointer))
 
+(defun %new-ptr ()
+  (foreign-alloc :pointer))
+
+(defun %new-unsigned (n)
+  (foreign-alloc :unsigned-int :initial-element n))
+
 (defun auth-getids (handle)
-  (let ((eff-uids (foreign-alloc :pointer))
-        (num-eff-uids (foreign-alloc :unsigned-int :initial-element 0))
-        (avail-uids (foreign-alloc :pointer))
-        (num-avail-uids (foreign-alloc :unsigned-int :initial-element 0))
-        (eff-gids (foreign-alloc :pointer))
-        (num-eff-gids (foreign-alloc :unsigned-int :initial-element 0))
-        (avail-gids (foreign-alloc :pointer))
-        (num-avail-gids (foreign-alloc :unsigned-int :initial-element 0)))
+  (let ((eff-uids (%new-ptr))
+        (num-eff-uids (%new-unsigned 10))
+        (avail-uids (%new-ptr))
+        (num-avail-uids (%new-unsigned 20))
+        (eff-gids (%new-ptr))
+        (num-eff-gids (%new-unsigned 10))
+        (avail-gids (%new-ptr))
+        (num-avail-gids (%new-unsigned 20))
+        (eff-uids-buf (foreign-alloc 'uid-t :count 10))
+        (avail-uids-buf (foreign-alloc 'uid-t :count 20))
+        (eff-gids-buf (foreign-alloc 'gid-t :count 10))
+        (avail-gids-buf (foreign-alloc 'gid-t :count 20)))
     (with-cleanup (free-memory-list
-                    (list eff-uids
-                          num-eff-uids
-                          eff-gids
-                          num-eff-uids
-                          avail-gids
-                          num-avail-gids
-                          eff-gids
-                          num-eff-gids))
+                    (list eff-uids-buf avail-uids-buf eff-gids-buf avail-gids-buf
+                          eff-uids avail-uids eff-gids avail-gids
+                          num-eff-uids num-avail-uids num-eff-gids num-avail-gids))
+      (setf (mem-ref eff-uids :pointer) eff-uids-buf
+            (mem-ref avail-uids :pointer) avail-uids-buf
+            (mem-ref eff-gids :pointer) eff-gids-buf
+            (mem-ref avail-gids :pointer) avail-gids-buf)
       (let ((ret (%auth-getids handle
                                eff-uids
                                num-eff-uids
@@ -42,20 +51,28 @@
                                num-avail-gids)))
         (select-error ret
                       (let ((eff-uids-ptr (mem-ref eff-uids :pointer))
-                            (num-eff-uids (mem-ref num-eff-uids :unsigned-int))
+                            (num-eff-uids1 (mem-ref num-eff-uids :unsigned-int))
                             (avail-uids-ptr (mem-ref avail-uids :pointer))
-                            (num-avail-uids (mem-ref num-avail-uids :unsigned-int))
+                            (num-avail-uids1 (mem-ref num-avail-uids :unsigned-int))
                             (eff-gids-ptr (mem-ref eff-gids :pointer))
-                            (num-eff-gids (mem-ref num-eff-gids :unsigned-int))
+                            (num-eff-gids1 (mem-ref num-eff-gids :unsigned-int))
                             (avail-gids-ptr (mem-ref avail-gids :pointer))
-                            (num-avail-gids (mem-ref num-avail-gids :unsigned-int)))
+                            (num-avail-gids1 (mem-ref num-avail-gids :unsigned-int)))
                         (with-cleanup (progn
-                                        (munmap eff-uids-ptr (* +uid-t-size+ num-eff-uids))
-                                        (munmap avail-uids-ptr (* +uid-t-size+ num-avail-uids))
-                                        (munmap eff-gids-ptr (* +gid-t-size+ num-eff-gids))
-                                        (munmap avail-gids-ptr (* +gid-t-size+ num-avail-gids)))
+                                        (unless (pointer-eq eff-uids-ptr
+                                                            eff-uids-buf)
+                                          (munmap eff-uids-ptr (* +uid-t-size+ num-eff-uids1)))
+                                        (unless (pointer-eq avail-uids-ptr
+                                                            avail-uids-buf)
+                                          (munmap avail-uids-ptr (* +uid-t-size+ num-avail-uids1)))
+                                        (unless (pointer-eq eff-gids-ptr
+                                                            eff-gids-buf)
+                                          (munmap eff-gids-ptr (* +gid-t-size+ num-eff-gids1)))
+                                        (unless (pointer-eq avail-gids-ptr
+                                                            avail-gids-buf)
+                                          (munmap avail-gids-ptr (* +gid-t-size+ num-avail-gids1))))
                         (values
-                          (make-iouser-mem eff-uids-ptr num-eff-uids
-                                           eff-gids-ptr num-eff-gids)
-                          (make-iouser-mem avail-uids-ptr num-avail-uids
-                                           avail-gids-ptr num-avail-gids)))))))))
+                          (make-iouser-mem eff-uids-ptr num-eff-uids1
+                                           eff-gids-ptr num-eff-gids1)
+                          (make-iouser-mem avail-uids-ptr num-avail-uids1
+                                           avail-gids-ptr num-avail-gids1)))))))))
