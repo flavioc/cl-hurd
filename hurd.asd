@@ -99,7 +99,8 @@
                                                                   :depends-on ("iouser")))
                                               :depends-on ("types" "package"))
                                      (:module auth
-                                              :components ((:file "getids"))
+                                              :components ((:file "getids")
+                                                           (:file "makeauth"))
                                               :depends-on ("types" "iohelp" "package"))
                                      (:module exec
                                               :components ((:file "flags")
@@ -145,7 +146,8 @@
                                                            (:file "transbox")
                                                            (:file "fetch-root"
                                                                   :depends-on ("transbox"))
+                                                           (:file "exec-reauth")
                                                            (:file "identity"))
-                                              :depends-on ("iohelp" "fsys" "ports" "package")))
+                                              :depends-on ("iohelp" "fsys" "ports" "package" "auth")))
                         :depends-on ("paths"))))
 
