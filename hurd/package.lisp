@@ -103,8 +103,8 @@
            :make-iouser-mem
            :make-iouser-root
            :make-empty-iouser
-           :contains-uid
-           :contains-gid
+           :contains-uid-p
+           :contains-gid-p
            :empty-uids-p
            :empty-gids-p
            :restrict-iouser
@@ -160,5 +160,6 @@
            :get-foreign-options
            :translator-options
            :add-option
-           :iterate-options))
+           :iterate-options
+           :exec-reauth))
 
