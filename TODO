@@ -1,11 +1,11 @@
 TODO list:
 
 - find... why?
-- fix file_exec, fsys_getroot, fetch_root
+- fix fsys_getroot, fetch_root (impossible)
 - documentation
 - testing
 - FIXME/XXX/TODO
-- setting translators and the unsetting problem
+- setting translators and then unsetting problem
 
 CLIENT RPCS:
 - file_chflags (not used)
