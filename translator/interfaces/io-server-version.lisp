@@ -2,10 +2,10 @@
 (in-package :hurd-translator)
 
 (def-io-interface :io-server-version ((io port)
-									  (server :pointer)
-									  (major-version :pointer)
-									  (minor-version :pointer)
-									  (edit-version :pointer))
+                                      (server :pointer)
+                                      (major-version :pointer)
+                                      (minor-version :pointer)
+                                      (edit-version :pointer))
   (when (port-exists-p io)
     (with-accessors ((name name) (version version)) *translator*
       (assert (= 3 (length version)))
