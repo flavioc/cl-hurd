@@ -141,6 +141,10 @@ st-blksize, st-blocks, st-author, st-flags."
 ; Use the new method...
 (defsetf stat-get stat-set)
 
+(defmethod stat-eq ((stat1 stat) (stat2 stat))
+  "Return T if stat1 is equal to stat2, otherwise NIL."
+  (memcmp (ptr stat1) (ptr stat2) +stat-size+))
+
 (defun make-stat (&optional (extra nil)
                             &key
                             (size 0)
