@@ -16,6 +16,7 @@
   :no-trunc
   :vdisable
   :sync-io
+  :async-io
   :prio-io
   :sock-maxbuf
   :filesizebits
