@@ -99,7 +99,7 @@
 (defmethod restrict-iouser ((user1 iouser) (user2 iouser))
   "Returns an intersection of user1 and user2, except when user1 is root and then we return user2."
   (cond
-    ((contains-uid user1 0) user2) ; root user
+    ((contains-uid-p user1 0) user2) ; root user
     (t
       (make-iouser :uids (intersection (uids user1)
                                        (uids user2))
