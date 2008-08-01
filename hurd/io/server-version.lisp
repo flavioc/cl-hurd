@@ -21,8 +21,8 @@
                           port
                           server-name
                           version
-                          (inc-pointer version 1)
-                          (inc-pointer version 2))))
+                          (inc-pointer version (foreign-type-size :int))
+                          (inc-pointer version (* 2 (foreign-type-size :int))))))
         (select-error
           error-code
           (append (list (foreign-string-to-lisp server-name))
