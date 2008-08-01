@@ -51,9 +51,12 @@
                                                          "maptime"))
                                      (:file "device-id"
                                             :depends-on ("package"))
+                                     (:file "memcmp"
+                                            :depends-on ("package"))
                                      (:file "stat"
                                             :depends-on ("mode"
                                                          "types"
+                                                         "memcmp"
                                                          "ids"
                                                          "memcpy"
                                                          "time-value"
