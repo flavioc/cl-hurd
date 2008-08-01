@@ -27,9 +27,11 @@
            :documentation "File system statistics")
    (name :initform "cl-translator"
          :accessor name
+         :initarg :name
          :documentation "Translator's name.")
    (version :initform (list 1 0 0)
             :accessor version
+            :initarg :version
             :documentation "Translator version.")
    (storage :initform :memory
             :initarg :storage
