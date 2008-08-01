@@ -15,7 +15,6 @@
            (new-protid (new-protid *translator*
                                    restricted-user
                                    (open-node protid))))
-      (warn "new user ~s" restricted-user)
       (setf (mem-ref new-port 'port) (get-right new-protid)
             (mem-ref new-port-type 'msg-type-name) :make-send)
       t)))
