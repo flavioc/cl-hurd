@@ -1,0 +1,16 @@
+
+(in-package :translator-test)
+
+(def-test-method file-chown-test ((test fs-test))
+  (with-testport (p (file-name-lookup +translator-root+))
+    (let ((stat (io-stat p)))
+      (assert-equal 0 (stat-get stat 'st-uid))
+      (assert-equal 0 (stat-get stat 'st-gid))
+      (assert-true (file-chown p 101 102))
+      (setf stat (io-stat p))
+      (assert-equal 101 (stat-get stat 'st-uid))
+      (assert-equal 102 (stat-get stat 'st-gid))
+      (assert-true (file-chown p 0 0))
+      (setf stat (io-stat p))
+      (assert-equal 0 (stat-get stat 'st-uid))
+      (assert-equal 0 (stat-get stat 'st-gid)))))

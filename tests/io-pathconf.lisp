@@ -2,7 +2,7 @@
 (in-package :translator-test)
 
 (def-test-method pathconf-test ((test io-test))
-  (with-port-deallocate (root +translator-root+)
+  (with-testport (root (file-name-lookup +translator-root+))
     (assert-equal -1 (io-pathconf root :link-max))
     (assert-equal -1 (io-pathconf root :max-input))
     (assert-equal -1 (io-pathconf root :pipe-buf))
