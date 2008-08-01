@@ -151,7 +151,10 @@ st-blksize, st-blocks, st-author, st-flags."
                             (mode nil)
                             (uid nil)
                             (gid nil)
-                            (type nil))
+                            (type nil)
+                            (ctime +now-time-value+)
+                            (atime +now-time-value+)
+                            (mtime +now-time-value+))
   "Create a new stat object. 'extra' can be:
 a mode object: we copy it to the mode field.
 a stat object: we make a copy of it for the new stat object.
@@ -184,6 +187,12 @@ size: initial size for the size field.
       (setf (stat-get obj 'st-uid) uid))
     (when (valid-id-p gid)
       (setf (stat-get obj 'st-gid) gid))
+    (when atime
+      (setf (stat-get obj 'st-atime) atime))
+    (when ctime
+      (setf (stat-get obj 'st-ctime) ctime))
+    (when mtime
+      (setf (stat-get obj 'st-mtime) mtime))
     ; Return the new object
     obj))
 
