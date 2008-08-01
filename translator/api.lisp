@@ -27,14 +27,10 @@ please see common/pathconf.lisp."
     ((:link-max :max-canon :max-input
                 :pipe-buf :vdisable :sock-maxbuf)
      -1)
-    ((:name-max)
-     1024)
-    ((:chown-restricted :no-trunc)
-     1)
-    ((:prio-io :sync-io :async-io)
-     0)
-    (:filesizebits
-      32)))
+    ((:name-max) 1024)
+    ((:chown-restricted :no-trunc) 1)
+    ((:prio-io :sync-io :async-io) 0)
+    (:filesizebits 32)))
 
 (%add-callback allow-open-p (node user flags is-new-p)
   "'user' wants to open 'node' with flags 'flags', 'is-new-p' indicates that this is a newly created node. This should return nil when we don't wanna open the node."
