@@ -76,7 +76,7 @@ Definition can be found at mach/time_value.h"
 (defmethod print-object ((time time-value) stream)
   (if (time-value-eq time +now-time-value+)
     (format stream "#<time-value NOW>")
-    (format stream "#<time-value seconds=~s microseconds=~s"
+    (format stream "#<time-value seconds=~s microseconds=~s>"
             (time-value-seconds time)
             (time-value-microseconds time))))
 
