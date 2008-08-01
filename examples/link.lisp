@@ -9,8 +9,7 @@
 (defconstant +target-link+ (first ext:*args*))
 
 (defclass link-translator (translator)
-  ((name :initform "link-translator"
-         :documentation "Translator name"))
+  ()
   (:documentation "The link-translator."))
 
 (define-callback make-root-node link-translator
@@ -28,7 +27,8 @@
     '(:read)))
 
 (defun main ()
-  (run-translator (make-instance 'link-translator)))
+  (run-translator (make-instance 'link-translator
+                                 :name "link-translator")))
 
 (main)
 

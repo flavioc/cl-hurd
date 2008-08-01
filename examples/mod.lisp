@@ -10,8 +10,7 @@
 (defconstant +file+ (first ext:*args*))
 
 (defclass mod-translator (tree-translator)
-  ((name :initform "mod-translator")
-   (file-stat :initarg :file-stat
+  ((file-stat :initarg :file-stat
               :initform nil
               :accessor file-stat)
    (dir-stat :initarg :dir-stat
@@ -185,7 +184,8 @@
   (with-port-deallocate (port (file-name-lookup +file+ :flags '(:read)))
     (let ((translator
             (make-instance 'mod-translator
-                           :timestamp (stat-get (io-stat port) 'st-mtime))))
+                           :timestamp (stat-get (io-stat port) 'st-mtime)
+                           :name "mod-translator")))
       (run-translator translator))))
 
 (main)

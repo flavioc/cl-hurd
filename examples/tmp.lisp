@@ -11,7 +11,7 @@
 ;;
 
 (defclass tmp-translator (tree-translator)
-  ((name :initform "tmp-translator")))
+  ())
 
 (defun %create-data-array ()
   (make-array 0
@@ -97,7 +97,8 @@
   t)
 
 (defun main ()
-  (run-translator (make-instance 'tmp-translator)))
+  (run-translator (make-instance 'tmp-translator
+                                 :name "tmp-translator")))
 
 (main)
 

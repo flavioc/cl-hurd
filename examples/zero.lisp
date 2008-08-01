@@ -6,7 +6,7 @@
 (in-package :zero-translator)
 
 (defclass zero-translator (translator)
-  ((name :initform "zero-translator"))
+  ()
   (:documentation "The zero-translator."))
 
 (define-callback make-root-node zero-translator
@@ -35,7 +35,8 @@
   t)
 
 (defun main ()
-  (run-translator (make-instance 'zero-translator)))
+  (run-translator (make-instance 'zero-translator
+                                 :name "zero-translator")))
 
 (main)
 

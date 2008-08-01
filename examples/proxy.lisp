@@ -7,7 +7,7 @@
 (in-package :proxy-translator)
 
 (defclass proxy-translator (tree-translator)
-  ((name :initform "proxy-translator")))
+  ())
 
 (defclass underlying-entry ()
   ((port :initarg :port
@@ -72,7 +72,8 @@
     node))
 
 (defun main ()
-  (let ((translator (make-instance 'proxy-translator)))
+  (let ((translator (make-instance 'proxy-translator
+                                   :name "proxy-translator")))
     (run-translator translator :flags '(:notrans :read))))
 
 (main)

@@ -6,8 +6,7 @@
 (in-package :null-translator)
 
 (defclass null-translator (translator)
-  ((name :initform "null-translator"
-         :documentation "Translator name"))
+  ()
   (:documentation "The null-translator."))
 
 (define-callback make-root-node null-translator
@@ -34,7 +33,8 @@
   t)
 
 (defun main ()
-  (run-translator (make-instance 'null-translator)))
+  (run-translator (make-instance 'null-translator
+                                 :name "null-translator")))
 
 (main)
 

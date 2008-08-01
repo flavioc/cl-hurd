@@ -17,8 +17,7 @@
 (defvar *zip* (open-zipfile (first ext:*args*)) "The zip handle.")
 
 (defclass zip-translator (tree-translator)
-  ((name :initform "zip-translator"
-         :documentation "Translator name"))
+  ()
   (:documentation "Zip translator."))
 
 (defclass zip-entry (entry)
@@ -127,6 +126,7 @@
                       (add-zip-file node (split-path name) entry)))
 
 (defun main ()
-  (run-translator (make-instance 'zip-translator)))
+  (run-translator (make-instance 'zip-translator
+                                 :name "zip-translator")))
 
 (main)
