@@ -24,6 +24,9 @@
              :accessor data))
   (:documentation "A temporary node."))
 
+(defmethod print-object ((entry tmp-entry) stream)
+  (format stream "#<tmp-entry data=~s>" (data entry)))
+
 (define-callback create-file tmp-translator
                  (node user filename mode)
   (unless (has-access-p node user :write)
@@ -59,6 +62,8 @@
                  (node user offset stream)
   (unless (has-access-p node user :write)
     (return-from write-file nil))
+  (when (is-dir-p (stat node))
+    (return-from write-file :is-a-directory))
   (let* ((size (stat-get (stat node) 'st-size))
          (arr (%read-sequence stream))
          (amount (length arr))
@@ -76,12 +81,13 @@
 
 (define-callback file-change-size tmp-translator
                  (node user new-size)
+  (when (is-dir-p (stat node))
+    (return-from file-change-size :is-a-directory))
   (when (is-owner-p node user)
     (adjust-array (data node) new-size :fill-pointer t)
     t))
 
 (define-callback shutdown tmp-translator ()
-  (warn "Temporary translator going down!")
   t)
 
 (define-callback create-anonymous-file tmp-translator
