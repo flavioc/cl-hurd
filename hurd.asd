@@ -26,6 +26,8 @@
                                             :depends-on ("package"))
                                      (:file "translator-options"
                                             :depends-on ("package"))
+                                     (:file "utils"
+                                            :depends-on ("package"))
                                      (:module libc
                                               :components ((:file "getcwdir")
                                                            (:file "file-name-lookup")
@@ -97,11 +99,11 @@
                                                                   :depends-on ("utils"))
                                                            (:file "reauth"
                                                                   :depends-on ("iouser")))
-                                              :depends-on ("types" "package"))
+                                              :depends-on ("types" "package" "utils"))
                                      (:module auth
                                               :components ((:file "getids")
                                                            (:file "makeauth"))
-                                              :depends-on ("types" "iohelp" "package"))
+                                              :depends-on ("types" "iohelp" "package" "utils"))
                                      (:module exec
                                               :components ((:file "flags")
                                                            (:file "exec"
