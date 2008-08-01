@@ -113,6 +113,7 @@
            :statfs-get
            :statfs-copy
            :statfs-struct
+           :statfs
            :f-type
            :f-bsize
            :f-bfree
