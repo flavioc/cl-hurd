@@ -32,3 +32,32 @@ CLIENT RPCS:
 - fsys-getpriv
 - fsys-init
 - fsys-forward
+
+TESTS:
+
+io-server-version
+io-pathconf
+file-check-access
+file-chmod
+io-stat
+file-chown
+file-chauthor
+io-get-owner
+io-mod-owner
+io-duplicate
+file-sync
+file-syncfs
+fsys-syncfs
+io-identity
+file-statfs
+file-utimes
+io-set-all-openmodes
+io-clear-some-openmodes
+io-get-openmodes
+io-set-some-openmodes
+file-get-fs-options
+fsys-get-options
+fsys-set-options
+file-getcontrol
+file-reparent
+file-getlinknode
