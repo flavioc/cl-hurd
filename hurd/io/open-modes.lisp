@@ -28,7 +28,8 @@
   (declare (type fixnum file))
   (with-foreign-pointer (bits (foreign-type-size 'open-flags))
     (select-error (%io-get-openmodes file bits)
-                  (mem-ref bits 'open-flags))))
+                  (only-flags (mem-ref bits 'open-flags)
+                              +honored-get-modes+))))
 
 (defcfun ("io_set_some_openmodes" %io-set-some-openmodes)
   err
