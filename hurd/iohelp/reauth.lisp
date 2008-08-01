@@ -17,12 +17,6 @@
   (agids :pointer)
   (agis-count :pointer))
 
-(defun %new-ptr ()
-  (foreign-alloc :pointer))
-
-(defun %new-unsigned (n)
-  (foreign-alloc :unsigned-int :initial-element n))
-
 (defun user-reauth (auth-server rend-port new-right permit-failure-p)
   (let* ((gubuf (foreign-alloc 'uid-t :count 20))
          (ggbuf (foreign-alloc 'gid-t :count 20))

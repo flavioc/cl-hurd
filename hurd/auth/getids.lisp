@@ -13,12 +13,6 @@
   (avail-gids :pointer)
   (num-avail-gids :pointer))
 
-(defun %new-ptr ()
-  (foreign-alloc :pointer))
-
-(defun %new-unsigned (n)
-  (foreign-alloc :unsigned-int :initial-element n))
-
 (defun auth-getids (handle)
   (let ((eff-uids (%new-ptr))
         (num-eff-uids (%new-unsigned 10))
