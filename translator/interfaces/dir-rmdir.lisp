@@ -12,6 +12,8 @@
              (let ((target (directory-lookup *translator* node user name)))
                (unless target
                  (return-from rmdir :no-such-file))
+               (unless (is-dir-p (stat target))
+                 (return-from rmdir :not-directory))
                (unless (zerop (- (number-of-entries *translator*
                                                     target
                                                     user)
@@ -24,4 +26,5 @@
                                                   t)))
                  (cond
                    ((eq err t) t)
+                   ((eq err nil) :not-permitted)
                    (t err))))))))
