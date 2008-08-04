@@ -9,39 +9,40 @@
  */
 
 /* routines that can be set by the middle level */
-typedef enum {
-	IO_WRITE,
-	IO_READ,
-	IO_SEEK,
-	IO_READABLE,
-	IO_SET_ALL_OPENMODES,
-	IO_GET_OPENMODES,
-	IO_SET_SOME_OPENMODES,
-	IO_CLEAR_SOME_OPENMODES,
-	IO_ASYNC,
-	IO_MOD_OWNER,
-	IO_GET_OWNER,
-	IO_GET_ICKY_ASYNC_ID,
-	IO_SELECT,
-	IO_STAT,
-	IO_REAUTHENTICATE,
-	IO_RESTRICT_AUTH,
-	IO_DUPLICATE,
-	IO_SERVER_VERSION,
-	IO_MAP,
-	IO_MAP_CNTL,
-	IO_GET_CONCH,
-	IO_RELEASE_CONCH,
-	IO_EOFNOTIFY,
-	IO_PRENOTIFY,
-	IO_POSTNOTIFY,
-	IO_READNOTIFY,
-	IO_READSLEEP,
-	IO_SIGIO,
-	IO_PATHCONF,
-	IO_IDENTITY,
-	IO_REVOKE,
-	_NUMBER_OF_ROUTINES
+typedef enum
+{
+  IO_WRITE,
+  IO_READ,
+  IO_SEEK,
+  IO_READABLE,
+  IO_SET_ALL_OPENMODES,
+  IO_GET_OPENMODES,
+  IO_SET_SOME_OPENMODES,
+  IO_CLEAR_SOME_OPENMODES,
+  IO_ASYNC,
+  IO_MOD_OWNER,
+  IO_GET_OWNER,
+  IO_GET_ICKY_ASYNC_ID,
+  IO_SELECT,
+  IO_STAT,
+  IO_REAUTHENTICATE,
+  IO_RESTRICT_AUTH,
+  IO_DUPLICATE,
+  IO_SERVER_VERSION,
+  IO_MAP,
+  IO_MAP_CNTL,
+  IO_GET_CONCH,
+  IO_RELEASE_CONCH,
+  IO_EOFNOTIFY,
+  IO_PRENOTIFY,
+  IO_POSTNOTIFY,
+  IO_READNOTIFY,
+  IO_READSLEEP,
+  IO_SIGIO,
+  IO_PATHCONF,
+  IO_IDENTITY,
+  IO_REVOKE,
+  _NUMBER_OF_ROUTINES
 } IoRoutine;
 
 /* we could make a function for every handler
@@ -49,6 +50,6 @@ typedef enum {
  * just use a generic pointer
  * that will be cast when needed
  */
-void set_io_routine(const IoRoutine what, void *fun);
+void set_io_routine (const IoRoutine what, void *fun);
 
 #endif
