@@ -19,7 +19,8 @@
                                           user
                                           name
                                           mode)))
-            (if result
-              t
-              :not-permitted)))))))
+            (cond
+              ((eq result t) t)
+              ((eq result nil) :not-permitted)
+              (t result))))))))
 
