@@ -11,23 +11,27 @@
            (unless (port-exists-p new-dir)
              (return-from dir-rename :invalid-cross-device-link))
            (with-lookup new-dir-protid new-dir
-             (let ((found-old-node (directory-lookup *translator*
-                                                     (get-node old-dir-protid)
-                                                     (get-user old-dir-protid)
-                                                     old-name)))
+             (let* ((old-dir-node (get-node old-dir-protid))
+                    (old-dir-user (get-user old-dir-protid))
+                    (found-old-node (directory-lookup *translator*
+                                                      old-dir-node
+                                                      old-dir-user
+                                                      old-name)))
                (unless found-old-node
                  (return-from dir-rename :no-such-file))
-               (let ((found-new-node (directory-lookup *translator*
-                                                       (get-node new-dir-protid)
-                                                       (get-user new-dir-protid)
-                                                       new-name)))
+               (let* ((new-dir-node (get-user new-dir-protid))
+                      (new-dir-user (get-node new-dir-protid))
+                      (found-new-node (directory-lookup *translator*
+                                                        new-dir-node
+                                                        new-dir-user
+                                                        new-name)))
                  (when (and found-new-node excl)
                    (return-from dir-rename :file-exists))
                  (let ((return-code (file-rename *translator*
-                                                 (get-user old-dir-protid)
-                                                 (get-node old-dir-protid)
+                                                 old-dir-user
+                                                 old-dir-node
                                                  old-name
-                                                 (get-node new-dir-protid)
+                                                 new-dir-node
                                                  new-name)))
                    (when (eq t return-code)
                      (deallocate-send-right new-dir-protid))
@@ -35,5 +39,4 @@
                      ((eq t return-code) t)
                      ((eq nil return-code) :permission-denied)
                      (t return-code)))))))))
-
 
