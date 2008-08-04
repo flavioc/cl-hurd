@@ -163,6 +163,23 @@
               (t
                 :no-such-file)))))))
 
+(defun %do-dir-lookup (filename protid flags mode)
+  (cond
+    ((and (not (string= "" filename))
+          (eq (char filename 0) #\/))
+     (values :retry-magical
+             filename
+             nil
+             :make-send))
+    (t
+      (%dir-lookup (open-node protid)
+                   (get-user protid)
+                   (get-node protid)
+                   (split-path filename)
+                   flags
+                   mode
+                   (make-hash-table)))))
+
 (def-fs-interface :dir-lookup ((dir-port port)
                                (filename :string)
                                (flags open-flags)
@@ -176,18 +193,17 @@
                            ret-retry-name
                            ret-retry-port
                            ret-retry-port-type)
-      (%dir-lookup (open-node dir-protid)
-                   (get-user dir-protid)
-                   (get-node dir-protid)
-                   (split-path filename)
-                   flags
-                   mode
-                   (make-hash-table))
+      (%do-dir-lookup filename
+                      dir-protid
+                      flags
+                      mode)
       (cond
         ((null ret-retry-name) ret-do-retry) ;; Some error ocurred
         (t
           (setf (mem-ref do-retry 'retry-type) ret-do-retry)
-          (lisp-string-to-foreign ret-retry-name retry-name (+ 1 (length ret-retry-name)))
+          (lisp-string-to-foreign ret-retry-name
+                                  retry-name
+                                  (1+ (length ret-retry-name)))
           (setf (mem-ref retry-port 'port) ret-retry-port)
           (setf (mem-ref retry-port-type 'msg-type-name) ret-retry-port-type)
           t)))))
