@@ -11,12 +11,12 @@
              ; Only nodes in this translator!
              (return-from dir-link :invalid-cross-device-link))
            (with-lookup file-protid file
-             (let ((dir-node (get-node dir-protid))
-                   (dir-user (get-user dir-protid))
-                   (found-node (directory-lookup *translator*
-                                                 dir-node
-                                                 dir-user
-                                                 name)))
+             (let* ((dir-node (get-node dir-protid))
+                    (dir-user (get-user dir-protid))
+                    (found-node (directory-lookup *translator*
+                                                  dir-node
+                                                  dir-user
+                                                  name)))
                (when (and found-node excl)
                  (return-from dir-link :file-exists))
                (let ((ret-code (create-hard-link *translator*
