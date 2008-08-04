@@ -244,6 +244,23 @@ the Mach Message, Mig, Kernel and Device errors.")
                           (second item)))
                   +recognized-standard-codes+)))
 
+(defun %create-key-value-error-table ()
+  "Creates the hash table mapping keywords to error codes."
+  (let ((table (make-hash-table)))
+    (loop for (value key) in +recognized-error-codes+
+          do (setf (gethash key table) value))
+    table))
+
+(defun %create-value-key-error-table ()
+  "Creates the hash table mapping error codes to keywords."
+  (let ((table (make-hash-table)))
+    (loop for (value key) in +recognized-error-codes+
+          do (setf (gethash value table) key))
+    table))
+
+(defconstant +table-error-key-value+ (%create-key-value-error-table))
+(defconstant +table-error-value-key+ (%create-value-key-error-table))
+
 (define-condition unrecognized-error-code (error)
   ((code :initarg :code :reader code))
   (:documentation "Signals an error code that we can not recognize by the above codes.")
@@ -257,8 +274,12 @@ the Mach Message, Mig, Kernel and Device errors.")
     ; Zero indicates operation was successfull, and so we return T.
     ((zerop value) t)
     (t
-      (unless-return (translate-foreign-list value +recognized-error-codes+ :from)
-                     (warn "Identifier ~a not recognized" value)))))
+      (multiple-value-bind (key found-p)
+        (gethash value +table-error-value-key+)
+        (cond
+          (found-p key)
+          (t
+            (warn "Identifier ~a not recognized" value)))))))
 
 (defmethod translate-to-foreign (value (type error-type))
   "Translates a lisp error code to a foreign one."
@@ -266,5 +287,10 @@ the Mach Message, Mig, Kernel and Device errors.")
     ; When the lisp value is T we give back the success error code.
     ((eq value t) 0)
     (t
-      (unless-return (translate-foreign-list value +recognized-error-codes+ :to)
-                     (error 'unrecognized-error-code :code value)))))
+      (multiple-value-bind (code found-p)
+        (gethash value +table-error-key-value+)
+        (cond
+          (found-p code)
+          (t
+            (error 'unrecognized-error-code :code value)))))))
+
