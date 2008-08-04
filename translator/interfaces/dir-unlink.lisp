@@ -4,10 +4,22 @@
 (def-fs-interface :dir-unlink ((port port)
 							   (name :string))
   (with-lookup protid port
-    (if (remove-directory-entry *translator*
-                                (get-node protid)
-                                (get-user protid)
-                                name
-                                nil) ; Not a directory
-      t
-      :not-permitted)))
+    (let* ((node (get-node protid))
+           (user (get-user protid))
+           (found-node (directory-lookup *translator*
+                                         node
+                                         user
+                                         name)))
+      (cond
+        (found-node
+          (let ((err (remove-directory-entry *translator*
+                                             node
+                                             user
+                                             name
+                                             nil))) ; Not a directory
+            (cond
+              ((eq err t) t)
+              ((eq err nil) :not-permitted)
+              (t err))))
+        (t :no-such-file)))))
+
