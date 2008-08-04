@@ -2,7 +2,7 @@
 (in-package :hurd-translator)
 
 (def-fs-interface :dir-unlink ((port port)
-							   (name :string))
+                               (name :string))
   (with-lookup protid port
     (let* ((node (get-node protid))
            (user (get-user protid))
