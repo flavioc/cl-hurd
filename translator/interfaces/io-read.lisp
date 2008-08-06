@@ -52,10 +52,10 @@
               (values data-read total-read))))))))
 
 (def-io-interface :io-read ((port port)
-							(data :pointer)
-							(datalen :pointer)
-							(offset loff-t)
-							(amount vm-size))
+                            (data :pointer)
+                            (datalen :pointer)
+                            (offset off-t)
+                            (amount vm-size))
   (with-lookup protid port
     (block io-read
            (let ((open-node (open-node protid))
