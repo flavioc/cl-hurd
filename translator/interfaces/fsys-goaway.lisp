@@ -15,15 +15,10 @@
             (when (box-active-p (box node))
               (with-port-deallocate (control (box-fetch-control (box node)))
                 ; We will catch errors later on
-                (warn "killing a translator..")
                 (when (fsys-goaway control flags)
                   (box-set-active (box node) nil nil))))))))
     ; Wait for no-senders port notifications
     (wait :miliseconds 500))
-  (bucket-iterate (port-bucket *translator*)
-                  (lambda (port)
-                    (when (typep port 'protid)
-                      (warn "node ~s still active" (get-node port)))))
   (when (and
           (not (flag-is-p flags :force))
           (plusp (bucket-count-type
