@@ -1,15 +1,21 @@
 
 (in-package :hurd-translator)
 
-;; Change file size.
 (def-fs-interface :file-set-size ((file port)
-                                  (size loff-t))
+                                  (size off-t))
   (with-lookup protid file
-    (let ((err (file-change-size *translator*
-                                 (get-node protid)
-                                 (get-user protid)
-                                 size)))
+    (let* ((node (get-node protid))
+           (err (file-change-size *translator*
+                                  node
+                                  (get-user protid)
+                                  size)))
       (cond
-        ((eq err t) t)
+        ((eq err t)
+         (let ((open (open-node protid)))
+           (when (> (file-offset open) size)
+             (setf (file-offset open) size)))
+         (setf (stat-get (stat node) 'st-size) size)
+         t)
         ((eq err nil) :not-permitted)
         (t err)))))
+
