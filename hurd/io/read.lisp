@@ -11,7 +11,7 @@
 
 (defconstant +default-io-read-size+ 1024)
 
-(defun io-read (file &key (offset +minus-one-ll+) ; -1.
+(defun io-read (file &key (offset +minus-one-ll+)
                      (amount +default-io-read-size+))
   (declare (type fixnum file amount)
            (type integer offset))
