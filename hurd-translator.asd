@@ -14,8 +14,7 @@
   :description "Common Lisp translator library for the Hurd"
   :depends-on (:cffi :flexi-streams :trivial-garbage
                      :hurd-common :mach :hurd)
-  :components ((:file "paths")
-               (:module translator
+  :components ((:module translator
                         :components ((:file "package")
                                      (:file "io-wrapper"
                                             :depends-on ("package"))
@@ -125,5 +124,4 @@
                                                            (:file "file-reparent")
                                                            (:file "file-lock-stat")
                                                            (:file "file-get-storage-info"))
-                                              :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent" "utils" "package")))
-                        :depends-on ("paths"))))
+                                              :depends-on ("io-wrapper" "fs-wrapper" "fsys-wrapper" "macros" "class" "api" "run" "globals" "dirent" "utils" "package"))))))

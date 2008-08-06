@@ -13,8 +13,7 @@
   :license "GPL v3.0"
   :description "Common Lisp bindings for the GNU Mach"
   :depends-on (:cffi :trivial-garbage :hurd-common)
-  :components ((:file "paths")
-               (:module mach
+  :components ((:module mach
                         :components ((:file "package")
                                      (:file "msg-type-name"
                                             :depends-on ("package"))
@@ -93,8 +92,5 @@
                                             :depends-on ("functions"))
                                      (:file "mmap"
                                             :depends-on ("types"))
-                                     (:file "round-page"
-                                            :depends-on ("types"))
                                      (:file "vm-allocate"
-                                            :depends-on ("types")))
-                        :depends-on ("paths"))))
+                                            :depends-on ("types"))))))

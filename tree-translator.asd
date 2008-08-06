@@ -14,14 +14,12 @@
   :description "Specialized tree translator."
   :depends-on (:cffi :hurd-common :mach
                      :hurd :hurd-translator)
-  :components ((:file "paths")
-               (:module tree-translator
+  :components ((:module tree-translator
                         :components ((:file "package")
                                      (:file "sorted-container"
                                             :depends-on ("package"))
                                      (:file "dir"
                                             :depends-on ("sorted-container"))
                                      (:file "class"
-                                            :depends-on ("dir")))
-                        :depends-on ("paths"))))
+                                            :depends-on ("dir"))))))
 
