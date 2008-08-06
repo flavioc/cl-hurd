@@ -13,24 +13,28 @@
 
 (defun %create-new-protid (open-node user node flags newnode-p)
   "Creates a new protid."
-  (let ((new-flags (disable-flags flags +open-flags+)))
-    (when (allow-open-p *translator* node user new-flags newnode-p)
-      (when (flag-is-p flags :trunc)
-        (unless (file-change-size *translator* node user 0)
-          (return-from %create-new-protid :not-permitted)))
-      (let* ((new-user (make-iouser :old user))
-             (new-open-node (make-open-node
-                              node
-                              new-flags
-                              :copy open-node))
-             (new-protid
-               (new-protid *translator*
-                           new-user
-                           new-open-node)))
-        (values :retry-normal
-                ""
-                (get-right new-protid)
-                :make-send)))))
+  (let* ((new-flags (disable-flags flags +open-flags+))
+         (allow-ret (allow-open-p *translator* node user new-flags newnode-p)))
+    (cond
+      ((eq t allow-ret)
+       (when (flag-is-p flags :trunc)
+         (unless (file-change-size *translator* node user 0)
+           (return-from %create-new-protid :not-permitted)))
+       (let* ((new-user (make-iouser :old user))
+              (new-open-node (make-open-node
+                               node
+                               new-flags
+                               :copy open-node))
+              (new-protid
+                (new-protid *translator*
+                            new-user
+                            new-open-node)))
+         (values :retry-normal
+                 ""
+                 (get-right new-protid)
+                 :make-send)))
+      ((eq nil allow-ret) :not-permitted)
+      (t allow-ret))))
 
 (defun %must-handle-shadow-roots (open-node node this-path)
   (and (or (eq (root *translator*) node)
