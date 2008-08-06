@@ -19,7 +19,6 @@
                 (let ((node (get-node port)))
                   (when (and (box-active-p (box node))
                              (not (member node nodes-done)))
-                    (warn "setting options on ~s" node)
                     (fsys-set-options (box-fetch-control (box node))
                                       :options new-options
                                       :do-children t)
