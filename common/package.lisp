@@ -8,8 +8,6 @@
            :+minus-one+
            :largest-representable-number
            :num-bits
-           :define-helper-library
-           :define-stub-library
            :error->string
            :err
            :unrecognized-error-code
