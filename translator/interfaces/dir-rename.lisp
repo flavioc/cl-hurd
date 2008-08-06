@@ -19,8 +19,8 @@
                                                       old-name)))
                (unless found-old-node
                  (return-from dir-rename :no-such-file))
-               (let* ((new-dir-node (get-user new-dir-protid))
-                      (new-dir-user (get-node new-dir-protid))
+               (let* ((new-dir-node (get-node new-dir-protid))
+                      (new-dir-user (get-user new-dir-protid))
                       (found-new-node (directory-lookup *translator*
                                                         new-dir-node
                                                         new-dir-user
