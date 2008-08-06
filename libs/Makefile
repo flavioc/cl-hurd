@@ -28,8 +28,8 @@ GENERATED_FSYS_REPLY_USER = fsys_reply_user
 FSYS_REPLY_OBJECTS = $(GENERATED_FSYS_REPLY_USER).o
 
 TARGETS = liblisptrans.so
-OBJS = fetch-root.o file-exec.o file-utimes.o \
-			 round-page.o portset-demuxer.o \
+OBJS = fetch-root.o file-exec.o \
+			 file-utimes.o portset-demuxer.o \
 			 $(IO_OBJECTS) $(FS_OBJECTS) \
 			 $(FSYS_OBJECTS) $(NOTIFY_OBJECTS) \
 			 $(FSYS_REPLY_OBJECTS)
