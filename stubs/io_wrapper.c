@@ -34,7 +34,7 @@ static void *routines[_NUMBER_OF_ROUTINES];
 
 typedef kern_return_t (*io_write_type) (io_t,
 					data_t, mach_msg_type_number_t,
-					loff_t, vm_size_t *);
+					off_t, vm_size_t *);
 
 kern_return_t
 lisp_io_write (io_t io_object,
@@ -56,7 +56,7 @@ lisp_io_write (io_t io_object,
 
 typedef kern_return_t (*io_read_type) (io_t,
 				       data_t *, mach_msg_type_number_t *,
-				       loff_t, vm_size_t);
+				       off_t, vm_size_t);
 
 kern_return_t
 lisp_io_read (io_t io_object,
@@ -76,7 +76,7 @@ lisp_io_read (io_t io_object,
 
 /* io seek */
 
-typedef kern_return_t (*io_seek_type) (io_t, loff_t, int, loff_t *);
+typedef kern_return_t (*io_seek_type) (io_t, off_t, int, off_t *);
 
 kern_return_t
 lisp_io_seek (io_t io_object, loff_t offset, int whence, loff_t * newp)
@@ -88,7 +88,7 @@ lisp_io_seek (io_t io_object, loff_t offset, int whence, loff_t * newp)
 
   io_seek_type seek_routine = routines[IO_SEEK];
 
-  return seek_routine (io_object, offset, whence, newp);
+  return seek_routine (io_object, offset, whence, (off_t *)newp);
 }
 
 /* io readable */

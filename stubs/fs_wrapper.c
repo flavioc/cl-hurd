@@ -169,7 +169,7 @@ lisp_file_utimes (file_t utimes_file,
 }
 
 /* file set size */
-typedef kern_return_t (*file_set_size_type) (file_t, loff_t);
+typedef kern_return_t (*file_set_size_type) (file_t, off_t);
 
 kern_return_t
 lisp_file_set_size (file_t trunc_file, loff_t new_size)
