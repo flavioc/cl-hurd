@@ -17,7 +17,8 @@
   :components ((:file "paths")
                (:module tree-translator
                         :components ((:file "package")
-                                     (:file "sorted-container")
+                                     (:file "sorted-container"
+                                            :depends-on ("package"))
                                      (:file "dir"
                                             :depends-on ("sorted-container"))
                                      (:file "class"
