@@ -8,13 +8,15 @@
                                (new-file-type :pointer))
   (with-lookup dir-protid dir
     (block dir-mkfile
-           (let ((new-node (create-anonymous-file *translator*
-                                                  (get-node dir-protid)
-                                                  (get-user dir-protid)
-                                                  mode)))
+           (let* ((node (get-node dir-protid))
+                  (user (get-user dir-protid))
+                  (new-node (create-anonymous-file *translator*
+                                                   node
+                                                   user
+                                                   mode)))
              (unless new-node
                (return-from dir-mkfile nil))
-             (let* ((new-user (make-iouser :old (get-user dir-protid)))
+             (let* ((new-user (make-iouser :old user))
                     (old-open-node (open-node dir-protid))
                     (new-protid (new-protid
                                   *translator*
