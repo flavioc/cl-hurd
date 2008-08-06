@@ -14,8 +14,6 @@
   (mem-aref ports 'port
             (foreign-enum-value 'init-port enum)))
 
-(define-helper-library exec-reauth)
-
 (defcfun ("exec_reauth_finished" exec-reauth-finished)
   :boolean
   (pid pid-t))

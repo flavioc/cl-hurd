@@ -1,8 +1,6 @@
 
 (in-package :hurd)
 
-(define-helper-library file-utimes)
-
 (defcfun ("helper_file_utimes" %file-utimes)
   err
   (file port)
