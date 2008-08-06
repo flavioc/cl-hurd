@@ -1,5 +1,5 @@
 
-TARGET_DIRS = stubs libs launcher
+TARGET_DIRS = libs launcher
 
 all:
 	@for dir in $(TARGET_DIRS); do \
