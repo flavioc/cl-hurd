@@ -39,7 +39,6 @@
 (defmethod box-fetch-control ((box transbox))
   "Fetch a new control port from a translator box."
   (assert (box-active-p box))
-  (warn "box: active refs ~s" (port-get-refs (active box) :right-dead-name))
   (port-mod-refs (active box) :right-send 1)
   (active box))
 
@@ -57,9 +56,7 @@
     ; See if the active name is dead
     (return-from box-set-active nil))
   (when (active box)
-    (warn "box: deallocate old active")
     (port-deallocate (active box)))
-  (warn "box: setting new ~s" port)
   (setf (slot-value box 'active) port)
   t)
 
