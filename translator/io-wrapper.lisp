@@ -1,8 +1,6 @@
 
 (in-package :hurd-translator)
 
-(define-stub-library io)
-
 (defcenum io-routine-code
   :IO-WRITE
   :IO-READ

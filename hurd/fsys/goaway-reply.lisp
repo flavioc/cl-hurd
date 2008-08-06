@@ -1,8 +1,6 @@
 
 (in-package :hurd)
 
-(define-stub-library fsys-reply)
-
 (defcfun ("fsys_goaway_reply" %fsys-goaway-reply)
   err
   (reply port)

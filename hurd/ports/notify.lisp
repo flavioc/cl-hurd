@@ -1,8 +1,6 @@
 
 (in-package :hurd)
 
-(define-stub-library notify)
-
 ;; Types of callbacks for a notify server.
 (defcenum notify-routine-code
   :do-mach-notify-port-deleted

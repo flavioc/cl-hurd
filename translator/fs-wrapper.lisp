@@ -1,8 +1,6 @@
 
 (in-package :hurd-translator)
 
-(define-stub-library fs)
-
 ;; All filesystem routines.
 (defcenum fs-routine-code
   :FILE-EXEC

@@ -1,8 +1,6 @@
 
 (in-package :hurd)
 
-(define-helper-library portset-demuxer)
-
 ;; Defines a new internal demuxer port the portset-demuxer.
 (defcfun ("set_demuxer" %set-demuxer)
   :void

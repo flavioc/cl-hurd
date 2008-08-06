@@ -1,8 +1,6 @@
 
 (in-package :hurd)
 
-(define-helper-library fetch-root)
-
 (defcfun ("helper_fetch_root" %helper-fetch-root)
   err
   (dotdot port)

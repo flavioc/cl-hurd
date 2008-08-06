@@ -1,8 +1,6 @@
 
 (in-package :hurd-translator)
 
-(define-helper-library file-exec)
-
 (defcfun ("do_exec_exec" %do-exec-exec)
   pid-t
   (execserver port)

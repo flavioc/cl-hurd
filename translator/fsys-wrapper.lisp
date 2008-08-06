@@ -1,8 +1,6 @@
 
 (in-package :hurd-translator)
 
-(define-stub-library fsys)
-
 ;; All the fsys routines.
 (defcenum fsys-routine-code
   :FSYS-STARTUP
