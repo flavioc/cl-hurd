@@ -50,7 +50,6 @@
            :mmap-map-flags
            :mmap
            :munmap
-           :round-page
            :vm-allocate
            :vm-deallocate
            :reply-port
