@@ -2,7 +2,7 @@
 (in-package :hurd-translator)
 
 (def-io-interface :io-seek ((io port)
-                            (offset loff-t)
+                            (offset off-t)
                             (whence seek-type)
                             (newoffset :pointer))
   (with-lookup protid io
@@ -12,11 +12,11 @@
       (:seek-end
         (incf offset (stat-get (stat (get-node protid)) 'st-size))))
     (cond
-      ((or (plusp offset)
-           (zerop offset))
-       (setf (mem-ref newoffset 'loff-t) offset
+      ((and
+         (>= offset 0)
+         (<= offset (stat-get (stat (get-node protid)) 'st-size)))
+       (setf (mem-ref newoffset 'off-t) offset
              (file-offset (open-node protid)) offset)
        t)
-      (t
-        :invalid-argument))))
+      (t :invalid-argument))))
 
