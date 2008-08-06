@@ -10,7 +10,7 @@
 (def-io-interface :io-write ((port port)
                              (data :pointer)
                              (datalen msg-type-number)
-                             (offset loff-t)
+                             (offset off-t)
                              (amount :pointer))
   (with-lookup protid port
 	  (block io-write
@@ -27,7 +27,11 @@
                (setf offset (file-offset open)))
              (let ((data-array (%foreign-vector-to-array data datalen)))
                (with-input-from-sequence (stream data-array)
-                 (let* ((ret (write-file *translator* node user offset stream))
+                 (let* ((ret (write-file *translator*
+                                         node
+                                         user
+                                         offset
+                                         stream))
                         (total (file-position stream)))
                    (cond
                      ((eq ret nil) :not-permitted)
@@ -36,3 +40,4 @@
                       (setf (mem-ref amount 'vm-size) total)
                       t)
                      (t ret)))))))))
+
