@@ -3,6 +3,6 @@
 
 (defun %is-minus-one-p (val)
   "Checks if 'val' has the -1 value."
-  (or (= val #xffffffff) ;; unsigned-int
-	  (= val #xffffffffffffffff))) ;; long-long
+  (or (= val +minus-one+) ;; unsigned-int
+	  (= val +minus-one-ll+))) ;; long-long
 
