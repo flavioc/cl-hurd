@@ -1,7 +1,7 @@
 
 (in-package :translator-test)
 
-(def-test-method fsys-options-test ((test fs-test))
+(def-test-method fsys-options-test ((test fsys-test))
   (with-testport (p (file-name-lookup +translator-root+))
     (with-testport (cntl (file-getcontrol p))
       (let ((old-options (fsys-get-options cntl)))

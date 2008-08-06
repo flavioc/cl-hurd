@@ -14,3 +14,4 @@
     (assert-equal '(:async :read) (io-get-openmodes p))
     (assert-true (io-set-all-openmodes p '()))
     (assert-equal '(:read) (io-get-openmodes p))))
+

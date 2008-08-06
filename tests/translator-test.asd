@@ -32,6 +32,11 @@
                       :depends-on ("io-suite"))
                (:file "io-openmodes"
                       :depends-on ("io-suite"))
+               (:file "io-read"
+                      :depends-on ("io-suite"))
+               (:file "io-write"
+                      :depends-on ("io-suite"
+                                   "io-read"))
                (:file "fs-suite"
                       :depends-on ("package" "paths" "macros"))
                (:file "file-check-access"
@@ -49,6 +54,20 @@
                (:file "file-reparent"
                       :depends-on ("fs-suite"))
                (:file "file-getlinknode"
+                      :depends-on ("fs-suite"))
+               (:file "dir-lookup"
+                      :depends-on ("fs-suite"))
+               (:file "dir-link"
+                      :depends-on ("fs-suite"))
+               (:file "dir-unlink"
+                      :depends-on ("fs-suite"))
+               (:file "dir-dir"
+                      :depends-on ("fs-suite"))
+               (:file "file-symlink"
+                      :depends-on ("fs-suite"))
+               (:file "dir-rename"
+                      :depends-on ("fs-suite"))
+               (:file "dir-readdir"
                       :depends-on ("fs-suite"))
                (:file "fsys-suite"
                       :depends-on ("package" "macros" "paths"))
