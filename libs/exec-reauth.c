@@ -1,6 +1,7 @@
 
 #include <hurd.h>
 #include <mach.h>
+#include <unistd.h>
 #include <hurd/auth.h>
 #include <hurd/io.h>
 #include <hurd/process.h>
@@ -49,8 +50,6 @@ helper_exec_reauth (auth_t newauth, int secure,
 	exec_reauth (newauth_new, secure, 0, new_ports, num_ports, new_fds,
 		     num_fds);
 
-      fprintf (stderr, "exec_reauth: %s\n", strerror (err));
-
       proc_setowner (new_ports[INIT_PORT_PROC], uid, is_empty);
 
       mach_port_insert_right (parent_task, newauth, newauth_new,
@@ -60,7 +59,6 @@ helper_exec_reauth (auth_t newauth, int secure,
 	{
 	  if (ports[i] == MACH_PORT_NULL)
 	    continue;
-	  fprintf (stderr, "%s\n",
 		   strerror (mach_port_insert_right
 			     (parent_task, new_ports[i], ports[i],
 			      MACH_MSG_TYPE_MOVE_SEND)));
@@ -70,13 +68,11 @@ helper_exec_reauth (auth_t newauth, int secure,
 	{
 	  if (fds[i] == MACH_PORT_NULL)
 	    continue;
-	  fprintf (stderr, "%s\n",
 		   strerror (mach_port_insert_right
 			     (parent_task, new_fds[i], fds[i],
 			      MACH_MSG_TYPE_MOVE_SEND)));
 	}
 
-      fprintf (stderr, "EXITING...\n");
       exit (err);
     }
 
