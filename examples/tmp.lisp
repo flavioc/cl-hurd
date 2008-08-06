@@ -10,8 +10,7 @@
 ;; This is a simple tmpfs translator.
 ;;
 
-(defclass tmp-translator (tree-translator)
-  ())
+(defclass tmp-translator (tree-translator) ())
 
 (defun %create-data-array ()
   (make-array 0
@@ -86,9 +85,6 @@
   (when (is-owner-p node user)
     (adjust-array (data node) new-size :fill-pointer t)
     t))
-
-(define-callback shutdown tmp-translator ()
-  t)
 
 (define-callback create-anonymous-file tmp-translator
                  (node user mode)
