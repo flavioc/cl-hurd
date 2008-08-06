@@ -11,3 +11,4 @@
   (declare (type fixnum dir)
            (type string name))
   (select-error (%dir-mkdir dir name mode)))
+
