@@ -39,7 +39,7 @@
         :accessor dirent-ino
         :documentation "Ino value of this entry.")
    (filetype :initarg :file-type
-             :accessor dirent-file-type
+             :accessor dirent-type
              :documentation "Mode type of this entry.")
    (size :initform nil
          :initarg :size
@@ -70,7 +70,7 @@
   (setf (foreign-slot-value ptr 'dirent-struct 'ino) (dirent-ino dirent)
         (foreign-slot-value ptr 'dirent-struct 'reclen) (dirent-size dirent)
         (foreign-slot-value ptr 'dirent-struct 'type)
-        (foreign-enum-value 'dirent-type (dirent-file-type dirent))
+        (foreign-enum-value 'dirent-type (dirent-type dirent))
         (foreign-slot-value ptr 'dirent-struct 'namlen) (dirent-name-size dirent))
   (lisp-string-to-foreign (dirent-name dirent)
                           (inc-pointer ptr +dirent-size+)
@@ -97,5 +97,5 @@
   (format stream "#<dirent name=~s ino=~s filetype=~s>"
           (dirent-name dirent)
           (dirent-ino dirent)
-          (dirent-file-type dirent)))
+          (dirent-type dirent)))
 
