@@ -13,7 +13,6 @@
 
 (defun %set-short-circuited-translator (ls node user)
   (let ((what (%get-short-circuited-translator ls)))
-    (warn "ls ~s" ls)
     (when what
       (case what
         (:lnk
@@ -23,13 +22,10 @@
          (when (= (length ls) 3)
            (let ((major (parse-integer (second ls) :junk-allowed t))
                  (minor (parse-integer (third ls) :junk-allowed t)))
-             (warn "major ~s minor ~s" major minor)
              (when (and major minor)
-               (warn "major minor ok")
                (let ((device (make-instance 'device-id
                                             :major major
                                             :minor minor)))
-                 (warn "device created..")
                  (if (eq what :blk)
                    (create-block *translator* node user device)
                    (create-character *translator* node user device)))))))
@@ -56,8 +52,6 @@
                                         (active port))
   (with-lookup protid file
     (block set-translator
-           (warn "file-set-translator active ~s passive ~s activeport ~s killtrans ~s"
-                 active-flags passive-flags active killtrans-flags)
            (unless (or (flag-is-p passive-flags :set)
                        (flag-is-p active-flags :set))
              (return-from set-translator :invalid-argument))
@@ -94,7 +88,6 @@
                   (cond
                     (sct t)
                     (t
-                      (warn "going to set...")
                       (box-set-passive (box node)
                                        passive-list)))))
                ((flag-is-p active-flags :set)
