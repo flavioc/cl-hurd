@@ -3,7 +3,6 @@
 
 (defun %get-translator-list (node user)
   (let ((what (get-type (stat node))))
-    (warn "%get-translator-list ~s" what)
     (case what
       (:lnk
         (when (and (link node)
@@ -43,5 +42,4 @@
             (list-to-foreign-string-zero-separated arg-list
                                                    (mem-ref data :pointer)
                                                    len-args)
-            (warn "arg-list ~s" arg-list)
             t))))))
