@@ -16,17 +16,22 @@
   :components ((:file "paths")
                (:module mach
                         :components ((:file "package")
-                                     (:file "msg-type-name")
-                                     (:file "task-special-ports")
-                                     (:file "port-right")
+                                     (:file "msg-type-name"
+                                            :depends-on ("package"))
+                                     (:file "task-special-ports"
+                                            :depends-on ("package"))
+                                     (:file "port-right"
+                                            :depends-on ("package"))
                                      (:file "port-type"
-                                            :depends-on ("port-right"))
+                                            :depends-on ("package"
+                                                         "port-right"))
                                      (:file "port")
                                      (:file "msg-notify")
                                      (:file "msg-option")
                                      (:file "msg-type")
                                      (:file "types"
                                             :depends-on ("port-type"
+                                                         "package"
                                                          "msg-type-name"
                                                          "port-right"
                                                          "port"
@@ -41,7 +46,8 @@
                                      (:file "port-destruction"
                                             :depends-on ("types"))
                                      (:file "task"
-                                            :depends-on ("types"))
+                                            :depends-on ("types"
+                                                         "package"))
                                      (:file "port-names"
                                             :depends-on ("types"
                                                          "mmap"
