@@ -58,7 +58,6 @@
            :file-reparent
            :file-set-size
            :file-set-translator
-           :file-remove-translator
            :file-statfs
            :file-sync
            :file-syncfs
