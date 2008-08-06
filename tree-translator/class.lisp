@@ -90,7 +90,8 @@ root node."
                           'dir-entry
                           :stat (make-stat (stat node) :mode mode)
                           :parent node)
-                   name)))))
+                   name)
+        t))))
 
 (define-callback remove-directory-entry tree-translator
 				 (node user name directory-p)
