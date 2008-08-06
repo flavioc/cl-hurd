@@ -13,9 +13,10 @@
   :license "GPL v3.0"
   :description "Common Lisp bindings for the Hurd"
   :depends-on (:cffi :trivial-garbage :hurd-common :mach)
-  :components ((:file "paths")
-               (:module hurd
+  :components ((:module hurd
                         :components ((:file "package")
+                                     (:file "lib"
+                                            :depends-on ("package"))
                                      (:file "types"
                                             :depends-on ("package"))
                                      (:file "paths"
@@ -119,7 +120,7 @@
                                                            (:file "syncfs")
                                                            (:file "get-options")
                                                            (:file "getroot"))
-                                              :depends-on ("iohelp" "retry" "translator-options" "package"))
+                                              :depends-on ("iohelp" "retry" "translator-options" "package" "lib"))
                                      (:module ports
                                               :components ((:file "port")
                                                            (:file "bucket"
@@ -139,7 +140,7 @@
                                                                                "no-senders"
                                                                                "notify"
                                                                                "demuxer")))
-                                              :depends-on ("macros" "package"))
+                                              :depends-on ("macros" "package" "lib"))
                                      (:module fshelp
                                               :components ((:file "access")
                                                            (:file "checkdirmod")
@@ -148,8 +149,6 @@
                                                            (:file "transbox")
                                                            (:file "fetch-root"
                                                                   :depends-on ("transbox"))
-                                                           (:file "exec-reauth")
                                                            (:file "identity"))
-                                              :depends-on ("iohelp" "fsys" "ports" "package" "auth")))
-                        :depends-on ("paths"))))
+                                              :depends-on ("iohelp" "fsys" "ports" "package" "auth" "lib"))))))
 
