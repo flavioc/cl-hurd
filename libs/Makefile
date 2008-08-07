@@ -65,9 +65,7 @@ $(GENERATED_FSYS_SERVER).c: $(FSYS_DEFS)
 fsys_wrapper.o: fsys_wrapper.c fsys_wrapper.h common.c
 
 $(GENERATED_NOTIFY_SERVER).c: $(NOTIFY_DEFS)
-	$(MIG_SERVER) $(GENERATED_NOTIFY_SERVER).c $(NOTIFY_DEFS)
-	sed -e 's:lisp_S_notify_server:lisp_notify_server:g' \
-		-i $(GENERATED_NOTIFY_SERVER).c
+	$(MIG_SERVER) $(GENERATED_NOTIFY_SERVER).c $(NOTIFY_DEFS) -prefix lisp_
 
 notify_wrapper.o: notify_wrapper.c notify_wrapper.h common.c
 
