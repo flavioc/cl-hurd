@@ -1,7 +1,7 @@
 
 (in-package :hurd-common)
 
-(defctype off-t :long "C type off_t")
+(defctype off-t :long-long "C type off_t")
 
 (defctype loff-t :long-long "C type loff_t")
 
