@@ -6,8 +6,9 @@
 
 (in-package :test-translator)
 
-(assert (= (length ext:*args*) 1))
-(defconstant +file+ (first ext:*args*))
+(defconstant +file+ "data/test.lisp")
+;(assert (= (length ext:*args*) 1))
+;(defconstant +file+ (first ext:*args*))
 
 (defun %create-data-array (size contents)
   (make-array size
