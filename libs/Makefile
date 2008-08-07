@@ -44,23 +44,30 @@ liblisptrans.so: $(OBJS)
 
 $(GENERATED_IO_SERVER).c: $(IO_DEFS)
 	$(MIG_SERVER) $(GENERATED_IO_SERVER).c $(IO_DEFS)
+	sed -e 's:lisp_S_io_server:lisp_io_server:g' \
+		-i $(GENERATED_IO_SERVER).c
 
 io_wrapper.o: io_wrapper.c io_wrapper.h common.c
 
 $(GENERATED_FS_SERVER).c: $(FS_DEFS)
 	$(MIG_SERVER) $(GENERATED_FS_SERVER).c $(FS_DEFS)
+	sed -e 's:lisp_S_fs_server:lisp_fs_server:g' -i $(GENERATED_FS_SERVER).c
 
 fs_wrapper.o: fs_wrapper.c fs_wrapper.h common.c
 
 $(GENERATED_FSYS_SERVER).c: $(FSYS_DEFS)
 	cpp $(FSYS_DEFS) -D REPLY_PORTS > tmp.defs
 	$(MIG_SERVER) $(GENERATED_FSYS_SERVER).c tmp.defs
+	sed -e 's:lisp_S_fsys_server:lisp_fsys_server:g' \
+		-i $(GENERATED_FSYS_SERVER).c
 	rm -f tmp.defs
 
 fsys_wrapper.o: fsys_wrapper.c fsys_wrapper.h common.c
 
 $(GENERATED_NOTIFY_SERVER).c: $(NOTIFY_DEFS)
 	$(MIG_SERVER) $(GENERATED_NOTIFY_SERVER).c $(NOTIFY_DEFS)
+	sed -e 's:lisp_S_notify_server:lisp_notify_server:g' \
+		-i $(GENERATED_NOTIFY_SERVER).c
 
 notify_wrapper.o: notify_wrapper.c notify_wrapper.h common.c
 
