@@ -2,7 +2,7 @@
 (in-package :mach)
 
 (defcenum port-right
-  :right-send
+  (:right-send 0)
   :right-receive
   :right-send-once
   :right-port-set

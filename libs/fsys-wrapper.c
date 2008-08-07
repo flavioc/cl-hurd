@@ -39,7 +39,7 @@ typedef kern_return_t (*fsys_startup_type) (mach_port_t,
 					    mach_msg_type_name_t *);
 
 kern_return_t
-lisp_fsys_startup (mach_port_t bootstrap,
+lisp_S_fsys_startup (mach_port_t bootstrap,
 		   mach_port_t reply,
 		   mach_msg_type_name_t replyPoly,
 		   int openflags,
@@ -64,7 +64,7 @@ typedef kern_return_t (*fsys_goaway_type) (fsys_t, mach_port_t,
 					   mach_msg_type_name_t, int);
 
 kern_return_t
-lisp_fsys_goaway (fsys_t fsys, mach_port_t reply,
+lisp_S_fsys_goaway (fsys_t fsys, mach_port_t reply,
 		  mach_msg_type_name_t replyPoly, int flags)
 {
   if (routines[FSYS_GOAWAY] == NULL)
@@ -93,7 +93,7 @@ typedef kern_return_t (*fsys_getroot_type) (fsys_t,
 					    mach_msg_type_name_t *);
 
 kern_return_t
-lisp_fsys_getroot (fsys_t fsys,
+lisp_S_fsys_getroot (fsys_t fsys,
 		   mach_port_t reply,
 		   mach_msg_type_name_t replyPoly,
 		   mach_port_t dotdot_node,
@@ -137,7 +137,7 @@ typedef kern_return_t (*fsys_getfile_type) (fsys_t,
 					    mach_msg_type_name_t *);
 
 kern_return_t
-lisp_fsys_getfile (fsys_t fsys,
+lisp_S_fsys_getfile (fsys_t fsys,
 		   mach_port_t reply,
 		   mach_msg_type_name_t replyPoly,
 		   idarray_t gen_uids,
@@ -168,7 +168,7 @@ typedef kern_return_t (*fsys_syncfs_type) (fsys_t,
 					   int, int);
 
 kern_return_t
-lisp_fsys_syncfs (fsys_t fsys,
+lisp_S_fsys_syncfs (fsys_t fsys,
 		  mach_port_t reply,
 		  mach_msg_type_name_t replyPoly, int wait, int do_children)
 {
@@ -190,7 +190,7 @@ typedef kern_return_t (*fsys_set_options_type) (fsys_t,
 						mach_msg_type_number_t, int);
 
 kern_return_t
-lisp_fsys_set_options (fsys_t fsys,
+lisp_S_fsys_set_options (fsys_t fsys,
 		       mach_port_t reply,
 		       mach_msg_type_name_t replyPoly,
 		       data_t options,
@@ -220,7 +220,7 @@ typedef kern_return_t (*fsys_getpriv_type) (fsys_t,
 					    mach_msg_type_name_t *);
 
 kern_return_t
-lisp_fsys_getpriv (fsys_t fsys,
+lisp_S_fsys_getpriv (fsys_t fsys,
 		   mach_port_t reply,
 		   mach_msg_type_name_t replyPoly,
 		   mach_port_t * host_priv,
@@ -249,7 +249,7 @@ typedef kern_return_t (*fsys_init_type) (fsys_t,
 					 mach_port_t, auth_t);
 
 kern_return_t
-lisp_fsys_init (fsys_t fsys,
+lisp_S_fsys_init (fsys_t fsys,
 		mach_port_t reply_port,
 		mach_msg_type_name_t reply_portPoly,
 		mach_port_t proc_server, auth_t auth_handle)
@@ -273,7 +273,7 @@ typedef kern_return_t (*fsys_forward_type) (mach_port_t,
 					    mach_msg_type_number_t);
 
 kern_return_t
-lisp_fsys_forward (mach_port_t server,
+lisp_S_fsys_forward (mach_port_t server,
 		   mach_port_t reply,
 		   mach_msg_type_name_t replyPoly,
 		   mach_port_t requestor,
@@ -298,7 +298,7 @@ typedef kern_return_t (*fsys_get_options_type) (fsys_t,
 						mach_msg_type_number_t *);
 
 kern_return_t
-lisp_fsys_get_options (fsys_t server,
+lisp_S_fsys_get_options (fsys_t server,
 		       mach_port_t reply,
 		       mach_msg_type_name_t replyPoly,
 		       data_t * options, mach_msg_type_number_t * optionsCnt)

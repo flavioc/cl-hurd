@@ -45,7 +45,7 @@ typedef kern_return_t (*file_exec_type) (file_t,
 					 mach_msg_type_number_t);
 
 kern_return_t
-lisp_file_exec (file_t exec_file,
+lisp_S_file_exec (file_t exec_file,
 		mach_port_t exec_task,
 		int flags,
 		data_t argv,
@@ -85,7 +85,7 @@ typedef kern_return_t (*file_chown_type) (file_t chown_file,
 					  uid_t new_owner, gid_t new_group);
 
 kern_return_t
-lisp_file_chown (file_t chown_file, uid_t new_owner, gid_t new_group)
+lisp_S_file_chown (file_t chown_file, uid_t new_owner, gid_t new_group)
 {
   if (routines[FILE_CHOWN] == NULL)
     {
@@ -102,7 +102,7 @@ lisp_file_chown (file_t chown_file, uid_t new_owner, gid_t new_group)
 typedef kern_return_t (*file_chauthor_type) (file_t, uid_t);
 
 kern_return_t
-lisp_file_chauthor (file_t chauth_file, uid_t new_author)
+lisp_S_file_chauthor (file_t chauth_file, uid_t new_author)
 {
   if (routines[FILE_CHAUTHOR] == NULL)
     {
@@ -119,7 +119,7 @@ lisp_file_chauthor (file_t chauth_file, uid_t new_author)
 typedef kern_return_t (*file_chmod_type) (file_t, mode_t);
 
 kern_return_t
-lisp_file_chmod (file_t chmod_file, mode_t new_mode)
+lisp_S_file_chmod (file_t chmod_file, mode_t new_mode)
 {
   if (routines[FILE_CHMOD] == NULL)
     {
@@ -136,7 +136,7 @@ lisp_file_chmod (file_t chmod_file, mode_t new_mode)
 typedef kern_return_t (*file_chflags_type) (file_t, int);
 
 kern_return_t
-lisp_file_chflags (file_t chflags_file, int new_flags)
+lisp_S_file_chflags (file_t chflags_file, int new_flags)
 {
   if (routines[FILE_CHFLAGS] == NULL)
     {
@@ -154,7 +154,7 @@ typedef kern_return_t (*file_utimes_type) (file_t,
 					   time_value_t *, time_value_t *);
 
 kern_return_t
-lisp_file_utimes (file_t utimes_file,
+lisp_S_file_utimes (file_t utimes_file,
 		  time_value_t new_atime, time_value_t new_mtime)
 {
   if (routines[FILE_UTIMES] == NULL)
@@ -172,7 +172,7 @@ lisp_file_utimes (file_t utimes_file,
 typedef kern_return_t (*file_set_size_type) (file_t, off_t);
 
 kern_return_t
-lisp_file_set_size (file_t trunc_file, loff_t new_size)
+lisp_S_file_set_size (file_t trunc_file, loff_t new_size)
 {
   if (routines[FILE_SET_SIZE] == NULL)
     {
@@ -189,7 +189,7 @@ lisp_file_set_size (file_t trunc_file, loff_t new_size)
 typedef kern_return_t (*file_lock_type) (file_t, int);
 
 kern_return_t
-lisp_file_lock (file_t lock_file, int flags)
+lisp_S_file_lock (file_t lock_file, int flags)
 {
   if (routines[FILE_LOCK] == NULL)
     {
@@ -206,7 +206,7 @@ lisp_file_lock (file_t lock_file, int flags)
 typedef kern_return_t (*file_lock_stat_type) (file_t, int *, int *);
 
 kern_return_t
-lisp_file_lock_stat (file_t lock_file, int *mystatus, int *otherstatus)
+lisp_S_file_lock_stat (file_t lock_file, int *mystatus, int *otherstatus)
 {
   if (routines[FILE_LOCK_STAT] == NULL)
     {
@@ -223,7 +223,7 @@ lisp_file_lock_stat (file_t lock_file, int *mystatus, int *otherstatus)
 typedef kern_return_t (*file_check_access_type) (file_t, int *);
 
 kern_return_t
-lisp_file_check_access (file_t file, int *allowed)
+lisp_S_file_check_access (file_t file, int *allowed)
 {
   if (routines[FILE_CHECK_ACCESS] == NULL)
     {
@@ -240,7 +240,7 @@ lisp_file_check_access (file_t file, int *allowed)
 typedef kern_return_t (*file_notice_changes_type) (file_t, mach_port_t);
 
 kern_return_t
-lisp_file_notice_changes (file_t file, mach_port_t port)
+lisp_S_file_notice_changes (file_t file, mach_port_t port)
 {
   if (routines[FILE_NOTICE_CHANGES] == NULL)
     {
@@ -260,7 +260,7 @@ typedef kern_return_t (*file_getcontrol_type) (file_t,
 					       mach_msg_type_name_t *);
 
 kern_return_t
-lisp_file_getcontrol (file_t file,
+lisp_S_file_getcontrol (file_t file,
 		      mach_port_t * control,
 		      mach_msg_type_name_t * controlPoly)
 {
@@ -279,7 +279,7 @@ lisp_file_getcontrol (file_t file,
 typedef kern_return_t (*file_statfs_type) (file_t, fsys_statfsbuf_t *);
 
 kern_return_t
-lisp_file_statfs (file_t file, fsys_statfsbuf_t * info)
+lisp_S_file_statfs (file_t file, fsys_statfsbuf_t * info)
 {
   printf ("STATING\n");
   if (routines[FILE_STATFS] == NULL)
@@ -297,7 +297,7 @@ lisp_file_statfs (file_t file, fsys_statfsbuf_t * info)
 typedef kern_return_t (*file_sync_type) (file_t, int, int);
 
 kern_return_t
-lisp_file_sync (file_t file, int wait, int omit_metadata)
+lisp_S_file_sync (file_t file, int wait, int omit_metadata)
 {
   if (routines[FILE_SYNC] == NULL)
     {
@@ -314,7 +314,7 @@ lisp_file_sync (file_t file, int wait, int omit_metadata)
 typedef kern_return_t (*file_syncfs_type) (file_t, int, int);
 
 kern_return_t
-lisp_file_syncfs (file_t file, int wait, int do_children)
+lisp_S_file_syncfs (file_t file, int wait, int do_children)
 {
   if (routines[FILE_SYNCFS] == NULL)
     {
@@ -341,7 +341,7 @@ typedef kern_return_t (*file_get_storage_info_type) (file_t,
 						     *);
 
 kern_return_t
-lisp_file_get_storage_info (file_t file,
+lisp_S_file_get_storage_info (file_t file,
 			    portarray_t * ports,
 			    mach_msg_type_name_t * portsPoly,
 			    mach_msg_type_number_t * portsCnt,
@@ -371,7 +371,7 @@ typedef kern_return_t (*file_getlinknode_type) (file_t,
 						mach_msg_type_name_t *);
 
 kern_return_t
-lisp_file_getlinknode (file_t file,
+lisp_S_file_getlinknode (file_t file,
 		       mach_port_t * linknode,
 		       mach_msg_type_name_t * linknodePoly)
 {
@@ -391,7 +391,7 @@ typedef kern_return_t (*file_getfh_type) (file_t,
 					  data_t *, mach_msg_type_number_t *);
 
 kern_return_t
-lisp_file_getfh (file_t file,
+lisp_S_file_getfh (file_t file,
 		 data_t * filehandle, mach_msg_type_number_t * filehandleCnt)
 {
   if (routines[FILE_GETFH] == NULL)
@@ -413,7 +413,7 @@ typedef kern_return_t (*dir_lookup_type) (file_t,
 					  mach_msg_type_name_t *);
 
 kern_return_t
-lisp_dir_lookup (file_t startdir,
+lisp_S_dir_lookup (file_t startdir,
 		 string_t filename,
 		 int flags,
 		 mode_t mode,
@@ -442,7 +442,7 @@ typedef kern_return_t (*dir_readdir_type) (file_t,
 					   int, vm_size_t, int *);
 
 kern_return_t
-lisp_dir_readdir (file_t dir,
+lisp_S_dir_readdir (file_t dir,
 		  data_t * data,
 		  mach_msg_type_number_t * dataCnt,
 		  boolean_t * dataDealloc,
@@ -464,7 +464,7 @@ lisp_dir_readdir (file_t dir,
 typedef kern_return_t (*dir_mkdir_type) (file_t, string_t, mode_t);
 
 kern_return_t
-lisp_dir_mkdir (file_t directory, string_t name, mode_t mode)
+lisp_S_dir_mkdir (file_t directory, string_t name, mode_t mode)
 {
   if (routines[DIR_MKDIR] == NULL)
     {
@@ -481,7 +481,7 @@ lisp_dir_mkdir (file_t directory, string_t name, mode_t mode)
 typedef kern_return_t (*dir_rmdir_type) (file_t, string_t);
 
 kern_return_t
-lisp_dir_rmdir (file_t directory, string_t name)
+lisp_S_dir_rmdir (file_t directory, string_t name)
 {
   if (routines[DIR_RMDIR] == NULL)
     {
@@ -498,7 +498,7 @@ lisp_dir_rmdir (file_t directory, string_t name)
 typedef kern_return_t (*dir_unlink_type) (file_t, string_t);
 
 kern_return_t
-lisp_dir_unlink (file_t directory, string_t name)
+lisp_S_dir_unlink (file_t directory, string_t name)
 {
   if (routines[DIR_UNLINK] == NULL)
     {
@@ -515,7 +515,7 @@ lisp_dir_unlink (file_t directory, string_t name)
 typedef kern_return_t (*dir_link_type) (file_t, file_t, string_t, int);
 
 kern_return_t
-lisp_dir_link (file_t dir, file_t file, string_t name, int excl)
+lisp_S_dir_link (file_t dir, file_t file, string_t name, int excl)
 {
   if (routines[DIR_LINK] == NULL)
     {
@@ -533,7 +533,7 @@ typedef kern_return_t (*dir_rename_type) (file_t,
 					  string_t, file_t, string_t, int);
 
 kern_return_t
-lisp_dir_rename (file_t olddirectory,
+lisp_S_dir_rename (file_t olddirectory,
 		 string_t oldname,
 		 file_t newdirectory, string_t newname, int excl)
 {
@@ -554,7 +554,7 @@ typedef kern_return_t (*dir_mkfile_type) (file_t,
 					  mach_msg_type_name_t *);
 
 kern_return_t
-lisp_dir_mkfile (file_t directory,
+lisp_S_dir_mkfile (file_t directory,
 		 int flags,
 		 mode_t mode,
 		 mach_port_t * newnode, mach_msg_type_name_t * newnodePoly)
@@ -574,7 +574,7 @@ lisp_dir_mkfile (file_t directory,
 typedef kern_return_t (*dir_notice_changes_type) (file_t, mach_port_t);
 
 kern_return_t
-lisp_dir_notice_changes (file_t directory, mach_port_t port)
+lisp_S_dir_notice_changes (file_t directory, mach_port_t port)
 {
   if (routines[DIR_NOTICE_CHANGES] == NULL)
     {
@@ -596,7 +596,7 @@ typedef kern_return_t (*file_set_translator_type) (file_t,
 						   mach_port_t);
 
 kern_return_t
-lisp_file_set_translator (file_t file,
+lisp_S_file_set_translator (file_t file,
 			  int passive_flags,
 			  int active_flags,
 			  int oldtrans_flags,
@@ -624,7 +624,7 @@ typedef kern_return_t (*file_get_translator_type) (file_t,
 						   mach_msg_type_number_t *);
 
 kern_return_t
-lisp_file_get_translator (file_t file,
+lisp_S_file_get_translator (file_t file,
 			  data_t * translator,
 			  mach_msg_type_number_t * translatorCnt)
 {
@@ -647,7 +647,7 @@ typedef kern_return_t (*file_get_translator_cntl_type) (file_t,
 							*);
 
 kern_return_t
-lisp_file_get_translator_cntl (file_t file,
+lisp_S_file_get_translator_cntl (file_t file,
 			       mach_port_t * translator_cntl,
 			       mach_msg_type_name_t * translator_cntlPoly)
 {
@@ -670,7 +670,7 @@ typedef kern_return_t (*file_get_fs_options_type) (file_t,
 						   mach_msg_type_number_t *);
 
 kern_return_t
-lisp_file_get_fs_options (file_t file,
+lisp_S_file_get_fs_options (file_t file,
 			  data_t * options,
 			  mach_msg_type_number_t * optionsCnt)
 {
@@ -692,7 +692,7 @@ typedef kern_return_t (*file_reparent_type) (file_t,
 					     mach_msg_type_name_t *);
 
 kern_return_t
-lisp_file_reparent (file_t file,
+lisp_S_file_reparent (file_t file,
 		    mach_port_t parent,
 		    mach_port_t * newfile,
 		    mach_msg_type_name_t * new_filePoly)

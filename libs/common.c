@@ -39,3 +39,4 @@ _get_module_info (void)
 	void set_ ## module ## _routine(const unsigned what, void *fun) { \
 		_set_routine(what, fun); \
 	}
+

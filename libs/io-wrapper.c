@@ -37,7 +37,7 @@ typedef kern_return_t (*io_write_type) (io_t,
 					off_t, vm_size_t *);
 
 kern_return_t
-lisp_io_write (io_t io_object,
+lisp_S_io_write (io_t io_object,
 	       data_t data,
 	       mach_msg_type_number_t dataCnt,
 	       loff_t offset, vm_size_t * amount)
@@ -59,7 +59,7 @@ typedef kern_return_t (*io_read_type) (io_t,
 				       off_t, vm_size_t);
 
 kern_return_t
-lisp_io_read (io_t io_object,
+lisp_S_io_read (io_t io_object,
 	      data_t * data,
 	      mach_msg_type_number_t * dataCnt,
 	      loff_t offset, vm_size_t amount)
@@ -79,7 +79,7 @@ lisp_io_read (io_t io_object,
 typedef kern_return_t (*io_seek_type) (io_t, off_t, int, off_t *);
 
 kern_return_t
-lisp_io_seek (io_t io_object, loff_t offset, int whence, loff_t * newp)
+lisp_S_io_seek (io_t io_object, loff_t offset, int whence, loff_t * newp)
 {
   if (routines[IO_SEEK] == NULL)
     {
@@ -96,7 +96,7 @@ lisp_io_seek (io_t io_object, loff_t offset, int whence, loff_t * newp)
 typedef kern_return_t (*io_readable_type) (io_t, vm_size_t *);
 
 kern_return_t
-lisp_io_readable (io_t io_object, vm_size_t * amount)
+lisp_S_io_readable (io_t io_object, vm_size_t * amount)
 {
   if (routines[IO_READABLE] == NULL)
     {
@@ -113,7 +113,7 @@ lisp_io_readable (io_t io_object, vm_size_t * amount)
 typedef kern_return_t (*io_set_all_openmodes_type) (io_t, int);
 
 kern_return_t
-lisp_io_set_all_openmodes (io_t io_object, int newbits)
+lisp_S_io_set_all_openmodes (io_t io_object, int newbits)
 {
   if (routines[IO_SET_ALL_OPENMODES] == NULL)
     {
@@ -131,7 +131,7 @@ lisp_io_set_all_openmodes (io_t io_object, int newbits)
 typedef kern_return_t (*io_get_openmodes_type) (io_t, int *);
 
 kern_return_t
-lisp_io_get_openmodes (io_t io_object, int *bits)
+lisp_S_io_get_openmodes (io_t io_object, int *bits)
 {
   if (routines[IO_GET_OPENMODES] == NULL)
     {
@@ -148,7 +148,7 @@ lisp_io_get_openmodes (io_t io_object, int *bits)
 typedef kern_return_t (*io_set_some_openmodes_type) (io_t, int);
 
 kern_return_t
-lisp_io_set_some_openmodes (io_t io_object, int bits_to_set)
+lisp_S_io_set_some_openmodes (io_t io_object, int bits_to_set)
 {
   if (routines[IO_SET_SOME_OPENMODES] == NULL)
     {
@@ -166,7 +166,7 @@ lisp_io_set_some_openmodes (io_t io_object, int bits_to_set)
 typedef kern_return_t (*io_clear_some_openmodes_type) (io_t, int);
 
 kern_return_t
-lisp_io_clear_some_openmodes (io_t io_object, int bits_to_clear)
+lisp_S_io_clear_some_openmodes (io_t io_object, int bits_to_clear)
 {
   if (routines[IO_CLEAR_SOME_OPENMODES] == NULL)
     {
@@ -186,7 +186,7 @@ typedef kern_return_t (*io_async_type) (io_t, mach_port_t,
 					mach_msg_type_name_t *);
 
 kern_return_t
-lisp_io_async (io_t io_object,
+lisp_S_io_async (io_t io_object,
 	       mach_port_t notify_port,
 	       mach_port_t * async_id_port,
 	       mach_msg_type_name_t * async_id_portPoly)
@@ -207,7 +207,7 @@ lisp_io_async (io_t io_object,
 typedef kern_return_t (*io_mod_owner_type) (io_t, pid_t);
 
 kern_return_t
-lisp_io_mod_owner (io_t io_object, pid_t owner)
+lisp_S_io_mod_owner (io_t io_object, pid_t owner)
 {
   if (routines[IO_MOD_OWNER] == NULL)
     {
@@ -224,7 +224,7 @@ lisp_io_mod_owner (io_t io_object, pid_t owner)
 typedef kern_return_t (*io_get_owner_type) (io_t, pid_t *);
 
 kern_return_t
-lisp_io_get_owner (io_t io_object, pid_t * owner)
+lisp_S_io_get_owner (io_t io_object, pid_t * owner)
 {
   if (routines[IO_GET_OWNER] == NULL)
     {
@@ -243,7 +243,7 @@ typedef kern_return_t (*io_get_icky_async_id) (io_t,
 					       mach_msg_type_name_t *);
 
 kern_return_t
-lisp_io_get_icky_async_id (io_t io_object,
+lisp_S_io_get_icky_async_id (io_t io_object,
 			   mach_port_t * icky_async_id_port,
 			   mach_msg_type_name_t * icky_async_id_portPoly)
 {
@@ -265,7 +265,7 @@ lisp_io_get_icky_async_id (io_t io_object,
 typedef kern_return_t (*io_select_type) (io_t, int *);
 
 kern_return_t
-lisp_io_select (io_t io_object, int *select_type)
+lisp_S_io_select (io_t io_object, int *select_type)
 {
   if (routines[IO_SELECT] == NULL)
     {
@@ -282,7 +282,7 @@ lisp_io_select (io_t io_object, int *select_type)
 typedef kern_return_t (*io_stat_type) (io_t, io_statbuf_t *);
 
 kern_return_t
-lisp_io_stat (io_t stat_object, io_statbuf_t * stat_info)
+lisp_S_io_stat (io_t stat_object, io_statbuf_t * stat_info)
 {
   if (routines[IO_STAT] == NULL)
     {
@@ -299,7 +299,7 @@ lisp_io_stat (io_t stat_object, io_statbuf_t * stat_info)
 typedef kern_return_t (*io_reauthenticate_type) (io_t, mach_port_t);
 
 kern_return_t
-lisp_io_reauthenticate (io_t auth_object, mach_port_t rendezvous2)
+lisp_S_io_reauthenticate (io_t auth_object, mach_port_t rendezvous2)
 {
   if (routines[IO_REAUTHENTICATE] == NULL)
     {
@@ -322,7 +322,7 @@ typedef kern_return_t (*io_restrict_auth_type) (io_t,
 						mach_msg_type_number_t);
 
 kern_return_t
-lisp_io_restrict_auth (io_t io_object,
+lisp_S_io_restrict_auth (io_t io_object,
 		       mach_port_t * new_object,
 		       mach_msg_type_name_t * new_objectPoly,
 		       idarray_t uids,
@@ -348,7 +348,7 @@ typedef kern_return_t (*io_duplicate_type) (io_t,
 					    mach_msg_type_name_t *);
 
 kern_return_t
-lisp_io_duplicate (io_t io_object,
+lisp_S_io_duplicate (io_t io_object,
 		   mach_port_t * newport, mach_msg_type_name_t * newportPoly)
 {
   if (routines[IO_DUPLICATE] == NULL)
@@ -368,7 +368,7 @@ typedef kern_return_t (*io_server_version_type) (io_t,
 						 int *);
 
 kern_return_t
-lisp_io_server_version (io_t vers_object,
+lisp_S_io_server_version (io_t vers_object,
 			string_t server_name,
 			int *server_major_version,
 			int *server_minor_version, int *server_edit_level)
@@ -393,7 +393,7 @@ typedef kern_return_t (*io_map_type) (io_t,
 				      mach_port_t *, mach_msg_type_name_t *);
 
 kern_return_t
-lisp_io_map (io_t io_object,
+lisp_S_io_map (io_t io_object,
 	     mach_port_t * memobjrd,
 	     mach_msg_type_name_t * memobjrdPoly,
 	     mach_port_t * memobjwt, mach_msg_type_name_t * memobjwtPoly)
@@ -416,7 +416,7 @@ typedef kern_return_t (*io_map_cntl_type) (io_t,
 					   mach_msg_type_name_t *);
 
 kern_return_t
-lisp_io_map_cntl (io_t io_object,
+lisp_S_io_map_cntl (io_t io_object,
 		  mach_port_t * memobj, mach_msg_type_name_t * memobjPoly)
 {
   if (routines[IO_MAP_CNTL] == NULL)
@@ -434,7 +434,7 @@ lisp_io_map_cntl (io_t io_object,
 typedef kern_return_t (*io_get_conch_type) (io_t);
 
 kern_return_t
-lisp_io_get_conch (io_t io_object)
+lisp_S_io_get_conch (io_t io_object)
 {
   if (routines[IO_GET_CONCH] == NULL)
     {
@@ -451,7 +451,7 @@ lisp_io_get_conch (io_t io_object)
 typedef kern_return_t (*io_release_conch_type) (io_t);
 
 kern_return_t
-lisp_io_release_conch (io_t io_object)
+lisp_S_io_release_conch (io_t io_object)
 {
   if (routines[IO_RELEASE_CONCH] == NULL)
     {
@@ -468,7 +468,7 @@ lisp_io_release_conch (io_t io_object)
 typedef kern_return_t (*io_eofnotify_type) (io_t);
 
 kern_return_t
-lisp_io_eofnotify (io_t io_object)
+lisp_S_io_eofnotify (io_t io_object)
 {
   if (routines[IO_EOFNOTIFY] == NULL)
     {
@@ -485,7 +485,7 @@ lisp_io_eofnotify (io_t io_object)
 typedef kern_return_t (*io_prenotify_type) (io_t, vm_offset_t, vm_offset_t);
 
 kern_return_t
-lisp_io_prenotify (io_t io_object,
+lisp_S_io_prenotify (io_t io_object,
 		   vm_offset_t write_start, vm_offset_t write_end)
 {
   if (routines[IO_PRENOTIFY] == NULL)
@@ -503,7 +503,7 @@ lisp_io_prenotify (io_t io_object,
 typedef kern_return_t (*io_postnotify_type) (io_t, vm_offset_t, vm_offset_t);
 
 kern_return_t
-lisp_io_postnotify (io_t io_object,
+lisp_S_io_postnotify (io_t io_object,
 		    vm_offset_t write_start, vm_offset_t write_end)
 {
   if (routines[IO_POSTNOTIFY] == NULL)
@@ -521,7 +521,7 @@ lisp_io_postnotify (io_t io_object,
 typedef kern_return_t (*io_readnotify_type) (io_t);
 
 kern_return_t
-lisp_io_readnotify (io_t io_object)
+lisp_S_io_readnotify (io_t io_object)
 {
   if (routines[IO_READNOTIFY] == NULL)
     {
@@ -538,7 +538,7 @@ lisp_io_readnotify (io_t io_object)
 typedef kern_return_t (*io_readsleep_type) (io_t);
 
 kern_return_t
-lisp_io_readsleep (io_t io_object)
+lisp_S_io_readsleep (io_t io_object)
 {
   if (routines[IO_READSLEEP] == NULL)
     {
@@ -555,7 +555,7 @@ lisp_io_readsleep (io_t io_object)
 typedef kern_return_t (*io_sigio_type) (io_t);
 
 kern_return_t
-lisp_io_sigio (io_t io_object)
+lisp_S_io_sigio (io_t io_object)
 {
   if (routines[IO_SIGIO] == NULL)
     {
@@ -572,7 +572,7 @@ lisp_io_sigio (io_t io_object)
 typedef kern_return_t (*io_pathconf_type) (io_t, int, int *);
 
 kern_return_t
-lisp_io_pathconf (io_t io_object, int name, int *value)
+lisp_S_io_pathconf (io_t io_object, int name, int *value)
 {
   if (routines[IO_PATHCONF] == NULL)
     {
@@ -593,7 +593,7 @@ typedef kern_return_t (*io_identity_type) (io_t,
 					   mach_msg_type_name_t *, ino64_t *);
 
 kern_return_t
-lisp_io_identity (io_t io_object,
+lisp_S_io_identity (io_t io_object,
 		  mach_port_t * idport,
 		  mach_msg_type_name_t * idportPoly,
 		  mach_port_t * fsidport,
@@ -615,7 +615,7 @@ lisp_io_identity (io_t io_object,
 typedef kern_return_t (*io_revoke_type) (io_t);
 
 kern_return_t
-lisp_io_revoke (io_t io_object)
+lisp_S_io_revoke (io_t io_object)
 {
   if (routines[IO_REVOKE] == NULL)
     {

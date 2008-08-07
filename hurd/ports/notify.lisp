@@ -24,7 +24,7 @@
 ;; For debugging purposes
 (defcfun ("get_notify_info" %get-notify-info) :void)
 
-(defcfun ("lisp_notify_server" %lisp-notify-server) :boolean
+(defcfun ("lisp_S_notify_server" %lisp-notify-server) :boolean
   (in :pointer)
   (out :pointer))
 

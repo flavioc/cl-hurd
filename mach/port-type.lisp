@@ -45,6 +45,7 @@
         (:type-port-or-dead ,+type-port-or-dead+)
         (:type-all-rights ,+type-all-rights+)
         (:type-dnrequest ,+type-dnrequest+)
+        (:type-marequest ,+type-marequest+)
         (:type-compat ,+type-compat+)))))
 
 (%create-port-type-type)

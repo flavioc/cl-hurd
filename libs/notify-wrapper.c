@@ -36,7 +36,7 @@ typedef kern_return_t (*do_mach_notify_port_deleted_type)(mach_port_t,
 		mach_port_t name);
 
 kern_return_t
-lisp_do_mach_notify_port_deleted(mach_port_t notify,
+lisp_S_do_mach_notify_port_deleted(mach_port_t notify,
 		mach_port_t name)
 {
 	//fprintf(stderr, "notify: port deleted\n");
@@ -56,7 +56,7 @@ typedef kern_return_t (*do_mach_notify_msg_accepted_type)(mach_port_t,
 		mach_port_t);
 
 kern_return_t
-lisp_do_mach_notify_msg_accepted(mach_port_t notify,
+lisp_S_do_mach_notify_msg_accepted(mach_port_t notify,
 		mach_port_t name)
 {
 	//fprintf(stderr, "notify: msg accepted\n");
@@ -76,7 +76,7 @@ typedef kern_return_t (*do_mach_notify_port_destroyed_type)(mach_port_t,
 		mach_port_t);
 
 kern_return_t
-lisp_do_mach_notify_port_destroyed(mach_port_t notify,
+lisp_S_do_mach_notify_port_destroyed(mach_port_t notify,
 		mach_port_t rights)
 {
 	//fprintf(stderr, "notify: port-destroyed\n");
@@ -98,7 +98,7 @@ typedef kern_return_t (*do_mach_notify_no_senders_type)(mach_port_t,
 		mach_port_mscount_t);
 
 kern_return_t
-lisp_do_mach_notify_no_senders(mach_port_t notify,
+lisp_S_do_mach_notify_no_senders(mach_port_t notify,
 		mach_port_mscount_t mscount)
 {
 	//fprintf(stderr, "notify: no senders\n");
@@ -117,7 +117,7 @@ lisp_do_mach_notify_no_senders(mach_port_t notify,
 typedef kern_return_t (*do_mach_notify_send_once_type)(mach_port_t);
 
 kern_return_t
-lisp_do_mach_notify_send_once(mach_port_t notify)
+lisp_S_do_mach_notify_send_once(mach_port_t notify)
 {
 	//fprintf(stderr, "notify: send once\n");
 	if(routines[DO_MACH_NOTIFY_SEND_ONCE] == NULL) {
@@ -136,7 +136,7 @@ typedef kern_return_t (*do_mach_notify_dead_name_type)(mach_port_t,
 		mach_port_t);
 
 kern_return_t
-lisp_do_mach_notify_dead_name(mach_port_t notify,
+lisp_S_do_mach_notify_dead_name(mach_port_t notify,
 		mach_port_t name)
 {
 	//fprintf(stderr, "notify: dead name\n");
