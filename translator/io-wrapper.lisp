@@ -48,7 +48,7 @@
 
 (defcfun ("get_io_info" %get-io-info) :void)
 
-(defcfun ("lisp_S_io_server" %lisp-io-server) :boolean
+(defcfun ("lisp_io_server" %lisp-io-server) :boolean
   (in :pointer)
   (out :pointer))
 

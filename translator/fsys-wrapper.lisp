@@ -27,7 +27,7 @@
 
 (defcfun ("get_fsys_info" %get-fsys-info) :void)
 
-(defcfun ("lisp_S_fsys_server" %lisp-fsys-server)
+(defcfun ("lisp_fsys_server" %lisp-fsys-server)
   :boolean
   (in :pointer)
   (out :pointer))
