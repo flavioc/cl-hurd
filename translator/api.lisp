@@ -212,6 +212,9 @@ Return T when this is possible, nil otherwise."
 (%add-callback refresh-node (node user)
   "'node' will be accessed by 'user'.")
 
+(%add-callback report-seek (node user new-offset)
+  "'user' seek the file 'node' to 'new-offset'.")
+
 (defmacro define-callback (name trans-type args &body body)
   "Defines one the api callbacks defined above."
   `(defmethod ,name ((translator ,trans-type) ,@args)
