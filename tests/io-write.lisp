@@ -7,6 +7,7 @@
                                         :flags '(:read)))
       (multiple-value-bind (ret err)
         (io-write p "a")
+        (assert-equal ret nil)
         (assert-equal err :invalid-argument)))
     (with-testport (p (file-name-lookup file
                                         :flags '(:creat :read :write)))
