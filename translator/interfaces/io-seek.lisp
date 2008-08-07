@@ -6,17 +6,21 @@
                             (whence seek-type)
                             (newoffset :pointer))
   (with-lookup protid io
-    (case whence
-      (:seek-cur
-        (incf offset (file-offset (open-node protid))))
-      (:seek-end
-        (incf offset (stat-get (stat (get-node protid)) 'st-size))))
-    (cond
-      ((and
-         (>= offset 0)
-         (<= offset (stat-get (stat (get-node protid)) 'st-size)))
-       (setf (mem-ref newoffset 'off-t) offset
-             (file-offset (open-node protid)) offset)
-       t)
-      (t :invalid-argument))))
+    (let ((node (get-node protid))
+          (user (get-user protid))
+          (open (open-node protid)))
+      (case whence
+        (:seek-cur
+          (incf offset (file-offset open)))
+        (:seek-end
+          (incf offset (stat-get (stat node) 'st-size))))
+      (cond
+        ((>= offset 0)
+         (setf (mem-ref newoffset 'off-t) offset
+               (file-offset open) offset)
+         ; Warn user of pointer change
+         (report-seek *translator* node user offset)
+         t)
+        (t
+          :invalid-argument)))))
 
