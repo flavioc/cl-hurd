@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "fs_wrapper.h"
+#include "fs-wrapper.h"
 
 /* this is NULL initialized */
 static void *routines[_NUMBER_OF_ROUTINES];

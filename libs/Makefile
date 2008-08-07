@@ -3,28 +3,28 @@ include ../defs.mk
 
 # fs stubs
 FS_DEFS = $(HURD_DIRECTORY)/fs.defs
-GENERATED_FS_SERVER = fs_server
-FS_OBJECTS = $(GENERATED_FS_SERVER).o fs_wrapper.o
+GENERATED_FS_SERVER = fs-server
+FS_OBJECTS = $(GENERATED_FS_SERVER).o fs-wrapper.o
 
 # io stubs
 IO_DEFS = $(HURD_DIRECTORY)/io.defs
-GENERATED_IO_SERVER = io_server
-IO_OBJECTS = $(GENERATED_IO_SERVER).o io_wrapper.o
+GENERATED_IO_SERVER = io-server
+IO_OBJECTS = $(GENERATED_IO_SERVER).o io-wrapper.o
 
 # fsys stubs
 FSYS_DEFS = $(HURD_DIRECTORY)/fsys.defs
-GENERATED_FSYS_SERVER = fsys_server
-FSYS_OBJECTS = $(GENERATED_FSYS_SERVER).o fsys_wrapper.o
+GENERATED_FSYS_SERVER = fsys-server
+FSYS_OBJECTS = $(GENERATED_FSYS_SERVER).o fsys-wrapper.o
 
 # notify stubs
 NOTIFY_DEFS = $(MACH_DIRECTORY)/notify.defs
-GENERATED_NOTIFY_SERVER = notify_server
-NOTIFY_OBJECTS = $(GENERATED_NOTIFY_SERVER).o notify_wrapper.o
+GENERATED_NOTIFY_SERVER = notify-server
+NOTIFY_OBJECTS = $(GENERATED_NOTIFY_SERVER).o notify-wrapper.o
 
 # fsys reply stubs
 
 FSYS_REPLY_DEFS = $(HURD_DIRECTORY)/fsys_reply.defs
-GENERATED_FSYS_REPLY_USER = fsys_reply_user
+GENERATED_FSYS_REPLY_USER = fsys-reply-user
 FSYS_REPLY_OBJECTS = $(GENERATED_FSYS_REPLY_USER).o
 
 TARGETS = liblisptrans.so

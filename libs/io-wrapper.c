@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "io_wrapper.h"
+#include "io-wrapper.h"
 
 /* this is NULL initialized */
 static void *routines[_NUMBER_OF_ROUTINES];

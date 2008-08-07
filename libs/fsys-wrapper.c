@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "fsys_wrapper.h"
+#include "fsys-wrapper.h"
 
 /* this is NULL initialized */
 static void *routines[_NUMBER_OF_ROUTINES];
