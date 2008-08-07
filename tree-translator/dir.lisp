@@ -119,11 +119,13 @@
   "Get directory entries from start to start + n."
   (elements-from (entries dir) start n))
 
-(defmethod rename-dir-entry ((dir dir-entry) old-name (new-dir dir-entry) new-name)
+(defmethod rename-dir-entry ((dir dir-entry) old-name (new-dir dir-entry) new-name &optional (force-p nil))
   "Rename file 'old-name' in dir to new-dir with name 'new-name'."
   (let ((entry (get-entry dir old-name)))
     (remove-dir-entry dir old-name)
     (setf (parent entry) new-dir)
+    (when force-p
+      (remove-dir-entry dir new-name))
     (add-entry new-dir entry new-name)))
 
 (defmethod iterate-entries ((dir dir-entry) fun)

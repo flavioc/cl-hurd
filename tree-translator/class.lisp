@@ -116,5 +116,5 @@ root node."
     (when (and (is-owner-p old-entry user)
                (is-owner-p new-dir user)
                (has-access-p new-dir user :write))
-      (rename-dir-entry old-dir old-name new-dir new-name)
+      (rename-dir-entry old-dir old-name new-dir new-name t)
       t)))
