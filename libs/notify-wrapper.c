@@ -1,7 +1,23 @@
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE 1
-#endif
+/* notify.defs wrapper code.
+
+   Copyright (C) 2008 Free Software Foundation, Inc.
+
+   Written by Fl√vio Cruz <flaviocruz@gmail.com>
+
+   This program is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public License as
+   published by the Free Software Foundation; either version 2, or (at
+   your option) any later version.
+
+   This program is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include <mach/boolean.h>
 #include <mach/kern_return.h>
@@ -36,7 +52,7 @@ typedef kern_return_t (*do_mach_notify_port_deleted_type)(mach_port_t,
 		mach_port_t name);
 
 kern_return_t
-lisp_S_do_mach_notify_port_deleted(mach_port_t notify,
+lisp_do_mach_notify_port_deleted(mach_port_t notify,
 		mach_port_t name)
 {
 	//fprintf(stderr, "notify: port deleted\n");
@@ -56,7 +72,7 @@ typedef kern_return_t (*do_mach_notify_msg_accepted_type)(mach_port_t,
 		mach_port_t);
 
 kern_return_t
-lisp_S_do_mach_notify_msg_accepted(mach_port_t notify,
+lisp_do_mach_notify_msg_accepted(mach_port_t notify,
 		mach_port_t name)
 {
 	//fprintf(stderr, "notify: msg accepted\n");
@@ -76,7 +92,7 @@ typedef kern_return_t (*do_mach_notify_port_destroyed_type)(mach_port_t,
 		mach_port_t);
 
 kern_return_t
-lisp_S_do_mach_notify_port_destroyed(mach_port_t notify,
+lisp_do_mach_notify_port_destroyed(mach_port_t notify,
 		mach_port_t rights)
 {
 	//fprintf(stderr, "notify: port-destroyed\n");
@@ -98,7 +114,7 @@ typedef kern_return_t (*do_mach_notify_no_senders_type)(mach_port_t,
 		mach_port_mscount_t);
 
 kern_return_t
-lisp_S_do_mach_notify_no_senders(mach_port_t notify,
+lisp_do_mach_notify_no_senders(mach_port_t notify,
 		mach_port_mscount_t mscount)
 {
 	//fprintf(stderr, "notify: no senders\n");
@@ -117,7 +133,7 @@ lisp_S_do_mach_notify_no_senders(mach_port_t notify,
 typedef kern_return_t (*do_mach_notify_send_once_type)(mach_port_t);
 
 kern_return_t
-lisp_S_do_mach_notify_send_once(mach_port_t notify)
+lisp_do_mach_notify_send_once(mach_port_t notify)
 {
 	//fprintf(stderr, "notify: send once\n");
 	if(routines[DO_MACH_NOTIFY_SEND_ONCE] == NULL) {
@@ -136,7 +152,7 @@ typedef kern_return_t (*do_mach_notify_dead_name_type)(mach_port_t,
 		mach_port_t);
 
 kern_return_t
-lisp_S_do_mach_notify_dead_name(mach_port_t notify,
+lisp_do_mach_notify_dead_name(mach_port_t notify,
 		mach_port_t name)
 {
 	//fprintf(stderr, "notify: dead name\n");

@@ -1,4 +1,24 @@
 
+/* Demuxer wrapper.
+
+   Copyright (C) 2008 Free Software Foundation, Inc.
+
+   Written by Fl√vio Cruz <flaviocruz@gmail.com>
+
+   This program is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public License as
+   published by the Free Software Foundation; either version 2, or (at
+   your option) any later version.
+
+   This program is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
+
 #include <mach.h>
 #include <mach/notify.h>
 #include <mach/mig_errors.h>
@@ -39,11 +59,7 @@ portset_demuxer (mach_msg_header_t * inp, mach_msg_header_t * outheadp)
   outp->RetCodeType = RetCodeType;
   outp->RetCode = MIG_BAD_ID;
 
-  //fprintf(stderr, "=====Got message=====!\n");
-
   int ret = demuxer (inp->msgh_local_port, inp, outheadp);
-
-  //fprintf(stderr, "=====End Message!=====\n");
 
   if (ret == EOPNOTSUPP)
     {
@@ -52,7 +68,6 @@ portset_demuxer (mach_msg_header_t * inp, mach_msg_header_t * outheadp)
     }
   else
     {
-      //fprintf(stderr, "ret demuxer: %d\n", ret);
       return (ret);
     }
 }
