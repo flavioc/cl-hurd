@@ -1,5 +1,7 @@
 
-CFLAGS = -Wall -Wextra -D_GNU_SOURCE=1
+CFLAGS = -Wall -Wextra -D_GNU_SOURCE=1 -DPIC -fPIC \
+				 -std=gnu99 -fgnu89-inline -D_FILE_OFFSET_BITS=64
+
 LDFLAGS = -lmachuser -lc -lhurduser
 
 HURD_DIRECTORY = /usr/include/hurd
