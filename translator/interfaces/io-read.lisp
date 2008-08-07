@@ -43,8 +43,7 @@
         (let* ((data-read (get-output-stream-sequence out-stream))
                (total-read (length data-read)))
           (cond
-            ((and (numberp amount)
-                  (> total-read amount))
+            ((> total-read amount)
              :gratuitous-error)
             (t
               (if current-offset-p
