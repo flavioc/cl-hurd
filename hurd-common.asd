@@ -37,7 +37,7 @@
                                             :depends-on ("package"))
                                      (:file "ids"
                                             :depends-on ("types"))
-                                     (:file "flags"
+                                     (:file "open-flags"
                                             :depends-on ("utils"))
                                      (:file "fs-type")
                                      (:file "mode"
