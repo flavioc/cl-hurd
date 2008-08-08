@@ -4,3 +4,4 @@
 - trivial-garbage (www.cliki.net/trivial-garbage?v=20)
 - flexi-streams (for translator's read-file & write-file)
 - cl-zip (for the zipfs example translator).
+- xlunit (to run the tests).
