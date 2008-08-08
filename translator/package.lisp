@@ -97,5 +97,7 @@
            :node-transbox
            :port-exists-p
            :wait
-           :report-seek))
+           :report-seek
+           :do-dir-lookup
+           :do-fsys-getroot))
 
