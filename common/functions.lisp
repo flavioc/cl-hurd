@@ -3,7 +3,7 @@
 
 ;;
 ;; This files declares some foreign functions that
-;; still don't deserve a single file for each one.
+;; still don't deserve a single file.
 ;;
 
 (defcfun ("strerror" %strerror) :string (code err))
@@ -15,4 +15,12 @@
 (defcfun ("getpid" %getpid) pid-t)
 
 (defun getpid ()
+  "Returns current Process ID."
   (%getpid))
+
+(defcfun ("getppid" %getppid) pid-t)
+
+(defun getppid ()
+  "Returns parent Process ID."
+  (%getppid))
+

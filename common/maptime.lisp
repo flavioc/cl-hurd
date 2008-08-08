@@ -1,6 +1,8 @@
 
 (in-package :hurd-common)
 
+;; This file maps the mapped_time_value_t type to Lisp.
+
 ;; Load libshouldbeinlibc
 (define-foreign-library libshouldbeinlibc
   (:unix (:or "libshouldbeinlibc.so.0.3" "libshouldbeinlibc.so"))
@@ -42,4 +44,5 @@ Returned value is a foreign pointer."
   "Return the check seconds field from a mapped-time-value."
   (foreign-slot-value ptr 'mapped-time-value 'check-seconds))
 
-(defvar *mapped-time* (maptime-map))
+(defvar *mapped-time* (maptime-map) "Represents current kernel time. Used to set current time.")
+

@@ -3,13 +3,14 @@
 
 ;;
 ;; In this file we define the canonical `err` CFFI data type
-;; that translates between foreign error codes and symbols with meaningfull names.
+;; that translates between foreign error codes and symbols with meaningful names.
 ;; All the erroneous situations are declared except
 ;; the "success" error code (has the value zero)
 ;; and is a particular case we deal in the translate-*-foreign functions.
 ;;
 
 (defun %get-hurd-error-code (code)
+  "Does the same thing as _HURD_ERRNO(x)."
   (boole boole-ior
          (ash #x10 26)
          (boole boole-and code #x3fff)))
@@ -243,6 +244,10 @@ the Mach Message, Mig, Kernel and Device errors.")
                     (list (%get-hurd-error-code (first item))
                           (second item)))
                   +recognized-standard-codes+)))
+
+;; We will now put all error and specific codes into
+;; two hash tables, one mapping error codes and lisp symbols
+;; and a second one doing the reverse thing.
 
 (defun %create-key-value-error-table ()
   "Creates the hash table mapping keywords to error codes."

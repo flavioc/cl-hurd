@@ -7,6 +7,6 @@
   (size :unsigned-int))
 
 (defun memcpy (dest src size)
-  "Copies to 'dest' from 'src', 'size' bytes of memory."
+  "Copies to 'dest' from 'src', 'size' bytes of memory. Return value should be ignored."
   (%memcpy dest src size))
 

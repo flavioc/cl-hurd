@@ -13,6 +13,7 @@
   (:documentation "Pair of major/minor device numbers representing some resources."))
 
 (defmethod get-device-integer ((device device-id))
+  "Return foreign device number."
   (boole boole-ior
          (ash (device-major device) 8)
          (device-minor device)))

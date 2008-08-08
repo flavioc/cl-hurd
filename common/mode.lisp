@@ -126,6 +126,7 @@
   "Translate a foreign bitfield to a mode object."
   (make-instance 'mode :mode-bits value))
 
+;; These functions do some common operations on bitfields.
 (defun %disable-bits (val bits) (boole boole-andc2 val bits))
 (defun %only-bits (val bits) (boole boole-and val bits))
 (defun %enable-bits (val bits) (boole boole-ior val bits))
@@ -144,6 +145,8 @@
      ,doc
      (eq (%only-bits val +ifmt+) ,bits)))
 
+;; These functions check for a specific mode type.
+;; Return T in success, NIL otherwise.
 (define-is-type-meth is-dir-p +ifdir+ "Is a directory?")
 (define-is-type-meth is-chr-p +ifchr+ "Is a character device?")
 (define-is-type-meth is-reg-p +ifreg+ "Is a regular device?")
@@ -292,6 +295,7 @@ You can also ignore user-type and the bits will be for all the user types.
      ,doc
      (= ,bits (%only-bits val ,bits))))
 
+;; Predicates for some mode bits.
 (define-mode-query-meth has-passive-trans-p +iptrans+ "Has a passive translator?")
 (define-mode-query-meth has-active-trans-p +iatrans+ "Has an active translator?")
 (define-mode-query-meth is-fs-root-p +iroot+ "Is filesystem root?")
@@ -312,6 +316,8 @@ You can also ignore user-type and the bits will be for all the user types.
              (%disable-bits val ,bits)))
      t))
 
+;; These functions accept two arguments:
+;; A mode object and a boolean, activating certain mode bits.
 (define-mode-switcher-meth set-uid +isuid+ "Sets uid bit")
 (define-mode-switcher-meth set-gid +isgid+ "Sets gid bit")
 (define-mode-switcher-meth set-vtx +isvtx+ "Sets sticky bit")
@@ -411,3 +417,4 @@ You can also ignore user-type and the bits will be for all the user types.
   (if (is-useunk-p mode)
     (format stream " useunk"))
   (format stream ">"))
+

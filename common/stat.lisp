@@ -161,6 +161,11 @@ a stat object: we make a copy of it for the new stat object.
 
 Other arguments:
 size: initial size for the size field.
+mode: mode object for st-mode field.
+uid: owner id.
+gid: group id.
+type: file type.
+ctime, atime, mtime: different time values, should be a time-value object.
 "
   (let* ((mem (foreign-alloc 'stat-struct)) ; Allocate memory for a stat
          (obj (make-instance 'stat :ptr mem))) ; Instantiate new object

@@ -1,6 +1,12 @@
 
 (in-package :hurd-common)
 
+;;
+;; This implements a time-value class.
+;; Objects of this class should be used to represent time,
+;; namely the *time stat fields.
+;;
+
 (defcstruct time-value-struct
   "Time value struct returned by the Mach kernel.
 Definition can be found at mach/time_value.h"
@@ -23,7 +29,7 @@ Definition can be found at mach/time_value.h"
       (tg:finalize obj (lambda () (foreign-free ptr)))
       obj)))
 
-(defconstant +now-time-value+ (make-time-value))
+(defconstant +now-time-value+ (make-time-value) "Current time value.")
 
 (define-foreign-type time-value-type ()
   ()
@@ -43,6 +49,7 @@ Definition can be found at mach/time_value.h"
   (ptr value))
 
 (defmethod time-value-seconds ((time time-value))
+  "Returns the seconds value from a time-value 'time'."
   (let ((ret (foreign-slot-value (ptr time)
                                  'time-value-struct
                                  'seconds)))
@@ -51,6 +58,7 @@ Definition can be found at mach/time_value.h"
       ret)))
 
 (defmethod time-value-microseconds ((time time-value))
+  "Returns the microseconds value from a time-value 'time'."
   (let ((ret (foreign-slot-value (ptr time)
                                  'time-value-struct
                                  'microseconds)))
@@ -59,12 +67,14 @@ Definition can be found at mach/time_value.h"
       ret)))
 
 (defmethod time-value-eq ((time1 time-value) (time2 time-value))
+  "Return T if times are equal."
   (and (= (time-value-seconds time1)
           (time-value-seconds time2))
        (= (time-value-microseconds time1)
           (time-value-microseconds time2))))
 
 (defmethod time-value-newer-p ((time1 time-value) (time2 time-value))
+  "Returns T if time1 represents a newer time-value than time2."
   (cond
     ((time-value-eq time1 +now-time-value+) t)
     ((> (time-value-seconds time1) (time-value-seconds time2)) t)

@@ -170,7 +170,9 @@ If you have the list with the length for each string pass it in ls-len."
        ret)))
 
 (defun microsecs->nanosecs (microsecs)
+  "Convert microseconds to nanoseconds."
   (* microsecs 1000))
 
 (defun nanosecs->microsecs (nanosecs)
+  "Convert nanoseconds to microseconds."
   (/ nanosecs 1000))

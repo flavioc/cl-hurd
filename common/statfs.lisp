@@ -1,10 +1,16 @@
 
 (in-package :hurd-common)
 
+;;
+;; This file implements the statfs abstraction
+;; to deal with statfs pointers.
+;;
+
 (defctype blkcnt :long-long "__fsblkcnt64_t type.")
 (defctype filcnt :long-long "__fsfilcnt64_t type.")
 
 (defbitfield statfs-flags
+  "Different flags for the f-flags statfs field."
   (:rdonly 1)
   (:nosuid 2)
   (:noexec 8)
@@ -38,18 +44,22 @@
   (:documentation "Allocates a statfs-struct pointer."))
 
 (defun make-statfs (&optional ptr)
+  "Create a new statfs object, allocating a new pointer in case 'ptr' is NIL."
   (let ((ptr-null-p (null ptr)))
     (when ptr-null-p
       (setf ptr (foreign-alloc 'statfs-struct)))
     (let ((obj (make-instance 'statfs :ptr ptr)))
       (when ptr-null-p
+        ; Free resources when we don't need them.
         (tg:finalize obj (lambda () (foreign-free ptr))))
       obj)))
 
 (defmethod statfs-get ((stat statfs) what)
+  "Get a statfs field. 'what' can be any statfs-struct field."
   (foreign-slot-value (ptr stat) 'statfs-struct what))
 
 (defmethod statfs-set ((stat statfs) what new-value)
+  "Change to 'new-value' a statfs field. 'what' can be any statfs-struct field."
   (setf (foreign-slot-value (ptr stat) 'statfs-struct what) new-value))
 
 (defsetf statfs-get statfs-set)

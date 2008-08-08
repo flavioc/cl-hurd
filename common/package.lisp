@@ -153,5 +153,6 @@
            :time-value-microseconds
            :remove-declare
            :getpid
+           :getppid
            :stat-eq))
 
