@@ -167,7 +167,14 @@
               (t
                 :no-such-file)))))))
 
-(defun %do-dir-lookup (filename protid flags mode)
+(%add-callback do-dir-lookup (filename protid flags mode)
+  "Lookup filename in protid with 'flags' and creation 'mode'.
+Must return four things:
+Type of retry.
+Filename to retry.
+Retry port.
+Retry port type.
+"
   (cond
     ((and (not (string= "" filename))
           (eq (char filename 0) #\/))
@@ -197,10 +204,11 @@
                            ret-retry-name
                            ret-retry-port
                            ret-retry-port-type)
-      (%do-dir-lookup filename
-                      dir-protid
-                      flags
-                      mode)
+      (do-dir-lookup *translator*
+                     filename
+                     dir-protid
+                     flags
+                     mode)
       (cond
         ((null ret-retry-name) ret-do-retry) ;; Some error ocurred
         (t
