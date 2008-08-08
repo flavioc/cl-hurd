@@ -1,10 +1,9 @@
 TODO list:
 
 - find... why?
-- fix fsys_getroot, fetch_root (broken)
+- fix fsys_getroot, fetch_root (broken for passive translators)
 - documentation
 - FIXME/XXX/TODO
-- setting translators and then unsetting problem
 
 CLIENT RPCS:
 - file_chflags (not used)
@@ -32,7 +31,7 @@ CLIENT RPCS:
 - fsys-init
 - fsys-forward
 
-TESTS:
+TESTS DONE:
 
 io-server-version
 io-pathconf
