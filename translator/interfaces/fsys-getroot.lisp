@@ -70,7 +70,7 @@ Filename to retry.
                     #'get-translator-callback
                     (callback fetch-root-callback))
         (unless (eq retry :no-such-file)
-          (return-from %fsys-getroot (values retry port :move-send retry-name))))))
+          (return-from do-fsys-getroot (values retry port :move-send retry-name))))))
   (%fsys-getroot-normal node flags dotdot user))
 
 (def-fsys-interface :fsys-getroot ((fsys port)
