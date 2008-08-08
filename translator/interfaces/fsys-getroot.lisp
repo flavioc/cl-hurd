@@ -53,7 +53,14 @@
   (and (not (flag-is-p flags :notrans))
        (box-translated-p (box node))))
 
-(defun %fsys-getroot (node flags dotdot user)
+(%add-callback do-fsys-getroot (node flags dotdot user)
+  "Lookup root port in 'node' with 'flags' to 'user'. 'dotdot' is the parent directory.
+This must return four things:
+Type of retry.
+Retry port.
+Retry port type.
+Filename to retry.
+"
   (when (%must-follow-translator-p node flags)
     (let* ((*current-node* node)
            (*current-dotdot* dotdot))
@@ -87,7 +94,7 @@
            (let ((user (make-iouser-mem gen-uids gen-uids-count
                                         gen-gids gen-gids-count)))
              (multiple-value-bind (retry-type0 file0 file-poly0 retry-name0)
-               (%fsys-getroot node flags dotdot user)
+               (do-fsys-getroot *translator* node flags dotdot user)
                (cond
                  ((null retry-name0) retry-type0) ; Some error ocurred
                  (t
