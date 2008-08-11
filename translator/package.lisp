@@ -99,5 +99,8 @@
            :wait
            :report-seek
            :do-dir-lookup
-           :do-fsys-getroot))
+           :do-fsys-getroot
+           :report-new-user
+           :report-no-users
+           :num-users))
 
