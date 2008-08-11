@@ -66,8 +66,8 @@
   (unless (data node)
     ; Get data sequence
     (setf (entry node) (get-zipfile-entry (name node) *zip*))
-    (setf (data node) (%get-entry-sequence (entry node)))
-    (decf (number-reads node)))
+    (setf (data node) (%get-entry-sequence (entry node))))
+  (decf (number-reads node))
   (let* ((size (stat-get (stat node) 'st-size))
          (size-res (- size start)))
     (cond
