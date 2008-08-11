@@ -122,8 +122,6 @@ lisp_S_fsys_getroot (fsys_t fsys,
 		   string_t retry_name,
 		   mach_port_t * file, mach_msg_type_name_t * filePoly)
 {
-//      fprintf(stderr, "Got in getroot %d\n", fsys);
-
   if (routines[FSYS_GETROOT] == NULL)
     {
       return EOPNOTSUPP;
@@ -336,7 +334,17 @@ routine_to_str (const FsysRoutine rot)
 #define RET(val) case val: return #val ;
   switch (rot)
     {
-    RET (FSYS_STARTUP) RET (FSYS_GOAWAY) RET (FSYS_GETROOT) RET (FSYS_GETFILE) RET (FSYS_SYNCFS) RET (FSYS_SET_OPTIONS) RET (FSYS_GETPRIV) RET (FSYS_INIT) RET (FSYS_FORWARD) RET (FSYS_GET_OPTIONS) case _NUMBER_OF_ROUTINES:
+    RET (FSYS_STARTUP)
+    RET (FSYS_GOAWAY)
+    RET (FSYS_GETROOT)
+    RET (FSYS_GETFILE)
+    RET (FSYS_SYNCFS)
+    RET (FSYS_SET_OPTIONS)
+    RET (FSYS_GETPRIV)
+    RET (FSYS_INIT)
+    RET (FSYS_FORWARD)
+    RET (FSYS_GET_OPTIONS)
+    case _NUMBER_OF_ROUTINES:
     default:
       return "";
     }
