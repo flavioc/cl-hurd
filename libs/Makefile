@@ -49,13 +49,13 @@ $(GENERATED_IO_SERVER).c: $(IO_DEFS)
 	sed -e 's:lisp_io_server_version:lisp_S_io_server_version:g' \
 		-i $(GENERATED_IO_SERVER).c
 
-io_wrapper.o: io_wrapper.c io_wrapper.h common.c
+io-wrapper.o: io-wrapper.c io-wrapper.h common.c
 
 $(GENERATED_FS_SERVER).c: $(FS_DEFS)
 	$(MIG_SERVER) $(GENERATED_FS_SERVER).c $(FS_DEFS)
 	sed -e 's:lisp_S_fs_server:lisp_fs_server:g' -i $(GENERATED_FS_SERVER).c
 
-fs_wrapper.o: fs_wrapper.c fs_wrapper.h common.c
+fs-wrapper.o: fs-wrapper.c fs-wrapper.h common.c
 
 $(GENERATED_FSYS_SERVER).c: $(FSYS_DEFS)
 	cpp $(FSYS_DEFS) -D REPLY_PORTS > tmp.defs
@@ -64,12 +64,12 @@ $(GENERATED_FSYS_SERVER).c: $(FSYS_DEFS)
 		-i $(GENERATED_FSYS_SERVER).c
 	rm -f tmp.defs
 
-fsys_wrapper.o: fsys_wrapper.c fsys_wrapper.h common.c
+fsys-wrapper.o: fsys-wrapper.c fsys-wrapper.h common.c
 
 $(GENERATED_NOTIFY_SERVER).c: $(NOTIFY_DEFS)
 	$(MIG_SERVER) $(GENERATED_NOTIFY_SERVER).c $(NOTIFY_DEFS) -prefix lisp_
 
-notify_wrapper.o: notify_wrapper.c notify_wrapper.h common.c
+notify-wrapper.o: notify-wrapper.c notify-wrapper.h common.c
 
 $(GENERATED_FSYS_REPLY_USER).c: $(FSYS_REPLY_DEFS)
 	$(MIG_USER) $(GENERATED_FSYS_REPLY_USER).c $(FSYS_REPLY_DEFS)
@@ -81,3 +81,6 @@ clean:
 		$(GENERATED_FSYS_SERVER).c \
 		$(GENERATED_NOTIFY_SERVER).c \
 		$(GENERATED_FSYS_REPLY_USER).c
+
+install: all
+	cp $(TARGETS) /usr/lib
