@@ -69,3 +69,4 @@
   (setf (shadow-root node) root
         (shadow-root-parent node) parent)
   t)
+
