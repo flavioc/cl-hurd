@@ -7,6 +7,7 @@
   (control port-pointer))
 
 (defun file-getcontrol (file)
+  "Get a translator control port from 'file'."
   (declare (type fixnum file))
   (with-foreign-pointer (control (foreign-type-size 'port))
     (select-error (%file-getcontrol file control)

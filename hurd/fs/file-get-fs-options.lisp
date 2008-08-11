@@ -8,6 +8,7 @@
   (options-len :pointer))
 
 (defun file-get-fs-options (file)
+  "Return a translator options object related to 'file'."
   (declare (type fixnum file))
   (with-foreign-pointer (options (foreign-type-size :pointer))
     (with-foreign-pointer (options-len (foreign-type-size 'msg-type-number))

@@ -8,6 +8,7 @@
   (otherstatus :pointer))
 
 (defun file-lock-stat (file)
+  "Get state of locking for 'file'."
   (declare (type fixnum file))
   (with-foreign-pointer (mystatus (foreign-type-size 'lock-flags))
     (with-foreign-pointer (otherstatus (foreign-type-size 'lock-flags))

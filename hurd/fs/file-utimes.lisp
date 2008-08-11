@@ -8,6 +8,7 @@
   (new-mtime time-value-t))
 
 (defun file-utimes (file &key (atime :now) (mtime :now))
+  "Change access time and/or modification time to 'file'."
   (declare (type fixnum file))
   (when (eq atime :now)
     (setf atime +now-time-value+))

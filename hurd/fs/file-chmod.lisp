@@ -7,6 +7,7 @@
   (mode mode-t))
 
 (defun file-chmod (file new-mode)
+  "Change permission bits of 'file'."
   (declare (type fixnum file)
            (type mode new-mode))
   (select-error (%file-chmod file new-mode)))

@@ -8,6 +8,7 @@
   (new-file port-pointer))
 
 (defun file-reparent (file parent)
+  "Return a new port for 'file' that lookups parent to 'parent'."
   (declare (type fixnum file parent))
   (with-foreign-pointer (new-file (foreign-type-size 'port))
     (select-error (%file-reparent file parent new-file)

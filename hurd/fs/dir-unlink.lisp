@@ -7,6 +7,7 @@
   (name :string))
 
 (defun dir-unlink (dir name)
+  "Unlink file 'name' from directory 'dir'."
   (declare (type fixnum dir)
            (type string name))
   (select-error (%dir-unlink dir name)))

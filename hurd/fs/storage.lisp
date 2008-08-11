@@ -1,6 +1,7 @@
 
 (in-package :hurd)
 
+;; File storage types.
 (defcenum file-storage-class
   :other
   :device
@@ -14,3 +15,4 @@
   :layer
   :remap
   :copy)
+

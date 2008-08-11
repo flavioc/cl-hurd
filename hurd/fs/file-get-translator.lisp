@@ -10,6 +10,7 @@
 (defconstant +file-get-translator-initial-size+ 1024)
 
 (defun file-get-translator (file)
+  "Returns the passive translator set in 'file'."
   (let* ((orig (foreign-alloc :char :count +file-get-translator-initial-size+))
          (buf (foreign-alloc :pointer))
          (len (foreign-alloc 'msg-type-number

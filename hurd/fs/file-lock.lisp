@@ -7,6 +7,7 @@
   (flags lock-flags))
 
 (defun file-lock (file flags)
+  "Lock file 'file' with flags 'flags'."
   (declare (type fixnum file)
            (type list flags))
   (select-error (%file-lock file flags)))

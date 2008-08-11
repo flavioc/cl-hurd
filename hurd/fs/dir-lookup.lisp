@@ -12,6 +12,7 @@
   (result port-pointer))
 
 (defun dir-lookup (dir file-name &key (flags '()) (mode (make-mode)))
+  "Lookup file 'file-name' in directory 'dir' with open flags 'flags'. Pass mode if you want to create a new file."
   (declare (type fixnum dir)
            (type string file-name)
            (type list flags)

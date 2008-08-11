@@ -7,6 +7,7 @@
   (info :pointer))
 
 (defun file-statfs (file)
+  "Returns a statfs object related to filesystem information."
   (declare (type fixnum file))
   (with-foreign-pointer (info (foreign-type-size 'statfs-struct))
     (select-error (%file-statfs file info)

@@ -21,6 +21,7 @@
                   entry)))
 
 (defun dir-readdir (dir &key (entry 0) (nentries -1) (bufsiz 0))
+  "Read directory entries from 'dir'. 'entry' indicates the starting entry. 'nentries' tells how many entries we want. 'bufsiz' limits the size of entries fetched."
   (declare (type fixnum dir entry nentries bufsiz))
   (when (or (zerop nentries)
             (< nentries -1))

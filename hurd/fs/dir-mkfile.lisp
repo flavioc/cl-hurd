@@ -9,6 +9,7 @@
   (newnode port-pointer))
 
 (defun dir-mkfile (dir &key (flags nil) (mode (make-mode)))
+  "Create a new anonymous file in directory 'dir'."
   (declare (type fixnum dir)
            (type list flags)
            (type mode mode))
