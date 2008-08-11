@@ -37,3 +37,4 @@
   "To be passive the stat bit must be set."
   (and (call-next-method)
        (has-passive-trans-p (stat (node box)))))
+

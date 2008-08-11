@@ -71,6 +71,7 @@
 (defsetf link set-link-node)
 
 (defmethod link ((node node))
+  "Return the file path this node links to, NIL otherwise."
   (cond
     ((is-lnk-p (stat node)) (slot-value node 'link))
     (t nil)))

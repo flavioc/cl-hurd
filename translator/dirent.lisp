@@ -6,3 +6,4 @@
   (make-dirent name
                (stat-get (stat node) 'st-ino)
                (stat-get (stat node) 'st-type)))
+

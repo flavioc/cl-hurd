@@ -32,6 +32,7 @@
   (:documentation "Open node class."))
 
 (defun %set-root-shadow-parent (obj parent shadow shadow-parent)
+  "Define the new parent, shadow and shadow parents."
   (when parent
     (setf (root-parent obj) parent))
   (when shadow
@@ -63,6 +64,7 @@
     obj))
 
 (defmethod install-shadow-root ((node open-node) root parent)
+  "Installs the new shadow root and shadow parents."
   (with-accessors ((s-r-parent shadow-root-parent)) node
     (when (port-valid-p s-r-parent)
       (port-deallocate s-r-parent)))

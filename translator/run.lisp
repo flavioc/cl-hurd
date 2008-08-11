@@ -32,14 +32,17 @@
                             (make-stat stat))))
     (inner-run translator demuxer)))
 
-(defun calculate-miliseconds (seconds miliseconds)
+(defun %calculate-miliseconds (seconds miliseconds)
+  "Return total of miliseconds."
   (+ (* 1000 seconds) miliseconds))
 
 (defun wait (&key (seconds 0) (miliseconds 0))
+  "Runs the translator server during 'seconds' seconds and 'miliseconds' miliseconds."
   (unless (and (zerop seconds)
                (zerop miliseconds))
     (run-server (lambda (port in out)
                   (declare (ignore port))
                   (translator-demuxer in out))
                 (port-bucket *translator*)
-                (calculate-miliseconds seconds miliseconds))))
+                (%calculate-miliseconds seconds miliseconds))))
+

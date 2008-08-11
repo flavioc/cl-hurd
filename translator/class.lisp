@@ -54,4 +54,5 @@
     (finalize translator (lambda () (port-destroy id)))))
 
 (defmethod running-p ((translator translator))
+  "Checking if translator is now running."
   (slot-value translator 'underlying-node))
