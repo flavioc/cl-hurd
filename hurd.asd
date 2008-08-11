@@ -62,7 +62,8 @@
                                                            (:file "seek")
                                                            (:file "select")
                                                            (:file "write")
-                                                           (:file "stat")))
+                                                           (:file "stat"))
+                                              :depends-on ("package" "types"))
                                      (:module fs
                                               :components ((:file "trans-flags")
                                                            (:file "file-get-translator")
