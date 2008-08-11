@@ -46,6 +46,8 @@ $(GENERATED_IO_SERVER).c: $(IO_DEFS)
 	$(MIG_SERVER) $(GENERATED_IO_SERVER).c $(IO_DEFS)
 	sed -e 's:lisp_S_io_server:lisp_io_server:g' \
 		-i $(GENERATED_IO_SERVER).c
+	sed -e 's:lisp_io_server_version:lisp_S_io_server_version:g' \
+		-i $(GENERATED_IO_SERVER).c
 
 io_wrapper.o: io_wrapper.c io_wrapper.h common.c
 
