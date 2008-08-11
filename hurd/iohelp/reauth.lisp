@@ -18,6 +18,7 @@
   (agis-count :pointer))
 
 (defun user-reauth (auth-server rend-port new-right permit-failure-p)
+  "Makes an user reauthentication with 'auth-server'."
   (let* ((gubuf (foreign-alloc 'uid-t :count 20))
          (ggbuf (foreign-alloc 'gid-t :count 20))
          (aubuf (foreign-alloc 'uid-t :count 20))
