@@ -16,17 +16,27 @@
 (assert (= (length ext:*args*) 1))
 (defvar *zip* (open-zipfile (first ext:*args*)) "The zip handle.")
 
+(defconstant +seq-cache-size+ 10 "Number of reads before disposing the extract array sequence.")
+
 (defclass zip-translator (tree-translator)
   ()
   (:documentation "Zip translator."))
 
 (defclass zip-entry (entry)
   ((name :initarg :name
-         :accessor name)
+         :accessor name
+         :documentation "Used to access the zip-entry from *zip*.")
+   (entry :initarg :entry
+          :accessor entry
+          :initform nil
+          :documentation "The zip entry associated with this file.")
    (data-sequence :initarg :data
-                  :initform (make-array 0)
+                  :initform nil
                   :accessor data
-                  :documentation "The zip data associated with this file."))
+                  :documentation "The zip data associated with this file.")
+   (number-reads :initform +seq-cache-size+
+                 :accessor number-reads
+                 :documentation "Count of reads."))
   (:documentation "Extends entry with a zip-entry."))
 
 (defclass zip-dir-entry (dir-entry)
@@ -40,9 +50,24 @@
 (defmethod print-object ((entry zip-entry) stream)
   (format stream "#<zip-entry name=~s>" (name entry)))
 
+(defun %get-entry-sequence (entry)
+  (let ((data-stream
+          (make-in-memory-output-stream
+            :element-type '(unsigned-byte 8))))
+    (zipfile-entry-contents entry data-stream)
+    (get-output-stream-sequence data-stream)))
+
 (define-callback read-file zip-translator
                  (node user start amount stream)
-  (declare (ignore user))
+  (unless (has-access-p node user :read)
+    (return-from read-file :permission-denied))
+  (when (is-dir-p (stat node))
+    (return-from read-file :is-a-directory))
+  (unless (data node)
+    ; Get data sequence
+    (setf (entry node) (get-zipfile-entry (name node) *zip*))
+    (setf (data node) (%get-entry-sequence (entry node)))
+    (decf (number-reads node)))
   (let* ((size (stat-get (stat node) 'st-size))
          (size-res (- size start)))
     (cond
@@ -59,35 +84,27 @@
   (when (has-access-p node user :read)
     '(:read)))
 
-(define-callback options-changed zip-translator
-                 ()
-  (warn "Options changed:")
-  (if (has-translator-option-p (options *translator*) :readonly)
-    (warn "READONLY activated"))
-  (if (has-translator-option-p (options *translator*) :coolness-level)
-    (warn "COOLNESS LEVEL ~s"
-          (get-translator-option (options *translator*)
-                                 :coolness-level)))
-  t)
+(define-callback report-no-users zip-translator
+                 (node)
+  (when (typep node 'zip-entry)
+    ; We don't need these anymore
+    (when (and (entry node)
+               (<= (number-reads node)))
+      (setf (entry node) nil
+            (data node) nil)
+      (setf (number-reads node) +seq-cache-size+))))
 
 (defun %create-zip-file (parent entry)
   "Create a new zip entry."
-  (let ((data-stream
-          (make-in-memory-output-stream
-            :element-type '(unsigned-byte 8)))
-        seq
-        stat)
-    (zipfile-entry-contents entry data-stream)
-    (setf seq (get-output-stream-sequence data-stream)
-          stat (make-stat (stat parent)
-                          :size (length seq)
-                          :type :reg))
-    (clear-perms stat :exec) ; Clear exec permissions.
-    (let ((obj (make-instance 'zip-entry
-                              :stat stat
-                              :parent parent
-                              :data seq)))
-      obj)))
+  (let ((stat (make-stat (stat parent)
+                         :size (zipfile-entry-size entry)
+                         :type :reg))
+        (name (zipfile-entry-name entry)))
+    (clear-perms stat :exec)
+    (make-instance 'zip-entry
+                   :stat stat
+                   :parent parent
+                   :name name)))
 
 (defun %create-zip-dir (parent name)
   "Create a new zip directory."
@@ -116,11 +133,11 @@
                                       (%create-zip-file node zip-entry)
                                       (%create-zip-dir node this-name))
                                     this-name)))
-            ;(warn "new-dir ~s" new-dir)
             (unless final-p
               (add-zip-file new-dir name-rest zip-entry))))))))
 
-(defmethod fill-root-node ((translator zip-translator) (node dir-entry))
+(define-callback fill-root-node zip-translator
+                 ((node dir-entry))
   "Add all entries found on the zip file."
   (do-zipfile-entries (name entry *zip*)
                       (add-zip-file node (split-path name) entry)))
@@ -130,3 +147,4 @@
                                  :name "zip-translator")))
 
 (main)
+
