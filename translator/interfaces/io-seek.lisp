@@ -16,11 +16,10 @@
           (incf offset (stat-get (stat node) 'st-size))))
       (cond
         ((>= offset 0)
-         (setf (mem-ref newoffset 'off-t) offset
+         (setf (mem-ref newoffset 'loff-t) offset
                (file-offset open) offset)
          ; Warn user of pointer change
          (report-seek *translator* node user offset)
          t)
-        (t
-          :invalid-argument)))))
+        (t :invalid-argument)))))
 
