@@ -160,5 +160,6 @@
            :translator-options
            :add-option
            :iterate-options
-           :exec-reauth))
+           :exec-reauth
+           :port-cleanup))
 
