@@ -63,14 +63,14 @@
 (defmethod remove-element ((container sorted-container) key)
   "Removes an element with key 'key'."
   ; First, remove it from the hash table.
-  (remhash key (table container))
-  ; Now, from the sorted list.
-  (setf (sorted-list container)
-        (delete key
-                (sorted-list container)
-                :key (indexer container)
-                :test #'equal))
-  container)
+  (when (remhash key (table container))
+    ; Now, from the sorted list.
+    (setf (sorted-list container)
+          (delete key
+                  (sorted-list container)
+                  :key (indexer container)
+                  :test #'equal))
+    container))
 
 (defmethod iterate-elements ((container sorted-container) fun)
   "Runs 'fun' for each key-value pair."
