@@ -16,3 +16,4 @@
         (bucket-remove-port bucket port-info)
         ;; Also from the *all-ports* table
         (remhash port *all-ports*)))))
+
