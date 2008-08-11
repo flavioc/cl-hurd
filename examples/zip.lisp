@@ -14,21 +14,27 @@
 ;;
 
 (assert (= (length ext:*args*) 1))
-(defvar *zip* (open-zipfile (first ext:*args*)) "The zip handle.")
+(defconstant +file+ (first ext:*args*))
+(defvar *zip* (open-zipfile +file+) "The zip handle.")
 
 (defconstant +seq-cache-size+ 10 "Number of reads before disposing the extract array sequence.")
 
 (defclass zip-translator (tree-translator)
-  ()
+  ((timestamp :initform nil
+              :accessor timestamp
+              :initarg :timestamp))
   (:documentation "Zip translator."))
 
-(defclass zip-entry (entry)
+(defclass dirty-entry ()
+  ((dirty :initform nil
+          :accessor dirty)))
+
+(defclass zip-entry (entry dirty-entry)
   ((name :initarg :name
          :accessor name
          :documentation "Used to access the zip-entry from *zip*.")
    (entry :initarg :entry
           :accessor entry
-          :initform nil
           :documentation "The zip entry associated with this file.")
    (data-sequence :initarg :data
                   :initform nil
@@ -39,7 +45,7 @@
                  :documentation "Count of reads."))
   (:documentation "Extends entry with a zip-entry."))
 
-(defclass zip-dir-entry (dir-entry)
+(defclass zip-dir-entry (dir-entry dirty-entry)
   ((name :initarg :name
          :initform nil
          :accessor name)))
@@ -65,7 +71,6 @@
     (return-from read-file :is-a-directory))
   (unless (data node)
     ; Get data sequence
-    (setf (entry node) (get-zipfile-entry (name node) *zip*))
     (setf (data node) (%get-entry-sequence (entry node))))
   (decf (number-reads node))
   (let* ((size (stat-get (stat node) 'st-size))
@@ -84,14 +89,41 @@
   (when (has-access-p node user :read)
     '(:read)))
 
+(define-callback refresh-node zip-translator
+                 (node user)
+  (declare (ignore node user))
+  (with-port-deallocate (port (file-name-lookup +file+ :flags '(:read :notrans)))
+    (let* ((stat (io-stat port))
+           (new-timestamp (stat-get stat 'st-mtime)))
+      (when (time-value-newer-p new-timestamp (timestamp translator))
+        ; Mark every node as un-visited.
+        (iterate-entries-deep (root translator)
+                              (lambda (name node)
+                                (declare (ignore name))
+                                (setf (dirty node) nil)
+                                t))
+        (warn "refreshing node...")
+        (setf *zip* (open-zipfile +file+))
+        (do-zipfile-entries (name entry *zip*)
+                            (update-zip-file (root *translator*) (split-path name) entry))
+        ; Now remove the nodes we have not visited during the update.
+        (iterate-entries-deep (root translator)
+                              (lambda (name node)
+                                (cond
+                                  ((dirty node) t) ; Keep going down there
+                                  (t
+                                    (remove-dir-entry (parent node)
+                                                      name)
+                                    nil))))
+        (setf (timestamp translator) new-timestamp)))))
+
 (define-callback report-no-users zip-translator
                  (node)
   (when (typep node 'zip-entry)
-    ; We don't need these anymore
-    (when (and (entry node)
+    ; We don't need this anymore
+    (when (or (data node)
                (<= (number-reads node)))
-      (setf (entry node) nil
-            (data node) nil)
+      (setf (data node) nil)
       (setf (number-reads node) +seq-cache-size+))))
 
 (defun %create-zip-file (parent entry)
@@ -104,7 +136,8 @@
     (make-instance 'zip-entry
                    :stat stat
                    :parent parent
-                   :name name)))
+                   :name name
+                   :entry entry)))
 
 (defun %create-zip-dir (parent name)
   "Create a new zip directory."
@@ -112,6 +145,52 @@
                  :stat (make-stat (stat parent))
                  :name name
                  :parent parent))
+
+(defun %update-file (node zip-entry)
+  ; Reset any extracted data.
+  (setf (data node) nil
+        (stat-get (stat node) 'st-size) (zipfile-entry-size zip-entry)
+        (entry node) zip-entry
+        (number-reads node) +seq-cache-size+))
+
+(defun update-zip-file (node name zip-entry)
+  (let* ((name-rest (rest name))
+         (this-name (first name))
+         (final-p (null name-rest)))
+    (if (string= this-name "")
+      (return-from update-zip-file nil))
+    (let ((entry (get-entry node this-name)))
+      (cond
+        (entry
+          (warn "~s found" this-name)
+          (cond
+            (final-p
+              (warn "~s is final-p" this-name)
+              (cond
+                ((typep entry 'zip-dir-entry)
+                 (warn "Removing directory and adding a new file ~s" this-name)
+                 (remove-dir-entry node this-name)
+                 (setf entry (add-entry node (%create-zip-file node zip-entry) this-name)))
+                (t
+                  (warn "Updating file ~s" this-name)
+                  (%update-file entry zip-entry))))
+            (t
+              (warn "~s is not final-p" this-name)
+              (when (typep entry 'zip-entry)
+                (warn "Removing old-entry ~s adding new directory" this-name)
+                (remove-dir-entry node this-name)
+                (setf entry (%create-zip-dir node this-name)))
+              (update-zip-file entry name-rest zip-entry))))
+        (t
+          (setf entry (add-entry node
+                                 (if final-p
+                                   (%create-zip-file node zip-entry)
+                                   (%create-zip-dir node this-name))
+                                 this-name))
+          (warn "Created new directory ~s" this-name)
+          (unless final-p
+            (update-zip-file entry name-rest zip-entry))))
+      (setf (dirty entry) t))))
 
 (defun add-zip-file (node name zip-entry)
   "Recursively using name as a path list add into 'node' a new 'zip-entry'."
@@ -121,10 +200,9 @@
     (if (string= this-name "")
       ;; Last node was a directory and it is already created.
       (return-from add-zip-file nil))
-    (multiple-value-bind (entry found-p)
-      (get-entry node this-name)
+    (let ((entry (get-entry node this-name)))
       (cond
-        (found-p
+        (entry
           (unless final-p
             (add-zip-file entry name-rest zip-entry)))
         (t
@@ -143,8 +221,10 @@
                       (add-zip-file node (split-path name) entry)))
 
 (defun main ()
-  (run-translator (make-instance 'zip-translator
-                                 :name "zip-translator")))
+  (with-port-deallocate (port (file-name-lookup +file+ :flags '(:read)))
+    (run-translator (make-instance 'zip-translator
+                                   :timestamp (stat-get (io-stat port) 'st-mtime)
+                                   :name "zip-translator"))))
 
 (main)
 
