@@ -77,6 +77,8 @@ helper_fetch_root (file_t dotdot,
 			    mach_msg_type_name_t * underlying_type,
 			    task_t task, void *cookie)
   {
+    (void)task;
+    (void)cookie;
     return (*callback2) (flags, underlying, underlying_type);
   }
 
