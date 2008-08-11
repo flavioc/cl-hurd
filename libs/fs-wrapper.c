@@ -185,7 +185,7 @@ lisp_S_file_utimes (file_t utimes_file,
 }
 
 /* file set size */
-typedef kern_return_t (*file_set_size_type) (file_t, off_t);
+typedef kern_return_t (*file_set_size_type) (file_t, int);
 
 kern_return_t
 lisp_S_file_set_size (file_t trunc_file, loff_t new_size)
@@ -197,7 +197,7 @@ lisp_S_file_set_size (file_t trunc_file, loff_t new_size)
 
   file_set_size_type set_size_routine = routines[FILE_SET_SIZE];
 
-  return set_size_routine (trunc_file, new_size);
+  return set_size_routine (trunc_file, (int)new_size);
 }
 
 /* file lock */
