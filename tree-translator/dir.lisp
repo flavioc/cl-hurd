@@ -59,6 +59,7 @@
     (cond
       (found found)
       (t
+        (assert (>= (stat-get (stat dir) 'st-nlink) 2))
         (incf (stat-get (stat dir) 'st-nlink)) ; New entry.
         (insert-element (entries dir)
                         (make-inner-entry entry name))
@@ -111,9 +112,10 @@
 
 (defmethod remove-dir-entry ((dir dir-entry) (entry string))
   "Removes a directory entry with name 'entry'."
-  (remove-element (entries dir) entry)
-  ; Decrease link count.
-  (decf (stat-get (stat dir) 'st-nlink)))
+  (when (remove-element (entries dir) entry)
+    (assert (> (stat-get (stat dir) 'st-nlink) 2))
+    ; Decrease link count.
+    (decf (stat-get (stat dir) 'st-nlink))))
 
 (defmethod get-dir-entries ((dir dir-entry) start n)
   "Get directory entries from start to start + n."
@@ -125,7 +127,7 @@
     (remove-dir-entry dir old-name)
     (setf (parent entry) new-dir)
     (when force-p
-      (remove-dir-entry dir new-name))
+      (remove-dir-entry new-dir new-name))
     (add-entry new-dir entry new-name)))
 
 (defmethod iterate-entries ((dir dir-entry) fun)
