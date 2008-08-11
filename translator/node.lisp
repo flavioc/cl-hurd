@@ -18,6 +18,9 @@
     (box :initform nil
          :accessor box
          :documentation "Node's translator box.")
+    (nusers :initform 0
+            :accessor num-users
+            :documentation "Number of users using this node.")
     (link :initform nil
           :documentation "If this is symlink, this is the target file."))
    (:documentation "The node class."))
@@ -71,3 +74,12 @@
   (cond
     ((is-lnk-p (stat node)) (slot-value node 'link))
     (t nil)))
+
+(defmethod inc-users ((node node))
+  "Increment number of users."
+  (incf (num-users node)))
+
+(defmethod dec-users ((node node))
+  "Decrement number of users."
+  (decf (num-users node)))
+
