@@ -15,8 +15,6 @@
   "Modify the specified port right's count of user references."
   (%mach-port-mod-refs task port right delta))
 
-; kern_return_t mach_port_get_refs (ipc_space_t task, mach_port_t name, mach_port_right_t right, mach_port_urefs_t *refs)
-
 (defcfun ("mach_port_get_refs" %mach-port-get-refs)
   err
   (task ipc-space)

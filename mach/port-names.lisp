@@ -58,8 +58,6 @@
   (loop for i from 0 below (mem-ref tcount 'msg-type-number)
         collect (mem-aref types-addr 'port-type-t i)))
 
-;kern_return_t mach_port_rename (ipc_space_t task, mach_port_t old_name, mach_port_t new_name)
-
 (defcfun ("mach_port_rename" %mach-port-rename)
   err
   (task ipc-space)
