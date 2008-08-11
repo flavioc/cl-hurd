@@ -25,12 +25,12 @@
 (defun maptime-map (&optional (use-mach-dev nil) (dev-name nil))
   "Return a mapped time pointer or nil and error in case of errors.
 Returned value is a foreign pointer."
-  (let ((ret (foreign-alloc :pointer :count 1)))
+  (with-foreign-pointer (ret (foreign-type-size :pointer))
     (let ((error-code (%maptime-map use-mach-dev
                                     dev-name
                                     ret)))
       (select-error error-code
-                    (mem-aref ret :pointer 0)))))
+                    (mem-ref ret :pointer)))))
 
 (defun maptime-seconds (ptr)
   "Return the seconds field from a mapped-time-value."
@@ -44,5 +44,5 @@ Returned value is a foreign pointer."
   "Return the check seconds field from a mapped-time-value."
   (foreign-slot-value ptr 'mapped-time-value 'check-seconds))
 
-(defvar *mapped-time* (maptime-map) "Represents current kernel time. Used to set current time.")
+(defconstant *mapped-time* (maptime-map))
 
