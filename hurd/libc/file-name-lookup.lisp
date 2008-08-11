@@ -18,7 +18,7 @@
                               (flags nil)
                               (mode nil)
                               (under nil))
-  "Open a port to file 'name'."
+  "Open a port to file 'name'. If 'under' is given start the lookup at that port."
   (cond
     (under (%file-name-lookup-under under name flags mode))
     (t (%file-name-lookup name flags mode))))

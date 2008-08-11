@@ -7,6 +7,7 @@
   (device-master :pointer))
 
 (defun get-privileged-ports ()
+  "Fetch the host privileged port and device master port from the process server."
   (with-foreign-pointer (host-priv-ptr (foreign-type-size 'host-priv-t))
     (with-foreign-pointer (device-master-ptr (foreign-type-size 'device-t))
       (select-error (%get-privileged-ports host-priv-ptr device-master-ptr)

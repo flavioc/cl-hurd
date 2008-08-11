@@ -7,6 +7,7 @@
   (ptr :pointer))
 
 (defun seteuids (uid-list)
+  "Set the effective UID set."
   (declare (type cons uid-list))
   (unless (and (listp uid-list)
                (not (null uid-list)))
