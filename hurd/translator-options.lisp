@@ -11,22 +11,27 @@
   (string-downcase (symbol-name symbol)))
 
 (defun make-translator-options (&optional option-list)
+  "Create a new translator options object based on an option list.
+Example: '(:readonly (:update 30))."
   (let ((obj (make-instance 'translator-options)))
     (when option-list
       (set-translator-options obj option-list nil))
     obj))
 
 (defun %obj-to-string (obj)
+  "Transforms a lisp object into a string."
   (cond
     ((null obj) "")
     ((eq t obj) "yes")
     (t (prin1-to-string obj))))
 
 (defun %get-string-keyword (keyword)
+  "Return an option string. Example: :readonly -> --readonly."
   (concatenate-string "--"
                       (string-downcase (symbol-name keyword))))
 
 (defun %build-option-string (base value)
+  "Construct an option string."
   (if (null value)
     base
     (concatenate-string base "="
@@ -41,6 +46,7 @@
 
 (defmethod set-translator-options ((options translator-options)
                                    option-list &optional (clear-old t))
+  "Change the current options."
   ; Clear old options.
   (when clear-old
     (setf (table options) nil))
@@ -79,6 +85,7 @@
         collect (funcall fn key value)))
 
 (defun %get-keyword (str)
+  "Return the keyword associated with string 'str'."
   (intern (string-upcase str) "KEYWORD"))
 
 (defun %split-options (item)
@@ -97,6 +104,7 @@
                   converted)))))))
 
 (defun get-foreign-options (ptr len)
+  "From a foreign pointer 'ptr' with size 'len', return a translator options object."
   (let* ((options-list (foreign-string-zero-separated-to-list
                          ptr len))
          (filtered-list ; Remove options without "--"
@@ -112,6 +120,7 @@
     (make-translator-options final-list)))
 
 (defmethod print-object ((options translator-options) stream)
+  "Print to 'stream' a translator options object."
   (format stream "#<translator-options ~a>"
           (get-translator-options options)))
 
