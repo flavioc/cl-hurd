@@ -21,6 +21,7 @@
                            other-auth-poly
                            eff-user
                            avail-user)
+  "Create a new authentication handle."
   (let ((euids (get-foreign-uids eff-user))
         (egids (get-foreign-gids eff-user))
         (auids (get-foreign-uids avail-user))
@@ -42,7 +43,6 @@
                                      (first egids) (second egids)
                                      (first agids) (second agids)
                                      new-handle)))
-            (warn "auth-makeauth ~s" err)
             (select-error err
                           (mem-ref new-handle 'auth-t))))))))
 

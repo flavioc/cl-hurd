@@ -14,6 +14,7 @@
   (num-avail-gids :pointer))
 
 (defun auth-getids (handle)
+  "Return the current user id's, effective and available."
   (let ((eff-uids (%new-ptr))
         (num-eff-uids (%new-unsigned 10))
         (avail-uids (%new-ptr))
