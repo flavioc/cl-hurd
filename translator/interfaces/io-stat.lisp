@@ -2,7 +2,7 @@
 (in-package :hurd-translator)
 
 (def-io-interface :io-stat ((io port)
-							(stat-info stat-t))
+                            (stat-info stat-t))
   (with-lookup protid io
     (stat-copy stat-info (get-stat protid))
     (set-root stat-info
