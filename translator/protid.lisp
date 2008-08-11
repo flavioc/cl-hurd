@@ -61,3 +61,18 @@
                  (pre-drop-node node)
                  (when *translator*
                    (drop-node *translator* node)))))
+
+(defmethod initialize-instance :after ((protid protid) &key)
+  "Increment number of user nodes. If current count is 0, report it."
+  (let ((node (get-node protid)))
+    (when (zerop (num-users node))
+      (report-new-user *translator* node))
+    (inc-users node)))
+
+(defmethod port-cleanup :after ((protid protid))
+  "When cleaning up this port, decrease number of users. Report it if it drops to 0."
+  (let ((node (get-node protid)))
+    (dec-users node)
+    (when (zerop (num-users node))
+      (report-no-users *translator* node))))
+
