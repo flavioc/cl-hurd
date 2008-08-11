@@ -1,6 +1,7 @@
 
 (in-package :hurd)
 
+;; Flags that can be passed to fsys-goaway.
 (defbitfield fsys-goaway-flags
   (:nowait #x00000001)
   (:nosync #x00000002)

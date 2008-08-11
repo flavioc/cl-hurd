@@ -8,6 +8,7 @@
   (data-len :pointer))
 
 (defun fsys-get-options (fsys)
+  "Get filesystem options as a translator options object."
   (declare (type fixnum fsys))
   (with-foreign-pointer (options (foreign-type-size :pointer))
     (with-foreign-pointer (options-len (foreign-type-size 'msg-type-number))

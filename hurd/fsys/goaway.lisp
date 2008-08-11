@@ -7,6 +7,7 @@
   (flags fsys-goaway-flags))
 
 (defun fsys-goaway (control flags)
+  "Sends a goaway request to 'control' and flags 'flags'."
   (declare (type fixnum control)
            (type list flags))
   (let ((err (%fsys-goaway control flags)))
