@@ -35,6 +35,7 @@
       (t :translator-died))))
 
 (defun fetch-root (box dotdot flags user get-translator-callback fetch-root-callback)
+  "Fetch the child translator port, starting the passive translator if needed."
   (unless (box-active-p box)
     (multiple-value-bind (path uid gid) (funcall get-translator-callback box)
       (unless (and path uid gid)

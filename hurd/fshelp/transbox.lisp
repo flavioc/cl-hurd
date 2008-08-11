@@ -75,3 +75,4 @@
   (format stream "#<transbox active=~s passive=~s>"
           (active box)
           (passive box)))
+
