@@ -13,5 +13,6 @@
   (declare (type fixnum old-dir new-dir)
            (type string oldname newname)
            (type boolean excl))
-  (select-error (%dir-rename old-dir oldname new-dir newname excl)))
+  (let ((err (%dir-rename old-dir oldname new-dir newname excl)))
+    (select-error err)))
 
