@@ -11,6 +11,7 @@
   (gids-len msg-type-number))
 
 (defun io-restrict-auth (file user)
+  "Return a new port restricted to iouser 'user'."
   (declare (type fixnum file)
            (type iouser user))
   (let* ((uids-l (get-foreign-uids user))

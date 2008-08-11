@@ -27,6 +27,7 @@
                  (%convert-item item))))
 
 (defun io-write (file data &key (offset +minus-one-ll+))
+  "Write 'data' to 'file' starting at 'offset'. Data can be a string or an octet sequence/array."
   (declare (type fixnum file)
            (type integer offset))
   (let ((total (length data)))

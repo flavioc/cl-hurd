@@ -7,6 +7,7 @@
   (owner pid-t))
 
 (defun io-mod-owner (file owner)
+  "Change the file owner."
   (declare (type fixnum file owner))
   (select-error (%io-mod-owner file owner)))
 

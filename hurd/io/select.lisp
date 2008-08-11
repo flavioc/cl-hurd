@@ -8,8 +8,8 @@
   (timeout :unsigned-int)
   (select-type :pointer))
 
-(defun io-select (file &key type
-                       reply (timeout 0))
+(defun io-select (file &key type reply (timeout 0))
+  "Returns the available read/write operations to 'file' given a specific timeout."
   (declare (type fixnum file timeout)
            (type list type))
   (with-foreign-pointer (ptr (foreign-type-size 'select-type))

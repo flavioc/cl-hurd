@@ -9,9 +9,11 @@
   (newp :pointer))
 
 (defun io-seek (file &key (offset 1) (whence :seek-cur))
+  "Seek the file pointer given the whence and offset semantics."
   (declare (type fixnum file)
            (type integer offset)
            (type symbol whence))
   (with-foreign-pointer (newp (foreign-type-size 'loff-t))
     (select-error (%io-seek file offset whence newp)
                   (mem-ref newp 'loff-t))))
+

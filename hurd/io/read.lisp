@@ -13,6 +13,7 @@
 
 (defun io-read (file &key (offset +minus-one-ll+)
                      (amount +default-io-read-size+))
+  "Read from 'file' a specific 'amount' of data, starting at 'offset'. Ignore 'offset' and the data will be read from the a saved position."
   (declare (type fixnum file amount)
            (type integer offset))
   (when (<= amount 0)

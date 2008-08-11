@@ -9,6 +9,7 @@
   (fileno :pointer))
 
 (defun io-identity (file)
+  "Return the identity port the filesystem id port and the fileno."
   (declare (type fixnum file))
   (with-foreign-pointer (idport (foreign-type-size 'port))
     (with-foreign-pointer (fsidport (foreign-type-size 'port))
