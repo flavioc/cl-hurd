@@ -153,6 +153,37 @@
          (size (calculate-users-size users)))
     (setf (stat-get (stat node) 'st-size) size)))
 
+(defmethod do-remove-directory-entry ((found node) node name)
+  (remove-dir-entry node name))
+
+(defmethod do-remove-directory-entry ((found channel-entry) node name)
+  (when (remove-dir-entry node name)
+    (irc:part (connection *translator*)
+              (irc:normalized-name (channel found)))
+    t))
+
+(define-callback remove-directory-entry irc-translator
+                 (node user name)
+  (let ((found (get-entry node name)))
+    (when (and found
+               (is-owner-p found user))
+      (do-remove-directory-entry found node name))))
+
+(define-callback create-directory irc-translator
+                 (node user name mode)
+  (unless (eq node (root *translator*))
+    (return-from create-directory nil))
+  (unless (is-owner-p node user)
+    (return-from create-directory nil))
+  (let ((old (get-entry node name)))
+    (cond
+      (old nil)
+      (t
+        (irc:join (connection *translator*)
+                  (concatenate-string "#"
+                                      name))
+        t))))
+
 (define-callback fill-root-node irc-translator
                  ((node dir-entry))
   (setf (file-stat translator)
@@ -204,10 +235,24 @@
   (warn "join arguments ~s ~s" (irc:arguments msg)
         (irc:source msg)))
 
+(defun remove-channel (name)
+  (remove-dir-entry (root *translator*) name))
+
+(defun handle-part (msg)
+  (let* ((orig-channel (first (irc:arguments msg)))
+         (channel (get-channel-name orig-channel))
+         (who (irc:source msg)))
+    (when (string= who *nickname*)
+      (remove-channel channel)))
+  (warn "part arguments ~s ~s" (irc:arguments msg)
+        (irc:source msg)))
+
 (defun handle-irc-message (msg)
   (cond
     ((string= "JOIN" (irc:command msg))
      (handle-join msg))
+    ((string= "PART" (irc:command msg))
+     (handle-part msg))
     (t nil)))
 
 (defun main ()
