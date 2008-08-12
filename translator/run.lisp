@@ -17,9 +17,8 @@
                   (funcall demuxer in out))
                 (port-bucket *translator*))))
 
-(defmethod run-translator ((translator translator)
-                           &key flags (demuxer #'translator-demuxer))
-  "Setup the translator and the run it."
+(defmethod setup-translator ((translator translator) &key flags)
+  "Setup the translator to be ready to run."
   (configure translator flags)
   (when (running-p translator)
     (let* ((under (underlying-node translator))
@@ -29,20 +28,27 @@
       (setf (root translator)
             (make-root-node translator
                             (underlying-node translator)
-                            (make-stat stat))))
-    (inner-run translator demuxer)))
+                            (make-stat stat)))
+      t)))
 
-(defun %calculate-miliseconds (seconds miliseconds)
+(defmethod run-translator ((translator translator)
+                           &key flags (demuxer #'translator-demuxer))
+  "Setup the translator and then run it."
+  (setup-translator translator :flags flags)
+  (inner-run translator demuxer))
+
+(defun calculate-miliseconds (seconds miliseconds)
   "Return total of miliseconds."
   (+ (* 1000 seconds) miliseconds))
 
-(defun wait (&key (seconds 0) (miliseconds 0))
+(defun wait (&key (seconds 0) (miliseconds 0) (demuxer #'translator-demuxer))
   "Runs the translator server during 'seconds' seconds and 'miliseconds' miliseconds."
   (unless (and (zerop seconds)
                (zerop miliseconds))
-    (run-server (lambda (port in out)
-                  (declare (ignore port))
-                  (translator-demuxer in out))
-                (port-bucket *translator*)
-                (%calculate-miliseconds seconds miliseconds))))
+    (when (running-p *translator*)
+      (run-server (lambda (port in out)
+                    (declare (ignore port))
+                    (funcall demuxer in out))
+                  (port-bucket *translator*)
+                  (calculate-miliseconds seconds miliseconds)))))
 
