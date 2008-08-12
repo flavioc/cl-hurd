@@ -77,6 +77,11 @@
                         stream)
         t))))
 
+(defun get-key-list (hashtable)
+  (sort (loop for key being the hash-keys of hashtable
+              collect key)
+        #'string<))
+
 (define-callback read-file irc-translator
                  ((node users-entry) user start amount stream)
   (when (has-access-p node user :read)
@@ -88,12 +93,12 @@
       (let* ((total (min size-res amount))
              (end (+ start total))
              (pos 0))
-        (loop for key being the hash-keys of users
+        (loop for nick in (get-key-list users)
               do (cond
                    ((>= pos end)
                     (return-from read-file t))
                    (t
-                     (loop for a across (concatenate-string key
+                     (loop for a across (concatenate-string nick
                                                             (list #\Newline))
                            do (progn
                                 (cond
