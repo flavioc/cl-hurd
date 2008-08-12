@@ -117,7 +117,8 @@
   (when (remove-element (entries dir) entry)
     (assert (> (stat-get (stat dir) 'st-nlink) 2))
     ; Decrease link count.
-    (decf (stat-get (stat dir) 'st-nlink))))
+    (decf (stat-get (stat dir) 'st-nlink))
+    t))
 
 (defmethod get-dir-entries ((dir dir-entry) start n)
   "Get directory entries from start to start + n."
