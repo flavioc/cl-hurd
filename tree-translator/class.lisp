@@ -94,15 +94,11 @@ root node."
         t))))
 
 (define-callback remove-directory-entry tree-translator
-				 (node user name directory-p)
-  (declare (ignore directory-p))
+				 (node user name)
   (let ((found (get-entry node name)))
     (when found
-      (cond
-        ((is-owner-p found user)
-         (remove-dir-entry node name)
-         t)
-        (t nil)))))
+      (when (is-owner-p found user)
+        (remove-dir-entry node name)))))
 
 (define-callback create-hard-link tree-translator
                  (dir user file name)
