@@ -102,5 +102,6 @@
            :do-fsys-getroot
            :report-new-user
            :report-no-users
-           :num-users))
+           :num-users
+           :setup-translator))
 
