@@ -25,7 +25,7 @@
                    (port-bucket *translator*) 'protid)))
     (return-from %shutdown :resource-busy))
   (unless (flag-is-p flags :nosync)
-    (sync-fs *translator* (make-iouser-root) t t))
+    (sync-fs *translator* (make-iouser-root) t))
   (shutdown *translator*)
   t)
 

@@ -7,13 +7,12 @@
                                   (reply-type msg-type-name)
                                   (wait :boolean)
                                   (children :boolean))
-  (declare (ignore reply reply-type))
+  (declare (ignore reply reply-type children))
   (when (port-exists-p control)
     (let ((root-user (make-iouser-root)))
       (if (sync-fs *translator*
                    root-user
-                   wait
-                   children)
+                   wait)
         t
         nil))))
 
