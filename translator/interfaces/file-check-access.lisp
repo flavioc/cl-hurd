@@ -11,5 +11,5 @@
         ((listp ret)
          (setf (mem-ref flags 'open-flags) ret)
          t)
-        (t nil)))))
+        (t ret)))))
 
