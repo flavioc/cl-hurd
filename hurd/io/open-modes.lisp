@@ -4,6 +4,7 @@
 (defconstant +honored-open-modes+ '(:append :async :fsync :nonblock))
 
 (defconstant +honored-get-modes+ (append +honored-open-modes+
+                                         '(:write :exec :read)))
 
 (defcfun ("io_set_all_openmodes" %io-set-all-openmodes)
   err
