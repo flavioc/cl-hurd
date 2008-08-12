@@ -101,8 +101,8 @@ Return T for success, NIL for operation not permitted or a specific error for ot
   "The user wants to create a directory in the directory 'node' with 'name' and 'mode'.
 Return T for success, NIL if don't permitted or a specific error.")
 
-(%add-callback remove-directory-entry (node user name directory-p)
-  "The user wants to remove an entry named 'name' from the directory 'node'. 'directory-p' indicates that the entry is a directory.
+(%add-callback remove-directory-entry (node user name)
+  "The user wants to remove an entry named 'name' from the directory 'node'.
 Return T for success, NIL for not permitted or a specific error.")
 
 (%add-callback read-file (node user start amount stream)

@@ -15,8 +15,7 @@
           (let ((err (remove-directory-entry *translator*
                                              node
                                              user
-                                             name
-                                             nil))) ; Not a directory
+                                             name)))
             (cond
               ((eq err t) t)
               ((eq err nil) :not-permitted)

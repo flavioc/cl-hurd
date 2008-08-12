@@ -5,6 +5,8 @@
                               (name :string))
   (with-lookup protid port
     (block rmdir
+           ; Remove possible final slash
+           (setf name (string-right-trim "/" name))
            (let ((node (get-node protid))
                  (user (get-user protid)))
              (unless (is-dir-p (stat node))
@@ -22,8 +24,7 @@
                (let ((err (remove-directory-entry *translator*
                                                   node
                                                   user
-                                                  name
-                                                  t)))
+                                                  name)))
                  (cond
                    ((eq err t) t)
                    ((eq err nil) :not-permitted)
