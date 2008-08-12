@@ -2,6 +2,7 @@
 (in-package :hurd-translator)
 
 (defun %get-translator-list (node user)
+  "If this is a shortcircuited translator, we can easily return the translator path."
   (let ((what (get-type (stat node))))
     (case what
       (:lnk

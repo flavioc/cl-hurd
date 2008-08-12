@@ -2,6 +2,7 @@
 (in-package :hurd-translator)
 
 (defun %get-options-callback (port data data-len)
+  "Writes translator options to data foreign pointer."
   (when (port-exists-p port)
     (let* ((opts (options *translator*))
            (args0 (when opts (get-translator-options opts)))
@@ -23,3 +24,4 @@
                                              (mem-ref data :pointer)
                                              len-args)
       t)))
+

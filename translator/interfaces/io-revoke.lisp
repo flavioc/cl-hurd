@@ -14,5 +14,5 @@
                              (unless (eq port protid)
                                (bucket-remove-port bucket port)))))
          t)
-        (t
-          :not-permitted)))))
+        (t :not-permitted)))))
+

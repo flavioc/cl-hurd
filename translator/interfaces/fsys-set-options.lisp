@@ -11,6 +11,7 @@
   (when (port-exists-p fsys)
     (let ((new-options (get-foreign-options data data-len)))
       (when do-children
+		;; Propagate options to children translators.
         (let (nodes-done)
           (bucket-iterate
             (port-bucket *translator*)

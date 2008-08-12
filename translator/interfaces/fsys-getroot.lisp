@@ -16,7 +16,7 @@
          (return-from %handle-normal-file :not-permitted)))
      (let* ((new-open-node (make-open-node
                              node
-                             (disable-flags flags +open-flags+)
+                             (disable-flags flags +open-create-flags+)
                              :root-parent dotdot))
             (new (new-protid *translator*
                             user
@@ -105,3 +105,4 @@ Filename to retry.
                                            retry-name
                                            (1+ (length retry-name0)))
                    t)))))))
+

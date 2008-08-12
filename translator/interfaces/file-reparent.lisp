@@ -17,6 +17,7 @@
            (new (new-protid *translator*
                             copy-user
                             new-open-node)))
+	  ;; Install new shadow ports.
       (install-shadow-root new-open-node node parent)
       (setf (mem-ref new-file 'port) (get-right new)
             (mem-ref new-file-type 'msg-type-name) :make-send)

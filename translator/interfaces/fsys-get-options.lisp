@@ -8,3 +8,4 @@
                                        (data-len :pointer))
   (declare (ignore reply reply-type))
   (%get-options-callback fsys data data-len))
+

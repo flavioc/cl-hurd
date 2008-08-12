@@ -1,6 +1,8 @@
 
 (in-package :hurd-translator)
 
+;; Functions used to verify circular links.
+
 (defun %has-node-p (table node)
   (multiple-value-bind (foo found-p)
     (gethash node table)
@@ -12,8 +14,7 @@
   table)
 
 (defun %create-new-protid (open-node user node flags newnode-p)
-  "Creates a new protid."
-  (let* ((new-flags (disable-flags flags +open-flags+))
+  (let* ((new-flags (disable-flags flags +open-create-flags+))
          (allow-ret (allow-open-p *translator* node user new-flags newnode-p)))
     (cond
       ((eq t allow-ret)

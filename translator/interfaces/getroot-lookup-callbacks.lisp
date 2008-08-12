@@ -14,8 +14,8 @@
       (t :no-such-file))))
 
 (defcallback fetch-root-callback
-             err
-             ((flags open-flags)
+  err
+  ((flags open-flags)
               (underlying port-pointer)
               (underlying-type :pointer))
   (let* ((node *current-node*)

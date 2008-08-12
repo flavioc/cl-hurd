@@ -17,3 +17,4 @@
         ((eq err t) t)
         ((eq err nil) :not-permitted)
         (t err)))))
+

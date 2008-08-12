@@ -9,3 +9,4 @@
       (setf (mem-ref status 'lock-flags) status-flags
             (mem-ref otherstatus 'lock-flags) status-flags)
       t)))
+

@@ -22,7 +22,7 @@
                                   *translator*
                                   new-user
                                   (make-open-node new-node
-                                                  (only-flags flags +open-flags+)
+                                                  (only-flags flags +open-create-flags+)
                                                   :copy old-open-node))))
                (setf (mem-ref new-file 'port) (get-right new-protid)
                      (mem-ref new-file-type 'msg-type-name) :make-send)

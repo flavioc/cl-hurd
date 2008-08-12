@@ -40,6 +40,7 @@
     (let ((shut-ret (%shutdown flags)))
       (cond
         ((eq t shut-ret)
+		 ;; Reply back to whatever called us.
          (fsys-goaway-reply reply reply-type t)
          (exit 0))
         (t

@@ -2,6 +2,7 @@
 (in-package :hurd-translator)
 
 (defun %get-short-circuited-translator (ls)
+  "Return a symbol denoting the short circuited translator, if that is the case."
   (let ((name (first ls)))
     (cond
       ((string= name +hurd-symlink+) :lnk)
@@ -12,6 +13,7 @@
       (t nil))))
 
 (defun %set-short-circuited-translator (ls node user)
+  "Runs a specific action for a short circuited translator."
   (let ((what (%get-short-circuited-translator ls)))
     (when what
       (case what
@@ -90,5 +92,4 @@
                     (t
                       (box-set-passive (box node)
                                        passive-list)))))
-               ((flag-is-p active-flags :set)
-                t))))))
+               ((flag-is-p active-flags :set) t))))))

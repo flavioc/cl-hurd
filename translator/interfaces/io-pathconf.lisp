@@ -10,8 +10,8 @@
                             (get-user protid)
                             what)))
       (cond
-        ((null result)
-         :invalid-argument)
+        ((null result) :invalid-argument)
         (t
           (setf (mem-ref value :int) result)
           t)))))
+
