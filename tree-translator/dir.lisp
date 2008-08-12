@@ -36,9 +36,11 @@
 
 (defclass inner-entry ()
   ((node :initarg :node
-         :accessor node)
+         :accessor node
+		 :documentation "Saved node.")
    (name :initarg :name
-         :accessor name)))
+         :accessor name
+		 :documentation "Name of the entry.")))
 
 (defun make-inner-entry (node name)
   (make-instance 'inner-entry :node node :name name))

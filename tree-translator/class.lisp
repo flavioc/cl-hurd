@@ -118,3 +118,4 @@ root node."
                (has-access-p new-dir user :write))
       (rename-dir-entry old-dir old-name new-dir new-name t)
       t)))
+
