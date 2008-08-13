@@ -4,11 +4,13 @@
 ;; This file maps the mapped_time_value_t type to Lisp.
 
 ;; Load libshouldbeinlibc
-(define-foreign-library libshouldbeinlibc
-  (:unix (:or "libshouldbeinlibc.so.0.3" "libshouldbeinlibc.so"))
-  (t (:default "libshouldbeinlibc")))
+(defun load-hurd-common-libraries ()
+  (define-foreign-library libshouldbeinlibc
+                          (:unix (:or "libshouldbeinlibc.so.0.3" "libshouldbeinlibc.so"))
+                          (t (:default "libshouldbeinlibc")))
+  (use-foreign-library libshouldbeinlibc))
 
-(use-foreign-library libshouldbeinlibc)
+(load-hurd-common-libraries)
 
 (defcfun ("maptime_map" %maptime-map)
   err

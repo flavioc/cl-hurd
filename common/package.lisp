@@ -154,5 +154,6 @@
            :remove-declare
            :getpid
            :getppid
-           :stat-eq))
+           :stat-eq
+           :load-hurd-common-libraries))
 
