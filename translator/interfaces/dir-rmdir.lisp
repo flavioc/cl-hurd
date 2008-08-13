@@ -16,11 +16,6 @@
                  (return-from rmdir :no-such-file))
                (unless (is-dir-p (stat target))
                  (return-from rmdir :not-directory))
-               (unless (zerop (- (number-of-entries *translator*
-                                                    target
-                                                    user)
-                                 2)) ; Don't count . and ..
-                 (return-from rmdir :directory-not-empty))
                (let ((err (remove-directory-entry *translator*
                                                   node
                                                   user
