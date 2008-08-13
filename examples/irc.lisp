@@ -1,6 +1,4 @@
 
-(setf *default-file-encoding* (make-encoding :charset 'charset:utf-8 :line-terminator :unix))
-
 (defpackage :irc-translator
   (:use :cl :hurd-common :mach
         :hurd :hurd-translator
@@ -9,19 +7,20 @@
 
 (in-package :irc-translator)
 
-;; Load configuration.
-;(assert (= (length ext:*args*) 1))
-;(defconstant +file+ (first ext:*args*))
-;(load +file+)
-(defvar *server* "irc.freenode.org")
-(defvar *nickname* "teste_nickname_n")
-(defvar *start-channels* '("#flaviochan"))
+(unless (= (length ext:*args*) 2)
+  (error "You must pass a nickname and the server as arguments."))
 
-(defun create-adjustable-array ()
-  (make-array 0
+(defvar *nickname* (first ext:*args*))
+(defvar *server* (second ext:*args*))
+
+(defconstant +max-file-size+ 5000)
+
+(defun create-adjustable-array (&key (size 0) (contents nil))
+  (make-array size
               :adjustable t
               :fill-pointer t
-              :element-type '(unsigned-byte 8)))
+              :element-type '(unsigned-byte 8)
+              :initial-contents contents))
 
 (defun has-data-p (connection)
   (let ((result (socket:socket-status (irc:network-stream connection))))
@@ -184,11 +183,11 @@
   (remove-dir-entry node name))
 
 (defmethod do-remove-directory-entry ((found channel-entry) node name)
-  (when (remove-dir-entry node name)
-    (irc:part (connection *translator*)
-              (irc:normalized-name (channel found))
-              (format nil "rm ~a" name))
-    t))
+  (declare (ignore node))
+  (irc:part (connection *translator*)
+            (irc:normalized-name (channel found))
+            (format nil "rm ~a" name))
+  t)
 
 (define-callback remove-directory-entry irc-translator
                  (node user name)
@@ -254,10 +253,7 @@
                                      :stat (make-stat (file-stat translator))
                                      :data (create-adjustable-array))))
     (setf (notice-node translator) notice-entry)
-    (add-entry node notice-entry "notice"))
-  (dolist (item *start-channels*)
-    (irc:join (connection translator)
-              item)))
+    (add-entry node notice-entry "notice")))
 
 (defmethod add-new-info ((node log-entry) str)
   (let* ((current-size (stat-get (stat node) 'st-size))
@@ -269,6 +265,12 @@
                   :fill-pointer t)
     (replace (data node) (string-to-octets final-str)
              :start1 current-size)
+    (when (> new-size +max-file-size+)
+      (let ((extra (- new-size +max-file-size+)))
+      (setf (data node)
+            (create-adjustable-array :size +max-file-size+
+                                     :contents (subseq (data node) extra)))
+      (decf new-size extra)))
     (setf (stat-get (stat node) 'st-size) new-size)))
 
 (defmethod add-new-info ((channel-name string) str)
@@ -387,8 +389,6 @@
        (handle-quit msg))
       ((or (string= "PING" cmd)
            (string= "UNKNOWN-REPLY" cmd))))))
-      ;(t (warn "~a ~a ~a" (irc:source msg)
-      ;         cmd (irc:arguments msg))))))
 
 (defun main ()
   (let ((translator
