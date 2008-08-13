@@ -22,13 +22,6 @@
     (or (eq :input result)
         (eq :io result))))
 
-(defun %create-data-array (size contents)
-  (make-array size
-              :initial-contents contents
-              :adjustable t
-              :fill-pointer t
-              :element-type '(unsigned-byte 8)))
-
 (defclass irc-translator (tree-translator)
   ((file-stat :initarg :file-stat
               :initform nil
@@ -44,8 +37,8 @@
                :documentation "Irc connection object.")))
 
 (defclass data-entry ()
-  ((contents :initarg :data
-             :initform nil
+  ((contents :initform nil
+             :initarg :data
              :accessor data)))
 
 (defclass channel-obj-entry ()
@@ -55,6 +48,7 @@
 (defclass channel-entry (dir-entry channel-obj-entry) ())
 (defclass topic-entry (data-entry entry channel-obj-entry) ())
 (defclass users-entry (entry channel-obj-entry) ())
+(defclass conversation-entry (entry channel-obj-entry data-entry) ())
 
 (defun update-topic-data (node)
   (setf (data node)
@@ -62,20 +56,23 @@
                             (irc:topic (channel node))
                             (list #\Newline)))))
 
+(defun read-from-data-entry (node start amount stream)
+  (let* ((size (stat-get (stat node) 'st-size))
+         (size-res (- size start)))
+    (unless (plusp size-res)
+      (return-from read-from-data-entry t))
+    (let* ((total (min size-res amount))
+           (end (+ start total)))
+      (write-sequence (subseq (data node) start end)
+                      stream)
+      t)))
+
 (define-callback read-file irc-translator
                  ((node topic-entry) user start amount stream)
   (when (has-access-p node user :read)
     (when (null (data node))
       (update-topic-data node))
-    (let* ((size (stat-get (stat node) 'st-size))
-           (size-res (- size start)))
-      (unless (plusp size-res)
-        (return-from read-file t))
-      (let* ((total (min size-res amount))
-             (end (+ start total)))
-        (write-sequence (subseq (data node) start end)
-                        stream)
-        t))))
+    (read-from-data-entry node start amount stream)))
 
 (defun get-key-list (hashtable)
   (sort (loop for key being the hash-keys of hashtable
@@ -109,36 +106,18 @@
                                 (incf pos))))))
         t))))
 
-(defun %read-sequence (stream)
-  (let ((arr (%create-data-array 0 '())))
-    (read-sequence arr stream)
-    arr))
+(define-callback read-file irc-translator
+                 ((node conversation-entry) user start amount stream)
+  (when (has-access-p node user :read)
+    (read-from-data-entry node start amount stream)))
 
 (define-callback write-file irc-translator
                  (node user offset stream)
-  (return-from write-file nil)
-  (unless (has-access-p node user :write)
-    (return-from write-file nil))
-  (when (is-dir-p (stat node))
-    (return-from write-file :is-a-directory))
-  (let* ((size (stat-get (stat node) 'st-size))
-         (arr (%read-sequence stream))
-         (amount (length arr))
-         (final-size (max (+ amount offset) size)))
-    (unless (= final-size size)
-      (adjust-array (data node)
-                    final-size
-                    :fill-pointer t))
-    (loop for octet across arr
-          for i from offset
-          do (progn
-               (setf (aref (data node) i) octet)))
-    ; Update stat size.
-    (setf (stat-get (stat node) 'st-size) final-size)
-    t))
+                 (declare (ignore node user offset stream))
+                 nil)
 
 (define-callback report-no-users irc-translator
-                 ((node data-entry))
+                 ((node topic-entry))
   (setf (data node) nil))
 
 (defun calculate-users-size (table)
@@ -176,6 +155,7 @@
 
 (define-callback create-directory irc-translator
                  (node user name mode)
+  (declare (ignore mode))
   (unless (eq node (root *translator*))
     (return-from create-directory nil))
   (unless (is-owner-p node user)
@@ -195,9 +175,11 @@
         (make-stat (stat node)
                    :mode (make-mode :perms '((:owner :read)
                                              (:group :read)))
-                   :type :reg))
+                   :type :reg
+                   :size 0))
   (setf (dir-stat translator)
         (make-stat (stat node)
+                   :nlink 0
                    :mode (make-mode :perms '((:owner :read :exec)
                                              (:group :read :exec)))
                    :type :dir))
@@ -206,6 +188,28 @@
   (dolist (item *start-channels*)
     (irc:join (connection translator)
               item)))
+
+(defmethod add-new-info ((node conversation-entry) str)
+  (let* ((current-size (stat-get (stat node) 'st-size))
+         (begin-p (zerop current-size))
+         (this-size (1+ (length str)))
+         (final-str (concatenate-string str (list #\Newline)))
+         (new-size (+ current-size this-size)))
+    (adjust-array (data node)
+                  new-size
+                  :fill-pointer t)
+    (replace (data node) (string-to-octets final-str)
+             :start1 current-size)
+    (setf (stat-get (stat node) 'st-size) new-size)))
+
+(defmethod add-new-info ((channel-name string) str)
+  (let ((found (get-entry (root *translator*) channel-name)))
+    (when (and found
+               (typep found 'channel-entry))
+      (let ((found2 (get-entry found "conversation")))
+        (when (and found2
+                   (typep found2 'conversation-entry))
+          (add-new-info found2 str))))))
 
 (defun create-new-channel (orig-channel channel)
   (let* ((channel-obj (irc:find-channel (connection *translator*)
@@ -223,7 +227,16 @@
           (users-entry (make-instance 'users-entry
                                       :parent channel-dir
                                       :stat (make-stat (file-stat *translator*))
-                                      :channel channel-obj)))
+                                      :channel channel-obj))
+          (conversation-entry (make-instance 'conversation-entry
+                                           :parent channel-dir
+                                           :stat (make-stat (file-stat *translator*))
+                                           :data (make-array 0
+                                                             :adjustable t
+                                                             :fill-pointer t
+                                                             :element-type '(unsigned-byte 8))
+                                           :channel channel-obj)))
+      (add-entry channel-dir conversation-entry "conversation")
       (add-entry channel-dir users-entry "users")
       (add-entry channel-dir topic-entry "topic"))))
 
@@ -236,29 +249,45 @@
          (channel (get-channel-name orig-channel))
          (who (irc:source msg)))
     (when (string= who *nickname*)
-      (create-new-channel orig-channel channel)))
-  (warn "join arguments ~s ~s" (irc:arguments msg)
-        (irc:source msg)))
+      (create-new-channel orig-channel channel))
+    (add-new-info channel
+                  (with-output-to-string (s)
+                    (format s "~s enters the room" who)))))
 
 (defun remove-channel (name)
   (remove-dir-entry (root *translator*) name))
 
 (defun handle-part (msg)
-  (let* ((orig-channel (first (irc:arguments msg)))
+  (let* ((args (irc:arguments msg))
+         (orig-channel (first (irc:arguments msg)))
          (channel (get-channel-name orig-channel))
          (who (irc:source msg)))
     (when (string= who *nickname*)
-      (remove-channel channel)))
-  (warn "part arguments ~s ~s" (irc:arguments msg)
-        (irc:source msg)))
+      (remove-channel channel))
+    (add-new-info channel
+                  (with-output-to-string (s)
+                    (format s "~s exits the room (~s)" who
+                            (if (null (rest args))
+                              "no reason"
+                              (second args)))))))
+
+(defun handle-privmsg (msg)
+  (add-new-info (get-channel-name (first (irc:arguments msg)))
+                (with-output-to-string (s)
+                  (format s "~s: ~a"
+                          (irc:source msg)
+                          (second (irc:arguments msg))))))
 
 (defun handle-irc-message (msg)
-  (cond
-    ((string= "JOIN" (irc:command msg))
-     (handle-join msg))
-    ((string= "PART" (irc:command msg))
-     (handle-part msg))
-    (t nil)))
+  (let ((cmd (irc:command msg)))
+    (cond
+      ((string= "JOIN" cmd)
+       (handle-join msg))
+      ((string= "PART" cmd)
+       (handle-part msg))
+      ((string= "PRIVMSG" cmd)
+       (handle-privmsg msg))
+      (t nil))))
 
 (defun main ()
   (let ((translator
