@@ -161,5 +161,6 @@
            :add-option
            :iterate-options
            :exec-reauth
-           :port-cleanup))
+           :port-cleanup
+           :load-hurd-libraries))
 
