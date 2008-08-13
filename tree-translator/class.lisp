@@ -98,7 +98,9 @@ root node."
   (let ((found (get-entry node name)))
     (when found
       (when (is-owner-p found user)
-        (remove-dir-entry node name)))))
+        (cond
+          ((plusp (dir-size found)) :directory-not-empty)
+          (t (remove-dir-entry node name)))))))
 
 (define-callback create-hard-link tree-translator
                  (dir user file name)
