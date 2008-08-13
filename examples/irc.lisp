@@ -15,7 +15,13 @@
 ;(load +file+)
 (defvar *server* "irc.freenode.org")
 (defvar *nickname* "teste_nickname_n")
-(defvar *start-channels* '("#linux" "#c++"))
+(defvar *start-channels* '("#flaviochan"))
+
+(defun create-adjustable-array ()
+  (make-array 0
+              :adjustable t
+              :fill-pointer t
+              :element-type '(unsigned-byte 8)))
 
 (defun has-data-p (connection)
   (let ((result (socket:socket-status (irc:network-stream connection))))
@@ -34,7 +40,10 @@
    (connection :initarg :connection
                :initform nil
                :accessor connection
-               :documentation "Irc connection object.")))
+               :documentation "Irc connection object.")
+   (notice-node :initform nil
+                :accessor notice-node
+                :documentation "Node with notices from the server.")))
 
 (defclass data-entry ()
   ((contents :initform nil
@@ -48,7 +57,11 @@
 (defclass channel-entry (dir-entry channel-obj-entry) ())
 (defclass topic-entry (data-entry entry channel-obj-entry) ())
 (defclass users-entry (entry channel-obj-entry) ())
-(defclass conversation-entry (entry channel-obj-entry data-entry) ())
+(defclass log-entry (entry channel-obj-entry data-entry) ())
+(defclass notice-entry (log-entry) ())
+(defclass pvp-entry (log-entry)
+  ((user :initarg :user
+         :accessor user)))
 
 (defun update-topic-data (node)
   (setf (data node)
@@ -107,14 +120,44 @@
         t))))
 
 (define-callback read-file irc-translator
-                 ((node conversation-entry) user start amount stream)
+                 ((node log-entry) user start amount stream)
   (when (has-access-p node user :read)
     (read-from-data-entry node start amount stream)))
 
 (define-callback write-file irc-translator
-                 (node user offset stream)
-                 (declare (ignore node user offset stream))
-                 nil)
+                 ((node notice-entry) user offset stream amount)
+  (declare (ignore user offset stream amount))
+  nil)
+
+(defun get-message-stream (stream amount)
+  (let ((array (make-array amount :element-type '(unsigned-byte 8))))
+    (read-sequence array stream)
+    (string-trim (list #\Newline)
+                 (octets-to-string array))))
+
+(define-callback write-file irc-translator
+                 ((node pvp-entry) user offset stream amount)
+  (declare (ignore offset))
+  (when (has-access-p node user :write)
+    (let ((msg (get-message-stream stream amount)))
+      (irc:privmsg (connection translator)
+                   (user node)
+                   msg)
+      (add-new-info node
+                    (make-privmsg-string *nickname* msg))
+      t)))
+
+(define-callback write-file irc-translator
+                 ((node log-entry) user offset stream amount)
+  (declare (ignore offset))
+  (when (has-access-p node user :write)
+    (let ((msg (get-message-stream stream amount)))
+      (irc:privmsg (connection *translator*)
+                   (channel node)
+                   msg)
+      (add-new-info node
+                    (make-privmsg-string *nickname* msg))
+      t)))
 
 (define-callback report-no-users irc-translator
                  ((node topic-entry))
@@ -143,7 +186,8 @@
 (defmethod do-remove-directory-entry ((found channel-entry) node name)
   (when (remove-dir-entry node name)
     (irc:part (connection *translator*)
-              (irc:normalized-name (channel found)))
+              (irc:normalized-name (channel found))
+              (format nil "rm ~a" name))
     t))
 
 (define-callback remove-directory-entry irc-translator
@@ -169,11 +213,31 @@
                                       name))
         t))))
 
+(define-callback shutdown irc-translator
+                 ()
+  (irc:quit (connection *translator*) "settrans -g")
+  (sleep 0.5))
+
+(defun make-pvp-file (root user)
+  (let ((new-entry (make-instance 'pvp-entry
+                                  :parent root
+                                  :stat (make-stat (file-stat *translator*))
+                                  :data (create-adjustable-array)
+                                  :user user)))
+    (add-entry root new-entry user)))
+
+(define-callback create-file irc-translator
+                 (node user filename mode)
+  (declare (ignore user mode))
+  (when (eq node (root translator))
+    (make-pvp-file (root translator)
+                   filename)))
+
 (define-callback fill-root-node irc-translator
                  ((node dir-entry))
   (setf (file-stat translator)
         (make-stat (stat node)
-                   :mode (make-mode :perms '((:owner :read)
+                   :mode (make-mode :perms '((:owner :read :write)
                                              (:group :read)))
                    :type :reg
                    :size 0))
@@ -185,15 +249,20 @@
                    :type :dir))
   (setf (connection translator)
         (irc:connect :nickname *nickname* :server *server*))
+  (let ((notice-entry (make-instance 'notice-entry
+                                     :parent node
+                                     :stat (make-stat (file-stat translator))
+                                     :data (create-adjustable-array))))
+    (setf (notice-node translator) notice-entry)
+    (add-entry node notice-entry "notice"))
   (dolist (item *start-channels*)
     (irc:join (connection translator)
               item)))
 
-(defmethod add-new-info ((node conversation-entry) str)
+(defmethod add-new-info ((node log-entry) str)
   (let* ((current-size (stat-get (stat node) 'st-size))
-         (begin-p (zerop current-size))
-         (this-size (1+ (length str)))
          (final-str (concatenate-string str (list #\Newline)))
+         (this-size (length final-str))
          (new-size (+ current-size this-size)))
     (adjust-array (data node)
                   new-size
@@ -208,7 +277,7 @@
                (typep found 'channel-entry))
       (let ((found2 (get-entry found "conversation")))
         (when (and found2
-                   (typep found2 'conversation-entry))
+                   (typep found2 'log-entry))
           (add-new-info found2 str))))))
 
 (defun create-new-channel (orig-channel channel)
@@ -228,13 +297,10 @@
                                       :parent channel-dir
                                       :stat (make-stat (file-stat *translator*))
                                       :channel channel-obj))
-          (conversation-entry (make-instance 'conversation-entry
+          (conversation-entry (make-instance 'log-entry
                                            :parent channel-dir
                                            :stat (make-stat (file-stat *translator*))
-                                           :data (make-array 0
-                                                             :adjustable t
-                                                             :fill-pointer t
-                                                             :element-type '(unsigned-byte 8))
+                                           :data (create-adjustable-array)
                                            :channel channel-obj)))
       (add-entry channel-dir conversation-entry "conversation")
       (add-entry channel-dir users-entry "users")
@@ -251,8 +317,7 @@
     (when (string= who *nickname*)
       (create-new-channel orig-channel channel))
     (add-new-info channel
-                  (with-output-to-string (s)
-                    (format s "~s enters the room" who)))))
+                  (format nil "~s enters the room" who))))
 
 (defun remove-channel (name)
   (remove-dir-entry (root *translator*) name))
@@ -265,18 +330,44 @@
     (when (string= who *nickname*)
       (remove-channel channel))
     (add-new-info channel
-                  (with-output-to-string (s)
-                    (format s "~s exits the room (~s)" who
-                            (if (null (rest args))
-                              "no reason"
-                              (second args)))))))
+                  (format nil "~s exits the room (~s)" who
+                          (if (null (rest args))
+                            "no reason"
+                            (second args))))))
+
+(defun make-privmsg-string (who msg)
+  (format nil "~s: ~a" who msg))
+
+(defun handle-privmsg-pvp (source msg)
+  (add-new-info (if (has-entry-p (root *translator*) source)
+                  (get-entry (root *translator*) source)
+                  (make-pvp-file (root *translator*) source))
+                (make-privmsg-string source msg)))
 
 (defun handle-privmsg (msg)
-  (add-new-info (get-channel-name (first (irc:arguments msg)))
-                (with-output-to-string (s)
-                  (format s "~s: ~a"
-                          (irc:source msg)
-                          (second (irc:arguments msg))))))
+  (let ((dest (first (irc:arguments msg)))
+        (src (irc:source msg))
+        (str (second (irc:arguments msg))))
+    (cond
+      ((string= dest *nickname*)
+       (handle-privmsg-pvp src str))
+      (t
+        (add-new-info (get-channel-name dest)
+                      (make-privmsg-string src str))))))
+
+(defun join-string-list (string-list)
+  "Concatenates a list of strings and puts spaces between the elements."
+  (format nil "~{~A~^ ~}" string-list))
+
+(defun handle-notice (msg)
+  (add-new-info (notice-node *translator*)
+                (join-string-list (irc:arguments msg))))
+
+(defun handle-quit (msg)
+  (add-new-info (notice-node *translator*)
+                (format nil "QUIT: ~a ~a"
+                        (irc:source msg)
+                        (join-string-list (irc:arguments msg)))))
 
 (defun handle-irc-message (msg)
   (let ((cmd (irc:command msg)))
@@ -287,7 +378,17 @@
        (handle-part msg))
       ((string= "PRIVMSG" cmd)
        (handle-privmsg msg))
-      (t nil))))
+      ((or (string= "NOTICE" cmd)
+           (and (>= (length cmd) 3)
+                (or (string= "ERR" (subseq cmd 0 3))
+                    (string= "RPL" (subseq cmd 0 3)))))
+       (handle-notice msg))
+      ((string= "QUIT" cmd)
+       (handle-quit msg))
+      ((or (string= "PING" cmd)
+           (string= "UNKNOWN-REPLY" cmd))))))
+      ;(t (warn "~a ~a ~a" (irc:source msg)
+      ;         cmd (irc:arguments msg))))))
 
 (defun main ()
   (let ((translator
@@ -296,9 +397,9 @@
     (setup-translator translator)
     (let ((*translator* translator))
       (loop do (progn
-                 (wait :miliseconds 50)
-                 (when (has-data-p (connection *translator*))
-                     (handler-bind
+                 (wait :miliseconds 100)
+                 (loop while (has-data-p (connection *translator*))
+                       do (handler-bind
                             ((irc:no-such-reply
                                #'(lambda (c)
                                    (declare (ignore c))
