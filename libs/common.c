@@ -29,11 +29,6 @@ _set_routine (const unsigned what, void *fun)
       fprintf (stderr, "Warning: redefining routine %s\n",
 	       routine_to_str (what));
     }
-  else
-    {
-      fprintf (stderr, "Information: defining routine %s\n",
-	       routine_to_str (what));
-    }
 
   routines[what] = fun;
 }
