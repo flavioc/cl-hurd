@@ -43,21 +43,20 @@
                         stream)
         t))))
 
-(defun %read-sequence (stream)
-  (let ((arr (%create-data-array 0 '())))
-    (loop for c = (read-byte stream nil)
-          while c
-          do (vector-push-extend c arr))
+(defun %read-sequence (stream amount)
+  (let ((arr (make-array amount
+                         :element-type '(unsigned-byte 8))))
+    (read-sequence arr stream)
     arr))
 
 (define-callback write-file test-translator
-                 (node user offset stream)
+                 (node user offset stream amount)
   (unless (has-access-p node user :write)
     (return-from write-file nil))
   (when (is-dir-p (stat node))
     (return-from write-file :is-a-directory))
   (let* ((size (stat-get (stat node) 'st-size))
-         (arr (%read-sequence stream))
+         (arr (%read-sequence stream amount))
          (amount (length arr))
          (final-size (max (+ amount offset) size)))
     (unless (= final-size size)
@@ -78,6 +77,7 @@
     (return-from file-change-size :is-a-directory))
   (when (is-owner-p node user)
     (adjust-array (data node) new-size :fill-pointer t)
+    (setf (stat-get (stat node) 'st-size) new-size)
     t))
 
 (define-callback create-file test-translator
