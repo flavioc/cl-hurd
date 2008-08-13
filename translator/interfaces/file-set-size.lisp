@@ -14,7 +14,6 @@
          (let ((open (open-node protid)))
            (when (> (file-offset open) size)
              (setf (file-offset open) size)))
-         (setf (stat-get (stat node) 'st-size) size)
          t)
         ((eq err nil) :not-permitted)
         (t err)))))
