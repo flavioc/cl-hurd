@@ -119,8 +119,8 @@ Return T for success, NIL for unsupported operation."
   (declare (ignore translator user wait-p do-children-p))
   t)
 
-(%add-callback write-file (node user offset stream)
-  "The user wants to write the bytes in the input stream 'stream' starting at 'offset'.
+(%add-callback write-file (node user offset stream amount)
+  "The user wants to write the bytes in the input stream 'stream' starting at 'offset'. 'amount' indicates number of bytes in the stream.
 Return T for success, NIL for not permitted or a specific error.")
 
 (%add-callback drop-node (node)

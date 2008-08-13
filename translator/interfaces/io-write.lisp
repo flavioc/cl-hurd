@@ -31,7 +31,8 @@
                                          node
                                          user
                                          offset
-                                         stream))
+                                         stream
+                                         datalen))
                         (total (file-position stream)))
                    (cond
                      ((eq ret nil) :not-permitted)
