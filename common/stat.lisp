@@ -152,6 +152,7 @@ st-blksize, st-blocks, st-author, st-flags."
                             (uid nil)
                             (gid nil)
                             (type nil)
+                            (nlink nil)
                             (ctime +now-time-value+)
                             (atime +now-time-value+)
                             (mtime +now-time-value+))
@@ -198,6 +199,8 @@ ctime, atime, mtime: different time values, should be a time-value object.
       (setf (stat-get obj 'st-ctime) ctime))
     (when mtime
       (setf (stat-get obj 'st-mtime) mtime))
+    (when nlink
+      (setf (stat-get obj 'st-nlink) nlink))
     ; Return the new object
     obj))
 
