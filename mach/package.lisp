@@ -29,8 +29,6 @@
            :with-port-deallocate
            :with-port-destroy
            :with-port
-           :with-send-right
-           :with-receive-right
            :port-type-is-p
            :port-pointer
            :port-valid-p
