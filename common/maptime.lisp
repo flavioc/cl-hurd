@@ -44,5 +44,5 @@ Returned value is a foreign pointer."
   "Return the check seconds field from a mapped-time-value."
   (foreign-slot-value ptr 'mapped-time-value 'check-seconds))
 
-(defconstant *mapped-time* (maptime-map))
+(define-symbol-macro *mapped-time* (maptime-map))
 
