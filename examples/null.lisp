@@ -26,7 +26,7 @@
   t)
 
 (define-callback write-file null-translator
-                 (node user offset stream)
+                 (node user offset stream amount)
   (declare (ignore translator node user offset))
   ; Empty the stream to look like we used it all.
   (loop while (read-byte stream nil))
