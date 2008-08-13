@@ -297,7 +297,6 @@ typedef kern_return_t (*file_statfs_type) (file_t, fsys_statfsbuf_t *);
 kern_return_t
 lisp_S_file_statfs (file_t file, fsys_statfsbuf_t * info)
 {
-  printf ("STATING\n");
   if (routines[FILE_STATFS] == NULL)
     {
       return EOPNOTSUPP;
@@ -437,7 +436,6 @@ lisp_S_dir_lookup (file_t startdir,
 		 string_t retry_name,
 		 mach_port_t * result, mach_msg_type_name_t * resultPoly)
 {
-  printf ("DIR LOOKUP %s\n", filename);
   if (routines[DIR_LOOKUP] == NULL)
     {
       return EOPNOTSUPP;
