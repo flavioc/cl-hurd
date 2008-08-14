@@ -63,6 +63,7 @@
       (t
         (assert (>= (stat-get (stat dir) 'st-nlink) 2))
         (incf (stat-get (stat dir) 'st-nlink)) ; New entry.
+        (incf (stat-get (stat entry) 'st-nlink)) ; New link to this file
         (insert-element (entries dir)
                         (make-inner-entry entry name))
         entry))))
@@ -70,7 +71,7 @@
 (defmethod setup-entry ((entry entry))
   "Changes some node information to sane defaults."
   (%new-ino-val (stat entry))
-  (setf (stat-get (stat entry) 'st-nlink) 1)
+  (setf (stat-get (stat entry) 'st-nlink) 0)
   entry)
 
 (defmethod setup-entry ((entry dir-entry))
@@ -78,7 +79,7 @@
   (set-type (stat entry) :dir)
   (%new-ino-val (stat entry))
   ; st-nlink represents number of objects in a directory
-  (setf (stat-get (stat entry) 'st-nlink) 2)
+  (setf (stat-get (stat entry) 'st-nlink) 1)
   entry)
 
 (defmethod initialize-instance :after ((entry entry) &key)
@@ -114,11 +115,14 @@
 
 (defmethod remove-dir-entry ((dir dir-entry) (entry string))
   "Removes a directory entry with name 'entry'."
-  (when (remove-element (entries dir) entry)
-    (assert (> (stat-get (stat dir) 'st-nlink) 2))
-    ; Decrease link count.
-    (decf (stat-get (stat dir) 'st-nlink))
-    t))
+  (let ((found (get-entry dir entry)))
+    (when (and found
+               (remove-element (entries dir) entry))
+      (assert (> (stat-get (stat dir) 'st-nlink) 2))
+      ; Decrease link count.
+      (decf (stat-get (stat dir) 'st-nlink))
+      (decf (stat-get (stat found) 'st-nlink))
+      t)))
 
 (defmethod get-dir-entries ((dir dir-entry) start n)
   "Get directory entries from start to start + n."
