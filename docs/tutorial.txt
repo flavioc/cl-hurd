@@ -66,3 +66,202 @@ With everything in place I recommend you to previously compile everything. In th
 -------------------------------
 4. A /dev/zero like translator
 -------------------------------
+
+Now that we can really starting doing some interesting things, we will start with a basic translator that can easily introduce ourselves to important concepts and at the same time don't be overly complex.
+
+The translator we will be implementing is very similar to the /dev/zero file that probably any Unix like system has. This file ignores everything that is written to it and when it is read it only gives us zeroes. It also very similar to the HHG's one.c example.
+
+Before the actual code we will properly package the new translator, using the ASDF method. Let's create a file named zero-translator.asd, with the following content:
+
+(defpackage #:zero-translator-asd
+  (:use :cl :asdf))
+
+(in-package :zero-translator-asd)
+
+(defsystem zero-translator
+  :name "zero-translator"
+  :version "0.0.0"
+  :maintainer "Your name"
+  :author "Your name"
+  :license "GPL v3.0"
+  :description "/dev/zero translator."
+  :depends-on (:hurd-translator)
+  :components ((:file "zero")))
+
+As you can see, this ASDF package has only one file (zero.lisp) and only depends on the hurd-translator ASDF package, which is the basic translator library that we will be using. If you need to use more ASDF packages please declare them there.
+
+Now to the zero.lisp file. At the top we put:
+
+(defpackage :zero-translator
+  (:use :cl :hurd-common :mach
+          :hurd :hurd-translator))
+
+(in-package :zero-translator)
+
+This basically tells the Lisp system to create a new package which uses the Hurd translator library (hurd-common, mach, hurd, hurd-translator and tree-translator packages are all from this library) and then sets the currently used package to the zero-translator package.
+
+Now inside the new package, we must define a new translator class, so that we can customize the translator methods to this new class. These translator methods act like hooks/callbacks that run whatever some request is made uppon the server.
+
+(defclass zero-translator (translator)
+  ()
+  (:documentation "The zero-translator."))
+
+This definition is remarkably simple, it just tells that the translator class is the base class of the zero-translator class and doesn't add any new slots.
+
+If you want to see how the translator class is defined please look at the file translator/class.lisp. The important slots stored on this class follow:
+
+  (1) underlying-node: It's the port to the underlying node where the translator is set. You can execute RPC's on it to request the information you need. For RPCs look at hurd/io, hurd/fs and hurd/fsys.
+  (2) root: It's simple the root node of the translator. If the translator simple exposes a new file this is that file, if it's a directory it will point to a directory node.
+  (3) get-statfs: Contains filesystem metadata that should be set by the translator programmer. Look at common/statfs.lisp for the methods you can use on this object.
+  (4) storage: Type of storage for this filesystem, defaults to :memory. Look at hurd/fs/storage.lisp for more types.
+  (5) options: Currently used filesystem options that can be set using the fsysopts utility. It's a translator-options object and it's implemented in hurd/translator-options.lisp.
+  (6) name and version: Translator name and 3 number list with version. It's used in request to the io-server-version RPC.
+
+Now, you also must know what kinds of methods can be applied to a translator object, so that you can get the desired translator behavior. All these callbacks are extensively documented and described in the filetranslator/api.lisp along with some good default implementations.
+If you want to dig at a lower level, it's also possible to define how core RPC's like fsys-getroot and dir-lookup work, specializing the do-fsys-getroot and do-dir-lookup (look at translator/interfaces/fsys-getroot.lisp and translator/interfaces/dir-lookup.lisp, respectively).
+
+And if these methods don't satisfy you can even replace the lower level callbacks (implemented at translator/interfaces/), but be aware that you must deal with nasty things, like pointers, memory, etc and you must also be knowledgeable in using CFFI to deal with foreign calls.
+
+All right, let's forget about that and get to the good stuff!
+
+Now that you have some more understanding how everything fits together, we should start to implement our first translator method: make-root-node.
+
+This method is only called right at the beggining of execution and it wants us to create a new 'node' object that will represent the initial translator file (which can be anything: a regular file, directory, character device, etc).
+
+To define translator methods we use the define-callback macro, which has this syntax:
+
+(define-callback <method-name> <translator-type> <argument list> <@body>)
+
+Which is transformed (as you may be guessing) into this:
+
+(defmethod <method-name> ((translator <translator-type>) @<argument list>)
+  <@body>)
+
+As you noted, the translator argument is always present in your methods! It represents your yet to be created, translator object, of the class zero-translator. Apart from that 'hidden' argument, you can also use the *translator* dynamic variable that references the exact same object, but can be accessed anytime and anywhere you want.
+
+Before implementing the make-root-node callback, you first must know the node class. It's implemented in the file translator/node.lisp and has the following important data:
+
+  (1) owner: File owner. Indicates the owner process ID and can be changed throught the io-mod-owner RPC. Defaults to 0.
+  (2) stat: This is a very important slot. It represents the node metadata and it's the same as the C struct stat. You really should know how to retrieve and change the stat information. Please look at common/stat.lisp to have a basic idea. Also note that the stat metada also contains a mode object, which itself, describes node permissions, file type, among other things, look at common/mode.lisp to see what methods are available to you. Important node: every method applicable to a mode object can also be directly applied to a stat object.
+  (3) box: Translator box, can contain the current passive or/and active translator set on this node.
+  (4) nusers: Number of users using this node. When it drops to 0 the method report-no-users is called and when it gets from the 'no users' state to a new user, the method report-new-user is called.
+  (5) link: Contains a string indicating the file this node symbolic links to. Only makes sense when the node mode type is a link.
+
+Allright, here is the make-root-node method:
+
+(define-callback make-root-node zero-translator
+               (underlying-node underlying-stat)
+  (declare (ignore underlying-node))
+  (let ((mode (make-mode :perms '((:owner :read :write)
+                                  (:group :read :write)
+                                  (:others :read :write))
+                         :type :chr)))
+    (make-instance 'node
+                   :stat (make-stat underlying-stat
+                                    :mode mode))))
+
+The first thing we must notice here are the arguments. This method accepts the underlying node port and 'underlying-stat', which refers to the stat metadata from the underlying node where the translator is being set.
+
+The first thing we do, is creating a new sane mode metadata, indicating the types of permissions we want for the node and then the filetype, in this case character device :chr. Other possible types are:
+
+  (1) :dir - Directory.
+  (2) :chr - Character device.
+  (3) :blk - Block device.
+  (4) :reg - Regular file.
+  (5) :lnk - Symbolic link.
+  (6) :sock - Socket.
+
+With the mode object created, we then create a node instance, indicating the stat object we want for that node, with make-stat.
+
+make-stat accepts an old stat object, and so the metadata will be copied to the new stat object. It means that this new stat object will be equal to 'underlying-stat', except the mode object which will be the onde we created early. make-stat can also accept other arguments, please see common/stat.lisp.
+
+In the end, the newly created node is returned and put in the root-node translator slot, so that you can access it later on, if you need.
+
+What else needs to be implemented? :-) Ah, file writing!
+
+File writing is pretty simple on this translator, we only need to ignore everything we get. The method that deals with file writing is write-file.
+
+(define-callback write-file zero-translator
+                 (node user offset stream amount)
+  (declare (ignore translator node user offset amount))
+  ; Empty the stream to look like we used it all.
+  (loop while (read-byte stream nil))
+  t)
+
+Here, we can see that write-file gets lots of arguments, which I will explain:
+
+  (1) node: It's the node the user wants to write in.
+  (2) user: The user making the write request. It's an iouser object contain the uid and gid sets from that user. Implemented at hurd/iohelp/iouser.lisp.
+  (3) offset: The place in the file the user wants to start writing to.
+  (4) stream: An input byte stream containing the data to be wrote, you can used read-byte to get the data, or read-sequence.
+  (5) amount: Amount of bytes present in this stream. Very useful if you want to put data into an array:
+    (let ((my-array (make-array amount :element-type '(unsigned-byte 8))))
+      (read-sequence my-array stream))
+
+    You can even get the string if it makes sense:
+    (octets-to-string my-array)
+
+How can the library know how much has been wrote? Well, simple looking at how much you read from the stream. So, if you read everything from the stream, the library will get the idea that everything was used, and then we return T meaning success.
+
+How about file reading? read-file is the method for reading nodes.
+
+(define-callback read-file zero-translator
+                 (node user start amount stream)
+  (declare (ignore translator node user start))
+  (loop for i from 0 below amount
+        do (write-byte 0 stream))
+  t)
+
+The arguments, explained:
+
+  (1) node: The node where the user wants to read.
+  (2) user: The user making the request.
+  (3) start: The file position the user wants to start reading at.
+  (4) amount: Amount of data the user wants to read. You don't need to provide that amount of data, only what you have or want deliberately.
+  (5) stream: Output stream were byte data should be written to.
+
+As we said earlier, the translator should give back only zeroes to read requests, because of that we simply write 'amount' zeroes requested to the output stream, and then return T sinaling success.
+
+What's missing? Ah! Startup code:
+
+(defun main ()
+  (run-translator (make-instance 'zero-translator
+                                 :name "zero-translator")))
+
+(main)
+
+Here we just create a new zero-translator instance and then run it. Boring, isn't it?
+
+And that's it! Let's wrap everything with a new file: run-zero.lisp:
+
+(asdf:operate 'asdf:load-op 'zero-translator)
+
+Now we can run the translator:
+
+$ settrans -a foo /usr/bin/run-lisp-trans ./run-zero.lisp
+
+And then you verify that it's really a character device:
+
+$ ls -l foo
+crw-rw-rw- 2 root root 0, 0 Aug 14 15:09 foo
+
+You can also do some tests. Run a CLISP instance and do this:
+
+* (asdf:operate 'asdf:load-op 'hurd)
+
+* (use-package :hurd)
+
+* (defvar *p* (file-name-lookup "foo" :flags '(:read :write)))
+
+* (io-read *p* :amount 5)
+#(0 0 0 0 0)
+
+* (io-write *p* #(1 2))
+2
+
+* (use-package :mach)
+
+* (port-deallocate *p*)
+T
+
+As expected.
