@@ -61,8 +61,8 @@
     (cond
       (found found)
       (t
-        (assert (>= (stat-get (stat dir) 'st-nlink) 2))
         (incf (stat-get (stat dir) 'st-nlink)) ; New entry.
+        (assert (>= (stat-get (stat dir) 'st-nlink) 2))
         (incf (stat-get (stat entry) 'st-nlink)) ; New link to this file
         (insert-element (entries dir)
                         (make-inner-entry entry name))
