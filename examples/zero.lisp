@@ -22,17 +22,19 @@
 
 (define-callback read-file zero-translator
                  (node user start amount stream)
-  (declare (ignore translator node user start))
-  (loop for i from 0 below amount
-        do (write-byte 0 stream))
-  t)
+  (declare (ignore translator start))
+  (when (has-access-p node user :read)
+    (loop for i from 0 below amount
+          do (write-byte 0 stream))
+    t))
 
 (define-callback write-file zero-translator
                  (node user offset stream amount)
-  (declare (ignore translator node user offset amount))
-  ; Empty the stream to look like we used it all.
-  (loop while (read-byte stream nil))
-  t)
+  (declare (ignore translator offset amount))
+  (when (has-access-p node user :write)
+    ; Empty the stream to look like we used it all.
+    (loop while (read-byte stream nil))
+    t))
 
 (defun main ()
   (run-translator (make-instance 'zero-translator
