@@ -234,11 +234,14 @@ Here we just create a new zero-translator instance and then run it. Boring, isn'
 
 And that's it! Let's wrap everything with a new file: run-zero.lisp:
 
+#!/usr/bin/run-lisp-trans
+
 (asdf:operate 'asdf:load-op 'zero-translator)
 
 Now we can run the translator:
 
-$ settrans -a foo /usr/bin/run-lisp-trans ./run-zero.lisp
+$ chmod +x run-zero.lisp
+$ settrans -a foo ./run-zero.lisp
 
 And then you verify that it's really a character device:
 
