@@ -6,9 +6,10 @@
 
 (in-package :test-translator)
 
-(defconstant +file+ "data/test.lisp")
-;(assert (= (length ext:*args*) 1))
-;(defconstant +file+ (first ext:*args*))
+(unless (= (length ext:*args*) 1)
+  (error "You must provide one argument with a file."))
+
+(defconstant +file+ (first ext:*args*))
 
 (defun %create-data-array (size contents)
   (make-array size
@@ -57,16 +58,12 @@
     (return-from write-file :is-a-directory))
   (let* ((size (stat-get (stat node) 'st-size))
          (arr (%read-sequence stream amount))
-         (amount (length arr))
          (final-size (max (+ amount offset) size)))
     (unless (= final-size size)
       (adjust-array (data node)
                     final-size
                     :fill-pointer t))
-    (loop for octet across arr
-          for i from offset
-          do (progn
-               (setf (aref (data node) i) octet)))
+    (replace (data node) arr :start1 offset)
     ; Update stat size.
     (setf (stat-get (stat node) 'st-size) final-size)
     t))
@@ -75,7 +72,7 @@
                  (node user new-size)
   (when (is-dir-p (stat node))
     (return-from file-change-size :is-a-directory))
-  (when (is-owner-p node user)
+  (when (has-access-p node user :write)
     (adjust-array (data node) new-size :fill-pointer t)
     (setf (stat-get (stat node) 'st-size) new-size)
     t))
@@ -94,11 +91,11 @@
 
 (define-callback create-anonymous-file test-translator
                  (node user mode)
-  (declare (ignore user))
-  (make-instance 'test-entry
-                 :stat (make-stat (stat node)
-                                  :mode mode)
-                 :parent node))
+  (when (can-modify-dir-p node user)
+    (make-instance 'test-entry
+                   :stat (make-stat (stat node)
+                                    :mode mode)
+                   :parent node)))
 
 (defun %read-file-data (str)
   (%create-data-array (length str)
@@ -138,30 +135,24 @@
 
 (define-callback fill-root-node test-translator
                  ((node dir-entry))
-  (let ((data (%read-lisp-file)))
-    (setf (file-stat translator)
-          (make-stat (stat node)
-                     :mode (make-mode :perms '((:owner :read)
-                                               (:group :read)))
-                     :type :reg))
-    (setf (dir-stat translator)
-          (make-stat (stat node)
-                     :mode (make-mode :perms '((:owner :read :exec)
-                                               (:group :read :exec)))
-                     :type :dir))
-    (%fill-node translator data node)))
-
-(defun %read-lisp-file ()
-  (with-open-file (stream +file+)
-    (read stream)))
+  (setf (file-stat translator)
+        (make-stat (stat node)
+                   :mode (make-mode :perms '((:owner :read)
+                                             (:group :read)))
+                   :type :reg)
+        (dir-stat translator)
+        (make-stat (stat node)
+                   :mode (make-mode :perms '((:owner :read :exec)
+                                             (:group :read :exec)))
+                   :type :dir))
+  (%fill-node translator (with-open-file (s +file+) (read s)) node))
 
 (defun main ()
-  (with-port-deallocate (port (file-name-lookup +file+ :flags '(:read)))
-    (let ((translator
-            (make-instance 'test-translator
-                           :name "test-translator"
-                           :version (list 1 2 3))))
-      (run-translator translator))))
+  (let ((translator
+          (make-instance 'test-translator
+                         :name "test-translator"
+                         :version (list 1 2 3))))
+    (run-translator translator)))
 
 (main)
 
