@@ -275,3 +275,284 @@ Remove the translator:
 
 $ settrans -g zero
 
+
+-------------------------------
+  5. A more complex example.
+-------------------------------
+
+Now we'll trying to implement a more complex translator example.
+The translator we will implement will provide directory listing and the usual file creation, writing, etc.
+
+At first it should create a directory structure mirroring Lisp lists. Here's an example:
+
+(:dir "root"
+      (:file "a" "abcdefghijklmnopqrstuvwxyz")
+      (:file "b" "123456789012345678901234567890")
+      (:file "c" "")
+      (:file "d" "456")
+      (:dir "dir1"
+            (:file "k" "1a2b3c")
+            (:file "a" "")
+            (:file "b" "a")
+            (:file "c" "c"))
+      (:dir "dir2")
+      (:link "f" "c")
+      (:dir "dir3"
+            (:file "a" "12345"))
+      (:link "g" "g") ; circular link
+      (:link "h" "/usr")
+      )
+
+Our translator node must have a directory named "root" and then some files and links on it... and so on.
+
+First, let's describe this new translator class (we'll name it test-translator):
+
+(defclass test-translator (tree-translator)
+  ((file-stat :initarg :file-stat
+              :initform nil
+              :accessor file-stat)
+   (dir-stat :initarg :dir-stat
+             :initform nil
+             :accessor dir-stat)))
+
+You might be wondering what's up with that 'tree-translator' business. We'll, the tree-translator is a special class of translators that do some work for us. The tree-translator has the special hability of implementing all the directory lookup and listing automatically, without the need for us to do that. If you want to see what methods are implemented please see tree-translator/class.lisp.
+
+It also extends the base node class with two new node types:
+
+  * entry: Is a node with the information about the parent directory.
+  * dir-entry: Is an 'entry' and also contains the directory entries.
+
+Please check the file tree-translator/dir.lisp for methods on directories.
+Some important metadata is also managed by this type of translator, specially the st-nlink and st-ino fields from the stat object.
+
+In our test-translator we put the file-stat and dir-stat slots. They act like a template metadata for new nodes.
+
+Another thing you should take note is that the previously used method make-root-node is already implemented for us in tree-translator's, in addition it creates a new method named fill-root-node with the root node as an argument. In this method you should fill your root directory with the stuff you want.
+
+For this case, this might be implemented like this:
+
+(define-callback fill-root-node test-translator
+                 ((node dir-entry))
+  (setf (file-stat translator)
+        (make-stat (stat node)
+                   :mode (make-mode :perms '((:owner :read)
+                                             (:group :read)))
+                   :type :reg)
+        (dir-stat translator)
+        (make-stat (stat node)
+                   :mode (make-mode :perms '((:owner :read :exec)
+                                             (:group :read :exec)))
+                   :type :dir))
+  (%fill-node translator (with-open-file (s +file+)
+                           (read stream))
+              node))
+
+As you can see it defines the translator slots with fresh metadata templates and then executes the function %fill-node with arguments the translator, the directory structure (as read from the +file+) and the root node.
+
+(defun %fill-node (translator ls node)
+  (let ((type (first ls))
+        (name (second ls))
+        (args (rest (rest ls))))
+    (case type
+      (:dir
+        (let ((dir (make-instance 'dir-entry
+                                  :stat (make-stat (dir-stat translator))
+                                  :parent node)))
+          (add-entry node dir name)
+          (loop for item in args
+                do (%fill-node translator item dir))))
+      (:file
+        (let* ((data (first args))
+               (file (make-instance 'test-entry
+                                    :stat (make-stat
+                                            (file-stat translator)
+                                            :size (length data))
+                                    :parent node
+                                    :data (%read-file-data data))))
+          (add-entry node file name)))
+      (:link
+        (let ((target (first args))
+              (new (make-instance 'entry
+                                  :stat (make-stat
+                                          (file-stat translator)
+                                          :type :lnk)
+                                  :parent node)))
+          (setf (link new) target)
+          (add-entry node new name))))))
+
+This is a recursive function. It checks the wanted file type, creates the specific node with that type and then it is put in the directory as a new directory entry.
+
+You should always give the :parent argument when you are creating new 'entry's.
+
+Take special attention for the symbolic links case "(setf (link new) target)". It defines the link (as a string) this link points to, but it also sets the file type to :lnk, even if it was not specified above.
+
+You may also be wondering what's that test-entry thing, but, it's just a new kind of node/entry.
+
+(defclass test-entry (entry)
+  ((contents :initarg :data
+             :initform (%create-data-array 0 nil)
+             :accessor data)))
+
+In this case we add a new slot that contains the file data, and that %create-data-array just creates a new extendable array:
+
+(defun %create-data-array (size contents)
+  (make-array size
+              :initial-contents contents
+              :adjustable t
+              :fill-pointer t
+              :element-type '(unsigned-byte 8)))
+
+You can use the CLOS dispatch system to specialize node behaviors, for example, you can have various node types that react differently to the read-file method, one would always return the data in upper case and in some others all in lower case, for example.
+
+As for that %read-file-data function, here it is:
+
+(defun %read-file-data (str)
+  (%create-data-array (length str)
+                      (loop for char across str
+                            collect (char-code char))))
+
+It takes the data string and converts it to an unsigned-byte array.
+
+Now that the directory structure is being created, you need to start exposing the file contents with read-file (just like the first case). Please also keep in mind that you should always keep the st-size stat field updated after a refresh-node method call. Sometimes the translator clients want to know how much data there is to read, and the file size is an important factor in this case, when it's being compared to an internally saved file offset.
+
+(define-callback read-file test-translator
+                 (node user start amount stream)
+  (when (has-access-p node user :read)
+    (let* ((size (stat-get (stat node) 'st-size))
+           (size-res (- size start)))
+      (unless (plusp size-res)
+        (return-from read-file t))
+      (let* ((total (min size-res amount))
+             (end (+ start total)))
+        (write-sequence (subseq (data node) start end)
+                        stream)
+        t))))
+
+In the read-file method we check if the user has read access to that node and then calculate how much data there is left to read from the 'start' position. When we know that, we just write a subsequence of the file contents to the output stream and then return T to report success.
+
+Another good thing to provide in translators (specially those with write support) is file truncating. For that, the library has the file-change-size method.
+
+(define-callback file-change-size test-translator
+                 (node user new-size)
+  (when (is-dir-p (stat node))
+    (return-from file-change-size :is-a-directory))
+  (when (has-access-p node user :write)
+    (adjust-array (data node) new-size :fill-pointer t)
+    (setf (stat-get (stat node) 'st-size) new-size)
+    t))
+
+First we verify if the file is a directory, and then if the requesting user has write access. When these tests are passed we can just adjust the file contents array and define a new size for that file in the stat object.
+
+And now for file writting!
+
+(defun %read-sequence (stream amount)
+  (let ((arr (make-array amount
+                         :element-type '(unsigned-byte 8))))
+    (read-sequence arr stream)
+    arr))
+
+(define-callback write-file test-translator
+                 (node user offset stream amount)
+ (unless (has-access-p node user :write)
+   (return-from write-file nil))
+ (when (is-dir-p (stat node))
+   (return-from write-file :is-a-directory))
+ (let* ((size (stat-get (stat node) 'st-size))
+        (arr (%read-sequence stream amount))
+        (final-size (max (+ amount offset) size)))
+   (unless (= final-size size)
+     (adjust-array (data node)
+                   final-size
+                   :fill-pointer t))
+   (replace (data node) arr :start1 offset)
+   ; Update stat size.
+   (setf (stat-get (stat node) 'st-size) final-size)
+   t))
+
+Well, let's see. We first do some boring tests and then we read all data from the stream with %read-sequence, then we need to know how much data the file will now have, and there three possible situations: the data will just be replaced, the file will get new data and both. Anyway, we need just to know the maximum of the current size and the offset plus the new data.
+
+After knowing the final size and if the file will grow we adjust the array according to this new size.
+
+Then simply replace the current array data with the stream data and update the file size. It's that simple.
+
+Now, you'll probably want to support file creation, for that, you must implement the create-file method.
+
+(define-callback create-file test-translator
+                 (node user filename mode)
+  (unless (has-access-p node user :write)
+    (return-from create-file nil))
+  (let ((entry (make-instance 'test-entry
+                              :stat (make-stat (stat node)
+                                               :mode mode
+                                               :size 0)
+                              :parent node)))
+    (add-entry node entry filename)
+    entry))
+
+The create-file method has 4 arguments:
+
+  (1) node: The directory where the user wants to create the file.
+  (2) user: The user creating the file.
+  (3) filename: The new file name.
+  (4) mode: Permission bits for that file.
+
+As you can see, we just create a new test-entry instance with 'node' has the parent and the you add that entry to the directory and return it.
+
+How about hard link creation? It's already implemented by default in the tree-translator.
+
+And symbolic link creation? Two methods must be implemented for it to work:
+
+  (1) allow-link-p: Allows link reading, implemented by default by the translator class.
+  (2) create-anonymous-file: Not implemented. It must create a detached node. Detached means that file will have a parent directory but not present when listed, and it will exist as a Lisp object that will be hard linked to a new symlink node. See sysdeps/mach/hurd/symlink.c from glibc's source code for more insights and reasons for this.
+
+Here's a simple implementation for create-anonymous-file:
+
+(define-callback create-anonymous-file test-translator
+                 (node user mode)
+  (when (can-modify-dir-p node user)
+    (make-instance 'test-entry
+                   :stat (make-stat (stat node)
+                                    :mode mode)
+                   :parent node)))
+Here 'node' represents the parent directory and 'mode' the permission bits.
+
+How about the startup code? First we need to get the file from the arguments that will be passed to our program. This file contains the mentioned directory structure.
+
+(unless (= (length ext:*args*) 1)
+  (error "You must provide one argument with a file."))
+
+(defconstant +file+ (first ext:*args*))
+
+Then the usual main function:
+
+(defun main ()
+  (let ((translator
+          (make-instance 'test-translator
+                         :name "test-translator"
+                         :version (list 1 2 3))))
+    (run-translator translator)))
+
+(main)
+
+Please see examples/test.lisp, examples/test-translator.asd and examples/run-test.lisp for the complete example.
+
+To see it running:
+
+$ settrans -ac foo ./run-test.lisp data/test.lisp
+$ cd foo
+$ ls
+root
+$ cd root
+$ ls -l
+total 40
+-r--r----- 1 root root 26 Aug 14 19:13 a
+-r--r----- 1 root root 30 Aug 14 19:13 b
+-r--r----- 1 root root  0 Aug 14 19:13 c
+-r--r----- 1 root root  3 Aug 14 19:13 d
+dr-xr-x--- 6 root root  0 Aug 14 19:13 dir1
+dr-xr-x--- 2 root root  0 Aug 14 19:13 dir2
+dr-xr-x--- 3 root root  0 Aug 14 19:13 dir3
+lr--r----- 1 root root  1 Aug 14 19:13 f -> c
+lr--r----- 1 root root  1 Aug 14 19:13 g -> g
+lr--r----- 1 root root  4 Aug 14 19:13 h -> /usr
+
