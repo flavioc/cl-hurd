@@ -1,0 +1,68 @@
+
+====================================
+ Using the Lisp translator library
+====================================
+
+0. Contents.
+
+  1. Introduction
+  2. Dependencies
+  3. Installation
+  4. A /dev/zero like translator.
+  5. A more complex example.
+
+
+--------------------
+1. Introduction
+--------------------
+
+This document will introduce you to a new Hurd translator library that can be used to easily implement new filesystem servers.
+
+The main advantages of this library compared to libnetfs or libtrivfs, are:
+
+  (1) - A much more fast development - What can take weeks to do in libnetfs, can be done in a few hours or less.
+  (2) - Easy development - You can put more focus on high level details of your translators and less on the little details that arise when writting C based translators.
+  (3) - Use of the Common Lisp language - Programming in Lisp is great fun.
+  (4) - Prototyping - You can test and validate new translator ideas and then build a fast implementation in C.
+
+Of course, there are also some drawbacks:
+
+  (1) - Efficiency - Don't expect to run your Lisp based translators as fast as the C based ones.
+  (2) - Disk based translators - Don't expect to write the next generation ext filesystem.
+
+Given these pros and cons, it's easy to deduce that this library is more suited to implement virtual filesystems. Examples are: translators were data is located in a local file (like zipfs, tarfs, rarfs, ...), single file translators (that do content filtering, output of a command, etc), network based filesystems (ftpfs, httpfs, ircfs, ...), proxy filesystems (like hostmux, usermux, etc..).
+
+-------------------------
+2. Dependencies
+-------------------------
+
+Right now, only CLISP is supported. Porting to new Lisp implementations will happen has soon they run/compile sanely on the Hurd operating system (especially SBCL ;-)).
+
+You must also have these asdf packages installed on your system:
+  - CFFI: (http://www.common-lisp.net/project/cffi/). It can be installed on Debian GNU/Hurd with apt-get install cl-cffi.
+  - flexi-streams (http://www.weitz.de/flexi-streams/). Can also be installed with apt-get install cl-flexi-streams.
+  - trivial-garbage (http://www.cliki.net/trivial-garbage?v=20). Not apt-get installable, but please grab the tarball from the project webpage and install it this way:
+    # cd /usr/share/common-lisp/source
+    # tar zxvf <path to trivial_garbage.tar.gz>
+    # ln -sf $PWD/trivial-garbage_0.16/trivial-garbage.asd ../systems/
+
+------------------------
+3. Installation
+------------------------
+
+To install the translator library, grab the Hurd source tree from the branch flaviocruz-soc2008-lisp-branch, and start building it:
+
+    # mkdir hurd-build
+    # cd hurd-build
+    # ../hurd/configure --prefix=/usr --enable-lisp
+    # make
+    # make install
+
+With everything in place I recommend you to previously compile everything. In the CLISP read-eval-print loop do:
+
+    * (asdf:operate 'asdf:load-op 'tree-translator)
+
+
+-------------------------------
+4. A /dev/zero like translator
+-------------------------------
