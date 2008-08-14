@@ -24,7 +24,7 @@
                  (node user start amount stream)
   (declare (ignore translator node user start))
   (loop for i from 0 below amount
-        do (write-byte 1 stream))
+        do (write-byte 0 stream))
   t)
 
 (define-callback write-file zero-translator
