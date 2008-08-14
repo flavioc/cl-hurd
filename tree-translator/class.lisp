@@ -99,8 +99,11 @@ root node."
     (when found
       (when (is-owner-p found user)
         (cond
-          ((plusp (dir-size found)) :directory-not-empty)
-          (t (remove-dir-entry node name)))))))
+          ((and (is-dir-p (stat found))
+                (plusp (dir-size found)))
+           :directory-not-empty)
+          (t
+            (remove-dir-entry node name)))))))
 
 (define-callback create-hard-link tree-translator
                  (dir user file name)
