@@ -183,10 +183,11 @@ File writing is pretty simple on this translator, we only need to ignore everyth
 
 (define-callback write-file zero-translator
                  (node user offset stream amount)
-  (declare (ignore translator node user offset amount))
-  ; Empty the stream to look like we used it all.
-  (loop while (read-byte stream nil))
-  t)
+ (declare (ignore translator offset amount))
+ (when (has-access-p node user :write)
+   ; Empty the stream to look like we used it all.
+   (loop while (read-byte stream nil))
+   t))
 
 Here, we can see that write-file gets lots of arguments, which I will explain:
 
@@ -207,10 +208,11 @@ How about file reading? read-file is the method for reading nodes.
 
 (define-callback read-file zero-translator
                  (node user start amount stream)
-  (declare (ignore translator node user start))
-  (loop for i from 0 below amount
-        do (write-byte 0 stream))
-  t)
+  (declare (ignore translator start))
+  (when (has-access-p node user :read)
+    (loop for i from 0 below amount
+          do (write-byte 0 stream))
+    t))
 
 The arguments, explained:
 
@@ -241,12 +243,12 @@ And that's it! Let's wrap everything with a new file: run-zero.lisp:
 Now we can run the translator:
 
 $ chmod +x run-zero.lisp
-$ settrans -a foo ./run-zero.lisp
+$ settrans -ac zero ./run-zero.lisp
 
 And then you verify that it's really a character device:
 
-$ ls -l foo
-crw-rw-rw- 2 root root 0, 0 Aug 14 15:09 foo
+$ ls -l zero
+crw-rw-rw- 2 root root 0, 0 Aug 14 15:09 zero
 
 You can also do some tests. Run a CLISP instance and do this:
 
@@ -254,7 +256,7 @@ You can also do some tests. Run a CLISP instance and do this:
 
 * (use-package :hurd)
 
-* (defvar *p* (file-name-lookup "foo" :flags '(:read :write)))
+* (defvar *p* (file-name-lookup "zero" :flags '(:read :write)))
 
 * (io-read *p* :amount 5)
 #(0 0 0 0 0)
@@ -268,3 +270,8 @@ You can also do some tests. Run a CLISP instance and do this:
 T
 
 As expected.
+
+Remove the translator:
+
+$ settrans -g zero
+
