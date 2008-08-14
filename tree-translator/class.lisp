@@ -34,6 +34,7 @@
   (set-trans underlying-stat nil)
   (let ((obj (make-instance 'dir-entry
                             :stat underlying-stat)))
+    (setf (stat-get (stat obj) 'st-nlink) 2)
     (fill-root-node translator obj)
     obj))
 
@@ -61,6 +62,10 @@ root node."
      (dir-size node))
     (t 0)))
 
+(defun not-permitted-entries-p (name)
+  (or (string= name ".")
+      (string= name "..")))
+
 (define-callback get-entries tree-translator
 				(node user start end)
   (unless (has-access-p node user :read)
@@ -80,6 +85,8 @@ root node."
 
 (define-callback create-directory tree-translator
                  (node user name mode)
+  (when (not-permitted-entries-p name)
+    (return-from create-directory nil))
   (unless (is-owner-p node user)
     (return-from create-directory nil))
   (let ((old (get-entry node name)))
@@ -95,24 +102,30 @@ root node."
 
 (define-callback remove-directory-entry tree-translator
 				 (node user name)
+  (when (not-permitted-entries-p name)
+    (return-from remove-directory-entry nil))
   (let ((found (get-entry node name)))
     (when found
       (when (is-owner-p found user)
         (cond
           ((and (is-dir-p (stat found))
-                (plusp (dir-size found)))
+                (plusp (- (dir-size found) 2)))
            :directory-not-empty)
           (t
             (remove-dir-entry node name)))))))
 
 (define-callback create-hard-link tree-translator
                  (dir user file name)
+  (when (not-permitted-entries-p name)
+    (return-from create-hard-link nil))
   (when (is-owner-p dir user)
     (add-entry dir file name)
     t))
 
 (define-callback file-rename tree-translator
                  (user old-dir old-name new-dir new-name)
+  (when (not-permitted-entries-p new-name)
+    (return-from file-rename nil))
   (let ((old-entry (get-entry old-dir old-name)))
     (when (and (is-owner-p old-entry user)
                (is-owner-p new-dir user)
