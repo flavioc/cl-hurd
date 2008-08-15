@@ -10,27 +10,28 @@
   3. Installation
   4. A /dev/zero like translator.
   5. A more complex example.
+  6. Conclusion
 
 
 --------------------
 1. Introduction
 --------------------
 
-This document will introduce you to a new Hurd translator library that can be used to easily implement new filesystem servers.
+This document will introduce you to a new Hurd translator library that can be used to easily implement new file system servers.
 
 The main advantages of this library compared to libnetfs or libtrivfs, are:
 
   (1) - A much more fast development - What can take weeks to do in libnetfs, can be done in a few hours or less.
-  (2) - Easy development - You can put more focus on high level details of your translators and less on the little details that arise when writting C based translators.
+  (2) - Easy development - You can put more focus on high level details of your translators and less on the little details that arise when writing C based translators.
   (3) - Use of the Common Lisp language - Programming in Lisp is great fun.
   (4) - Prototyping - You can test and validate new translator ideas and then build a fast implementation in C.
 
 Of course, there are also some drawbacks:
 
   (1) - Efficiency - Don't expect to run your Lisp based translators as fast as the C based ones.
-  (2) - Disk based translators - Don't expect to write the next generation ext filesystem.
+  (2) - Disk based translators - Don't expect to write the next generation ext file system.
 
-Given these pros and cons, it's easy to deduce that this library is more suited to implement virtual filesystems. Examples are: translators were data is located in a local file (like zipfs, tarfs, rarfs, ...), single file translators (that do content filtering, output of a command, etc), network based filesystems (ftpfs, httpfs, ircfs, ...), proxy filesystems (like hostmux, usermux, etc..).
+Given these pros and cons, it's easy to deduce that this library is more suited to implement virtual file systems. Examples are: translators were data is located in a local file (like zipfs, tarfs, rarfs, ...), single file translators (that do content filtering, output of a command, etc), network based file systems (ftpfs, httpfs, ircfs, ...), proxy file systems (like hostmux, usermux, etc..).
 
 -------------------------
 2. Dependencies
@@ -41,7 +42,7 @@ Right now, only CLISP is supported. Porting to new Lisp implementations will hap
 You must also have these asdf packages installed on your system:
   - CFFI: (http://www.common-lisp.net/project/cffi/). It can be installed on Debian GNU/Hurd with apt-get install cl-cffi.
   - flexi-streams (http://www.weitz.de/flexi-streams/). Can also be installed with apt-get install cl-flexi-streams.
-  - trivial-garbage (http://www.cliki.net/trivial-garbage?v=20). Not apt-get installable, but please grab the tarball from the project webpage and install it this way:
+  - trivial-garbage (http://www.cliki.net/trivial-garbage?v=20). Not apt-get installable, but please grab the tarball from the project web page and install it this way:
     # cd /usr/share/common-lisp/source
     # tar zxvf <path to trivial_garbage.tar.gz>
     # ln -sf $PWD/trivial-garbage_0.16/trivial-garbage.asd ../systems/
@@ -100,7 +101,7 @@ Now to the zero.lisp file. At the top we put:
 
 This basically tells the Lisp system to create a new package which uses the Hurd translator library (hurd-common, mach, hurd, hurd-translator and tree-translator packages are all from this library) and then sets the currently used package to the zero-translator package.
 
-Now inside the new package, we must define a new translator class, so that we can customize the translator methods to this new class. These translator methods act like hooks/callbacks that run whatever some request is made uppon the server.
+Now inside the new package, we must define a new translator class, so that we can customize the translator methods to this new class. These translator methods act like hooks/callbacks that run whatever some request is made upon the server.
 
 (defclass zero-translator (translator)
   ()
@@ -112,12 +113,12 @@ If you want to see how the translator class is defined please look at the file t
 
   (1) underlying-node: It's the port to the underlying node where the translator is set. You can execute RPC's on it to request the information you need. For RPCs look at hurd/io, hurd/fs and hurd/fsys.
   (2) root: It's simple the root node of the translator. If the translator simple exposes a new file this is that file, if it's a directory it will point to a directory node.
-  (3) get-statfs: Contains filesystem metadata that should be set by the translator programmer. Look at common/statfs.lisp for the methods you can use on this object.
-  (4) storage: Type of storage for this filesystem, defaults to :memory. Look at hurd/fs/storage.lisp for more types.
-  (5) options: Currently used filesystem options that can be set using the fsysopts utility. It's a translator-options object and it's implemented in hurd/translator-options.lisp.
+  (3) get-statfs: Contains file system meta data that should be set by the translator programmer. Look at common/statfs.lisp for the methods you can use on this object.
+  (4) storage: Type of storage for this file system, defaults to :memory. Look at hurd/fs/storage.lisp for more types.
+  (5) options: Currently used file system options that can be set using the fsysopts utility. It's a translator-options object and it's implemented in hurd/translator-options.lisp.
   (6) name and version: Translator name and 3 number list with version. It's used in request to the io-server-version RPC.
 
-Now, you also must know what kinds of methods can be applied to a translator object, so that you can get the desired translator behavior. All these callbacks are extensively documented and described in the filetranslator/api.lisp along with some good default implementations.
+Now, you also must know what kinds of methods can be applied to a translator object, so that you can get the desired translator behavior. All these callbacks are extensively documented and described in the file translator/api.lisp along with some good default implementations.
 If you want to dig at a lower level, it's also possible to define how core RPC's like fsys-getroot and dir-lookup work, specializing the do-fsys-getroot and do-dir-lookup (look at translator/interfaces/fsys-getroot.lisp and translator/interfaces/dir-lookup.lisp, respectively).
 
 And if these methods don't satisfy you can even replace the lower level callbacks (implemented at translator/interfaces/), but be aware that you must deal with nasty things, like pointers, memory, etc and you must also be knowledgeable in using CFFI to deal with foreign calls.
@@ -126,7 +127,7 @@ All right, let's forget about that and get to the good stuff!
 
 Now that you have some more understanding how everything fits together, we should start to implement our first translator method: make-root-node.
 
-This method is only called right at the beggining of execution and it wants us to create a new 'node' object that will represent the initial translator file (which can be anything: a regular file, directory, character device, etc).
+This method is only called right at the beginning of execution and it wants us to create a new 'node' object that will represent the initial translator file (which can be anything: a regular file, directory, character device, etc).
 
 To define translator methods we use the define-callback macro, which has this syntax:
 
@@ -141,13 +142,13 @@ As you noted, the translator argument is always present in your methods! It repr
 
 Before implementing the make-root-node callback, you first must know the node class. It's implemented in the file translator/node.lisp and has the following important data:
 
-  (1) owner: File owner. Indicates the owner process ID and can be changed throught the io-mod-owner RPC. Defaults to 0.
-  (2) stat: This is a very important slot. It represents the node metadata and it's the same as the C struct stat. You really should know how to retrieve and change the stat information. Please look at common/stat.lisp to have a basic idea. Also note that the stat metada also contains a mode object, which itself, describes node permissions, file type, among other things, look at common/mode.lisp to see what methods are available to you. Important node: every method applicable to a mode object can also be directly applied to a stat object.
+  (1) owner: File owner. Indicates the owner process ID and can be changed through the io-mod-owner RPC. Defaults to 0.
+  (2) stat: This is a very important slot. It represents the node meta data and it's the same as the C struct stat. You really should know how to retrieve and change the stat information. Please look at common/stat.lisp to have a basic idea. Also note that the stat meta data also contains a mode object, which itself, describes node permissions, file type, among other things, look at common/mode.lisp to see what methods are available to you. Important node: every method applicable to a mode object can also be directly applied to a stat object.
   (3) box: Translator box, can contain the current passive or/and active translator set on this node.
   (4) nusers: Number of users using this node. When it drops to 0 the method report-no-users is called and when it gets from the 'no users' state to a new user, the method report-new-user is called.
   (5) link: Contains a string indicating the file this node symbolic links to. Only makes sense when the node mode type is a link.
 
-Allright, here is the make-root-node method:
+Alright, here is the make-root-node method:
 
 (define-callback make-root-node zero-translator
                (underlying-node underlying-stat)
@@ -160,9 +161,9 @@ Allright, here is the make-root-node method:
                    :stat (make-stat underlying-stat
                                     :mode mode))))
 
-The first thing we must notice here are the arguments. This method accepts the underlying node port and 'underlying-stat', which refers to the stat metadata from the underlying node where the translator is being set.
+The first thing we must notice here are the arguments. This method accepts the underlying node port and 'underlying-stat', which refers to the stat meta data from the underlying node where the translator is being set.
 
-The first thing we do, is creating a new sane mode metadata, indicating the types of permissions we want for the node and then the filetype, in this case character device :chr. Other possible types are:
+The first thing we do, is creating a new sane mode meta data, indicating the types of permissions we want for the node and then the file type, in this case character device :chr. Other possible types are:
 
   (1) :dir - Directory.
   (2) :chr - Character device.
@@ -173,7 +174,7 @@ The first thing we do, is creating a new sane mode metadata, indicating the type
 
 With the mode object created, we then create a node instance, indicating the stat object we want for that node, with make-stat.
 
-make-stat accepts an old stat object, and so the metadata will be copied to the new stat object. It means that this new stat object will be equal to 'underlying-stat', except the mode object which will be the onde we created early. make-stat can also accept other arguments, please see common/stat.lisp.
+make-stat accepts an old stat object, and so the meta data will be copied to the new stat object. It means that this new stat object will be equal to 'underlying-stat', except the mode object which will be the node we created early. make-stat can also accept other arguments, please see common/stat.lisp.
 
 In the end, the newly created node is returned and put in the root-node translator slot, so that you can access it later on, if you need.
 
@@ -222,9 +223,9 @@ The arguments, explained:
   (4) amount: Amount of data the user wants to read. You don't need to provide that amount of data, only what you have or want deliberately.
   (5) stream: Output stream were byte data should be written to.
 
-As we said earlier, the translator should give back only zeroes to read requests, because of that we simply write 'amount' zeroes requested to the output stream, and then return T sinaling success.
+As we said earlier, the translator should give back only zeroes to read requests, because of that we simply write 'amount' zeroes requested to the output stream, and then return T signaling success.
 
-What's missing? Ah! Startup code:
+What's missing? Ah! Start-up code:
 
 (defun main ()
   (run-translator (make-instance 'zero-translator
@@ -315,7 +316,7 @@ First, let's describe this new translator class (we'll name it test-translator):
              :initform nil
              :accessor dir-stat)))
 
-You might be wondering what's up with that 'tree-translator' business. We'll, the tree-translator is a special class of translators that do some work for us. The tree-translator has the special hability of implementing all the directory lookup and listing automatically, without the need for us to do that. If you want to see what methods are implemented please see tree-translator/class.lisp.
+You might be wondering what's up with that 'tree-translator' business. We'll, the tree-translator is a special class of translators that do some work for us. The tree-translator has the special ability of implementing all the directory lookup and listing automatically, without the need for us to do that. If you want to see what methods are implemented please see tree-translator/class.lisp.
 
 It also extends the base node class with two new node types:
 
@@ -323,9 +324,9 @@ It also extends the base node class with two new node types:
   * dir-entry: Is an 'entry' and also contains the directory entries.
 
 Please check the file tree-translator/dir.lisp for methods on directories.
-Some important metadata is also managed by this type of translator, specially the st-nlink and st-ino fields from the stat object.
+Some important meta data is also managed by this type of translator, specially the st-nlink and st-ino fields from the stat object.
 
-In our test-translator we put the file-stat and dir-stat slots. They act like a template metadata for new nodes.
+In our test-translator we put the file-stat and dir-stat slots. They act like a template meta data for new nodes.
 
 Another thing you should take note is that the previously used method make-root-node is already implemented for us in tree-translator's, in addition it creates a new method named fill-root-node with the root node as an argument. In this method you should fill your root directory with the stuff you want.
 
@@ -347,7 +348,7 @@ For this case, this might be implemented like this:
                            (read stream))
               node))
 
-As you can see it defines the translator slots with fresh metadata templates and then executes the function %fill-node with arguments the translator, the directory structure (as read from the +file+) and the root node.
+As you can see it defines the translator slots with fresh meta data templates and then executes the function %fill-node with arguments the translator, the directory structure (as read from the +file+) and the root node.
 
 (defun %fill-node (translator ls node)
   (let ((type (first ls))
@@ -393,7 +394,7 @@ You may also be wondering what's that test-entry thing, but, it's just a new kin
              :initform (%create-data-array 0 nil)
              :accessor data)))
 
-In this case we add a new slot that contains the file data, and that %create-data-array just creates a new extendable array:
+In this case we add a new slot that contains the file data, and that %create-data-array just creates a new adjustable array:
 
 (defun %create-data-array (size contents)
   (make-array size
@@ -428,7 +429,7 @@ Now that the directory structure is being created, you need to start exposing th
                         stream)
         t))))
 
-In the read-file method we check if the user has read access to that node and then calculate how much data there is left to read from the 'start' position. When we know that, we just write a subsequence of the file contents to the output stream and then return T to report success.
+In the read-file method we check if the user has read access to that node and then calculate how much data there is left to read from the 'start' position. When we know that, we just write a sub sequence of the file contents to the output stream and then return T to report success.
 
 Another good thing to provide in translators (specially those with write support) is file truncating. For that, the library has the file-change-size method.
 
@@ -443,7 +444,7 @@ Another good thing to provide in translators (specially those with write support
 
 First we verify if the file is a directory, and then if the requesting user has write access. When these tests are passed we can just adjust the file contents array and define a new size for that file in the stat object.
 
-And now for file writting!
+And now for file writing!
 
 (defun %read-sequence (stream amount)
   (let ((arr (make-array amount
@@ -503,7 +504,8 @@ How about hard link creation? It's already implemented by default in the tree-tr
 And symbolic link creation? Two methods must be implemented for it to work:
 
   (1) allow-link-p: Allows link reading, implemented by default by the translator class.
-  (2) create-anonymous-file: Not implemented. It must create a detached node. Detached means that file will have a parent directory but not present when listed, and it will exist as a Lisp object that will be hard linked to a new symlink node. See sysdeps/mach/hurd/symlink.c from glibc's source code for more insights and reasons for this.
+  (2) create-symlink: Turns a node into a symlink, implemented by default by the translator class.
+  (3) create-anonymous-file: Not implemented. It must create a detached node. Detached means that file will have a parent directory but not present when listed, and it will exist as a Lisp object that will be hard linked to a new symlink node. See sysdeps/mach/hurd/symlink.c from glibc's source code for more insights and reasons for this.
 
 Here's a simple implementation for create-anonymous-file:
 
@@ -516,7 +518,7 @@ Here's a simple implementation for create-anonymous-file:
                    :parent node)))
 Here 'node' represents the parent directory and 'mode' the permission bits.
 
-How about the startup code? First we need to get the file from the arguments that will be passed to our program. This file contains the mentioned directory structure.
+How about the start-up code? First we need to get the file from the arguments that will be passed to our program. This file contains the mentioned directory structure.
 
 (unless (= (length ext:*args*) 1)
   (error "You must provide one argument with a file."))
@@ -555,4 +557,12 @@ dr-xr-x--- 3 root root  0 Aug 14 19:13 dir3
 lr--r----- 1 root root  1 Aug 14 19:13 f -> c
 lr--r----- 1 root root  1 Aug 14 19:13 g -> g
 lr--r----- 1 root root  4 Aug 14 19:13 h -> /usr
+
+-------------------------------
+  6. Conclusion
+-------------------------------
+
+Now that you got some taste of what's like to program Lisp translators, I invite you to read more complex translator examples that are present in the package, namely the zip and irc translators.
+
+Happy hacking!
 
