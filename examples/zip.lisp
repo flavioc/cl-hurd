@@ -13,9 +13,15 @@
 ;; Right now it supports file and directory listing.
 ;;
 
-(assert (= (length ext:*args*) 1))
+(unless (= (length ext:*args*) 1)
+  (error "You must pass a zip file as an argument."))
+
 (defconstant +file+ (first ext:*args*))
+
 (defvar *zip* (open-zipfile +file+) "The zip handle.")
+
+(unless *zip*
+  (error "Error while opening the zip file ~a" +file+))
 
 (defconstant +seq-cache-size+ 10 "Number of reads before disposing the extract array sequence.")
 
@@ -102,7 +108,6 @@
                                 (declare (ignore name))
                                 (setf (dirty node) nil)
                                 t))
-        (warn "refreshing node...")
         (setf *zip* (open-zipfile +file+))
         (do-zipfile-entries (name entry *zip*)
                             (update-zip-file (root *translator*) (split-path name) entry))
@@ -162,22 +167,16 @@
     (let ((entry (get-entry node this-name)))
       (cond
         (entry
-          (warn "~s found" this-name)
           (cond
             (final-p
-              (warn "~s is final-p" this-name)
               (cond
                 ((typep entry 'zip-dir-entry)
-                 (warn "Removing directory and adding a new file ~s" this-name)
                  (remove-dir-entry node this-name)
                  (setf entry (add-entry node (%create-zip-file node zip-entry) this-name)))
                 (t
-                  (warn "Updating file ~s" this-name)
                   (%update-file entry zip-entry))))
             (t
-              (warn "~s is not final-p" this-name)
               (when (typep entry 'zip-entry)
-                (warn "Removing old-entry ~s adding new directory" this-name)
                 (remove-dir-entry node this-name)
                 (setf entry (%create-zip-dir node this-name)))
               (update-zip-file entry name-rest zip-entry))))
@@ -187,7 +186,6 @@
                                    (%create-zip-file node zip-entry)
                                    (%create-zip-dir node this-name))
                                  this-name))
-          (warn "Created new directory ~s" this-name)
           (unless final-p
             (update-zip-file entry name-rest zip-entry))))
       (setf (dirty entry) t))))
