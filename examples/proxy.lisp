@@ -15,7 +15,6 @@
          :accessor port)))
 
 (defclass proxy-entry (underlying-entry entry) ())
-
 (defclass proxy-dir-entry (underlying-entry dir-entry) ())
 
 (define-callback read-file proxy-translator
@@ -32,9 +31,6 @@
                     (write-byte (- item 32) stream))
                    (t (write-byte item stream)))))
       t)))
-
-(define-callback shutdown proxy-translator ()
-  (warn "Proxy translator going down!"))
 
 (defun %get-file-type (stat)
   (cond
@@ -66,8 +62,8 @@
 (define-callback make-root-node proxy-translator
                  (underlying-node underlying-stat)
   (let ((node (make-instance (%get-file-type underlying-stat)
-                              :stat underlying-stat
-                              :port underlying-node)))
+                             :stat underlying-stat
+                             :port underlying-node)))
     (%fetch-nodes node)
     node))
 
