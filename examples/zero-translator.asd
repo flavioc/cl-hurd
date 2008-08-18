@@ -14,3 +14,4 @@
   :description "/dev/zero translator."
   :depends-on (:hurd-translator)
   :components ((:file "zero")))
+
