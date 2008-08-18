@@ -1,0 +1,32 @@
+
+=================================================
+ Hurd Common Lisp bindings & translator library
+=================================================
+
+- common/
+
+Contains common code to mach, hurd and hurd-translator packages.
+
+- mach/
+
+Contains mach bindings for functions used to manipulate ports in the hurd package.
+
+- hurd/
+
+Contains bindings to some RPC's. Implements the iouser abstraction and a Lispy libports implementation using only mach functions (not the libports library).
+
+- translator/
+
+Contains the translator and node class. Implements the translator callbacks and describes the available API.
+
+- tree-translator/
+
+Special translator class to easily implement directory based translators.
+
+- examples/
+
+Translator examples.
+
+- tests/
+
+Test the translator library using the 'test' translator.
