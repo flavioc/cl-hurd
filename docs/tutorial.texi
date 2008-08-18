@@ -1,6 +1,6 @@
 \input tutorial-lisp.tex
 @setfilename tutorial-lisp.info
-@settitle Lisp Hurd bindings
+@settitle Programming Lisp translators
 
 @copying
 Copyright (C) 2008
@@ -81,31 +81,31 @@ Proxy file systems (like hostmux, usermux, etc..).
 * Dependencies:: What needs to be installed before using the library.
 * Installation:: How to install the library.
 * A /dev/zero like translator:: Introductory example.
-* A more complex example:: A more compreensive example.
+* A more complex example:: A more comprehensive example.
 * Conclusion:: Conclusion text.
 @end menu
 
 @node Dependencies, Installation, Top, Top
 @chapter Dependencies
 
-Right now, only CLISP is supported. Porting to new Lisp implementations will happen has soon they run/compile sanely on the Hurd operating system (especially SBCL ;-)).
+Right now, only CLISP is supported. Porting to new Lisp implementations will happen has soon they run and compile sanely on the Hurd operating system (especially SBCL ;-)).
 
 You must also have these asdf packages installed on your system:
 @itemize @bullet
 @item
 @uref{http://www.common-lisp.net/project/cffi/,CFFI}
 
-It can be installed on Debian GNU/Hurd with apt-get install cl-cffi.
+It can be installed on Debian GNU/Hurd with @command{apt-get install cl-cffi}.
 
 @item
 @uref{http://www.weitz.de/flexi-streams/,flexi-streams}
 
-Can also be installed with apt-get install cl-flexi-streams.
+Can also be installed with @command{apt-get install cl-flexi-streams}.
 
 @item
 @uref{http://www.cliki.net/trivial-garbage?v=20,trivial-garbage}
 
-Not apt-get installable, but please grab the tarball from the project web page and install it this way:
+Not apt-get installable, but please grab the tarball from the project web page and install it as described:
 
 @example
 # cd /usr/share/common-lisp/source
@@ -130,7 +130,7 @@ To install the translator library, grab the Hurd source tree from the branch @co
 # make install
 @end example
 
-With everything in place I recommend you to previously compile everything. In the CLISP read-eval-print loop do:
+With everything in place I recommend you to compile everything before using the library. In the CLISP read-eval-print loop do:
 
 @example
 * (asdf:operate 'asdf:load-op 'tree-translator)
@@ -141,9 +141,9 @@ With everything in place I recommend you to previously compile everything. In th
 
 Now that we can really starting doing some interesting things, we will start with a basic translator that can easily introduce ourselves to important concepts and at the same time don't be overly complex.
 
-The translator we will be implementing is very similar to the @file{/dev/zero} file that probably any Unix like system has. This file ignores everything that is written to it and when it is read it only gives us zeroes. It also very similar to the HHG's one.c example.
+The translator we will be implementing is very similar to the @file{/dev/zero} file that probably any Unix like system implements. This file ignores everything that is written to it and when it is read it only gives us zeroes. It's also very similar to the @uref{www.gnu.org/software/hurd/hacking-guide/hhg.html,HHG's} hurd-one.c example.
 
-Before the actual code we will properly package the new translator, using the ASDF method. Let's create a file named @file{zero-translator.asd}, with the following content:
+Before getting into actual code we will properly package the new translator, using the ASDF method. Let's create a file named @file{zero-translator.asd} with the following content:
 
 @lisp
 (defpackage #:zero-translator-asd
@@ -162,7 +162,7 @@ Before the actual code we will properly package the new translator, using the AS
   :components ((:file "zero")))
 @end lisp
 
-As you can see, this ASDF package has only one file (@file{zero.lisp}) and only depends on the hurd-translator ASDF package, which is the basic translator library that we will be using. If you need to use more ASDF packages please declare them there.
+As you can see, this ASDF package has only one file (@file{zero.lisp}) and only depends on the hurd-translator ASDF package, which is the basic translator library that we will be using. If you need to use more ASDF packages please declare them here.
 
 Now to the @file{zero.lisp} file. At the top we put:
 
@@ -172,22 +172,19 @@ Now to the @file{zero.lisp} file. At the top we put:
           :hurd :hurd-translator))
 
 (in-package :zero-translator)
-
 @end lisp
 
 This basically tells the Lisp system to create a new package which uses the Hurd translator library (hurd-common, mach, hurd, hurd-translator and tree-translator packages are all from this library) and then sets the currently used package to the zero-translator package.
 
-Now inside the new package, we must define a new translator class, so that we can customize the translator methods to this new class. These translator methods act like hooks/callbacks that run whatever some request is made upon the server.
+Now inside the new package, we must define a new @code{translator} class, so that we can customize the translator methods to this new class. These translator methods act like hooks/callbacks that run whatever some request is made upon the server.
 
 @lisp
-
 (defclass zero-translator (translator)
   ()
   (:documentation "The zero-translator."))
-
 @end lisp
 
-This definition is remarkably simple, it just tells that the translator class is the base class of the zero-translator class and doesn't add any new slots.
+This definition is remarkably simple, it just tells that the @code{translator} class is the base class of the @code{zero-translator} class and doesn't add any new slots.
 
 If you want to see how the translator class is defined please look at the file @file{translator/class.lisp}. The important slots stored on this class follow:
 
@@ -195,17 +192,17 @@ If you want to see how the translator class is defined please look at the file @
 @item
 underlying-node
 
-It's the port to the underlying node where the translator is set. You can execute RPC's on it to request the information you need. For RPCs look at hurd/io, hurd/fs and hurd/fsys.
+It's the port to the underlying node where the translator is set. You can execute RPC's on it to request some information you need. For RPCs look at @file{hurd/io/}, @file{hurd/fs/} and @file{hurd/fsys}.
 
 @item
 root
 
-It's simple the root node of the translator. If the translator simple exposes a new file this is that file, if it's a directory it will point to a directory node.
+It's simply the translator's root node. If the translator simply exposes a new regular file this represents that file, if it's a directory it will refer to a directory node.
 
 @item
-get-statfs
+statfs
 
-Contains file system meta data that should be set by the translator programmer. Look at @file{common/statfs.lisp} for the methods you can use on this object.
+Contains file system meta data that should be set by the translator writer. Look at @file{common/statfs.lisp} for methods you can use on this object.
 
 @item
 storage
@@ -227,15 +224,15 @@ Translator name and 3 number list with version. It's used in request to the io-s
 Now, you also must know what kinds of methods can be applied to a translator object, so that you can get the desired translator behavior. All these callbacks are extensively documented and described in the file @file{translator/api.lisp} along with some good default implementations.
 If you want to dig at a lower level, it's also possible to define how core RPC's like fsys-getroot and dir-lookup work, specializing the do-fsys-getroot and do-dir-lookup (look at @file{translator/interfaces/fsys-getroot.lisp} and @file{translator/interfaces/dir-lookup.lisp}, respectively).
 
-And if these methods don't satisfy you can even replace the lower level callbacks (implemented at @file{translator/interfaces/}), but be aware that you must deal with nasty things, like pointers, memory, etc and you must also be knowledgeable in using CFFI to deal with foreign calls.
+And if these methods don't satisfy your needs, you can even replace the lower level callbacks (implemented at @file{translator/interfaces/}), but be aware that you must deal with nasty things, like pointers, memory, etc and you must also be knowledgeable in using CFFI to deal with foreign calls.
 
-All right, let's forget about that and get to the good stuff!
+Alright, let's forget about that and get to the good stuff!
 
-Now that you have some more understanding how everything fits together, we should begin implementing our first translator method: @code{make-root-node}.
+Now that you have some basic understanding how everything fits together, we should begin implementing our first translator method: @code{make-root-node}.
 
 This method is only called right at the beginning of execution and it wants us to create a new 'node' object that will represent the initial translator file, which can be anything: a regular file, directory, character device, etc.
 
-To define translator methods we use the define-callback macro, which has this syntax:
+To define translator methods we use the define-callback macro, which has following syntax:
 
 @lisp
 (define-callback <method-name> <translator-type> <argument list> <body>)
@@ -248,9 +245,9 @@ Which is transformed (as you may be guessing) into this:
   <body>)
 @end lisp
 
-As you noted, the translator argument is always present in translator methods! It represents your yet to be created, translator object, of the class zero-translator. Apart from that 'hidden' argument, you can also use the *translator* dynamic variable that references the exact same object, but can be accessed anytime and anywhere you want.
+As you noted, the translator argument is always present in translator methods! It represents your yet to be created, translator object, of the class @code{zero-translator}. Apart from that 'hidden' argument, you can also use the *translator* dynamic variable that references the exact same object, but can be accessed anytime and anywhere you want.
 
-Before implementing the @code{make-root-node} callback, you first must know the node class. It's implemented in the file @file{translator/node.lisp} and has the following important data:
+Before implementing the @code{make-root-node} callback, you need some basic knowledge of the @code{node} class. It's implemented in the file @file{translator/node.lisp} and has the following slots:
 
 @itemize @bullet
 @item
@@ -261,7 +258,10 @@ File owner. Indicates the owner process ID and can be changed through the io-mod
 @item
 stat
 
-This is a very important slot. It represents the node meta data and it's the same as the C struct stat. You really should know how to retrieve and change the stat information. Please look at @file{common/stat.lisp} to have a basic idea. Also note that the stat meta data also contains a mode object, which itself, describes node permissions, file type, among other things, look at @file{common/mode.lisp} to see what methods are available to you. Important node: every method applicable to a mode object can also be directly applied to a stat object.
+This is a very important slot. It represents the node meta data and it's the same thing as the C @code{struct stat}.
+You should really know how to retrieve and change the @code{stat} information. Please look at @file{common/stat.lisp} to have a basic idea. Also note that the @code{stat} meta data also contains a mode object, which itself, describes node permissions, file type, among other things. Look at @file{common/mode.lisp} to see what methods are available to you.
+
+Important note: every method applicable to a @code{mode} object can also be directly applied to a @code{stat} object.
 
 @item
 box
@@ -271,7 +271,7 @@ Translator box, can contain the current passive or/and active translator set on 
 @item
 nusers
 
-Number of users using this node. When it drops to 0 the method report-no-users is called and when it gets from the 'no users' state to a new user, the method report-new-user is called.
+Number of users using this node. When it drops to 0 the method @code{report-no-users} is called and when it gets from the 'no users' state to a new user, the method @code{report-new-user} is called.
 
 @item
 link
@@ -294,9 +294,9 @@ Alright, here is the @code{make-root-node} method:
                                     :mode mode))))
 @end lisp
 
-The first thing we must notice here are the arguments. This method accepts the underlying node port and 'underlying-stat', which refers to the stat meta data from the underlying node where the translator is being set.
+The first thing we must notice here are the arguments. This method accepts the underlying node port and @code{underlying-stat}, which refers to the @code{stat} meta data from the underlying node where the translator is being set.
 
-The first thing we do, is creating a new sane mode meta data, indicating the types of permissions we want for the node and then the file type, in this case character device :chr. Other possible types are:
+The first thing we do, is creating a sane @code{mode} meta data, indicating the types of permissions we want for the node and then the file type, in this case character device @code{:chr}. Other possible types are:
 
 @itemize @bullet
 @item
@@ -325,11 +325,11 @@ sock
 Socket.
 @end itemize
 
-With the mode object created, we then create a node instance, indicating the stat object we want for that node, with @code{make-stat}.
+With the mode object created, we then create a @code{node} instance, indicating the @code{stat} object we want for that node, with @code{make-stat}.
 
-@code{make-stat} accepts an old stat object, and so the meta data will be copied to the new stat object. It means that this new stat object will be equal to 'underlying-stat', except the mode object which will be the node we created early. @code{make-stat} can also accept other arguments, please see @file{common/stat.lisp}.
+@code{make-stat} accepts an old @code{stat} object, and so the meta data will be copied to the new @code{stat} object. It means that this new @code{stat} object will be equal to @code{underlying-stat}, except the mode object which will be the node we created early. @code{make-stat} can also accept other arguments, please see @file{common/stat.lisp}.
 
-In the end, the newly created node is returned and put in the root-node translator slot, so that you can access it later on, if you need.
+In the end, the newly created node is returned and put in the @code{root-node} translator slot, so that you can access it later on, if you need.
 
 What else needs to be implemented? :-) Ah, file writing!
 
@@ -355,7 +355,7 @@ It's the node the user wants to write in.
 @item
 user
 
-The user making the write request. It's an iouser object contain the uid and gid sets from that user. Implemented at @file{hurd/iohelp/iouser.lisp}.
+The user making the write request. It's an @code{iouser} object contain the @code{uid} and @code{gid} sets from that user. Implemented at @file{hurd/iohelp/iouser.lisp}.
 
 @item
 offset
@@ -365,7 +365,7 @@ The place in the file the user wants to start writing to.
 @item
 stream
 
-An input byte stream containing the data to be wrote, you can used read-byte to get the data, or read-sequence.
+An input byte stream containing the data to be wrote, you can used @code{read-byte to get the data}, or @code{read-sequence}.
 
 @item
 amount
@@ -376,7 +376,7 @@ Amount of bytes present in this stream. Very useful if you want to put data into
       (read-sequence my-array stream))
 @end lisp
 
-You can even get it in string form if it makes sense:
+You can even convert it to string form if you need to:
 
 @lisp
 (octets-to-string my-array)
@@ -384,7 +384,7 @@ You can even get it in string form if it makes sense:
 
 @end itemize
 
-How can the library know how much has been wrote? Well, simple looking at how much you read from the stream. So, if you read everything from the stream, the library will get the idea that everything was used, and then we return T meaning success.
+How can the library know how much has been wrote? Well, simple looking at how much you read from the stream. So, if you read everything from the stream, the library will get the idea that everything was used. Finally we return T meaning success.
 
 How about file reading? @code{read-file} is the method for reading nodes.
 
@@ -428,7 +428,7 @@ Output stream were byte data should be written to.
 
 @end itemize
 
-As we said earlier, the translator should give back only zeroes to read requests, because of that we simply write 'amount' zeroes requested to the output stream, and then return T signaling success.
+As we said earlier, the translator should give back only zeroes to read requests, because of that we simply write 'amount' zeroes to the output stream, and then return T signaling success.
 
 What's missing? Ah! Start-up code:
 
@@ -454,7 +454,6 @@ Now we can run the translator:
 
 @example
 $ chmod +x run-zero.lisp
-
 $ settrans -ac zero ./run-zero.lisp
 @end example
 
@@ -482,7 +481,7 @@ T
 
 As expected.
 
-Remove the translator:
+Now, remove the translator:
 
 @example
 $ settrans -g zero
@@ -491,8 +490,8 @@ $ settrans -g zero
 @node A more complex example, Conclusion, Top, Top
 @chapter A more complex example
 
-Now we'll trying to implement a more complex translator example.
-The translator we will implement will provide directory listing and the usual file creation, writing, etc.
+Now we'll try to implement a more complex translator example.
+The translator we are going implement will provide directory listing and the traditional file creation, writing, etc.
 
 At first it should create a directory structure mirroring Lisp lists. Here's an example:
 
@@ -518,7 +517,7 @@ At first it should create a directory structure mirroring Lisp lists. Here's an 
 
 Our translator node must have a directory named "root" and then some files and links on it. The third list argument for regular files describe file contents and the third argument for symbolic links describe the link target.
 
-First, let's describe this new translator class (we'll name it test-translator):
+First, let's describe this new translator class (we'll name it @code{test-translator}):
 
 @lisp
 (defclass test-translator (tree-translator)
@@ -530,19 +529,28 @@ First, let's describe this new translator class (we'll name it test-translator):
              :accessor dir-stat)))
 @end lisp
 
-You might be wondering what's up with that 'tree-translator' business. We'll, the tree-translator is a special class of translators that do some work for us. The tree-translator has the special ability of implementing all the directory lookup and listing automatically, without the need for us to do that. If you want to see what methods are implemented please see @file{tree-translator/class.lisp}.
+You might be wondering what's up with that @code{tree-translator} business. We'll, the tree-translator is a special class of translators that do some work for us. The @code{tree-translator} has the special ability of implementing all the directory lookup and listing automatically, without the need for us to do that. If you want to see what methods are implemented please see @file{tree-translator/class.lisp}.
 
 It also extends the base node class with two new node types:
 
-  * entry: Is a node with the information about the parent directory.
-  * dir-entry: Is an 'entry' and also contains the directory entries.
+@itemize @bullet
+
+@item
+entry
+
+Is a node with the information about the parent directory.
+@item
+dir-entry
+
+Is an @code{entry} and also contains the directory entries.
+@end itemize
 
 Please check the file @file{tree-translator/dir.lisp} for methods on directories.
-Some important meta data is also managed by this type of translator, specially the st-nlink and st-ino fields from the stat object.
+Some important meta data is also managed by this type of translator, specially the st-nlink and st-ino fields for the @code{stat} object.
 
-In our test-translator we put the file-stat and dir-stat slots. They act like a template meta data for new nodes.
+In our @code{test-translator} we put the @code{file-stat} and @code{dir-stat} slots. They act like a template meta data for new nodes.
 
-Another thing you should take note is that the previously used method @code{make-root-node} is already implemented for us in tree-translator's, in addition it creates a new method named @code{fill-root-node} with the root node as an argument. In this method you should fill your root directory with the stuff you want.
+Another thing you should take note is that the previously used method @code{make-root-node} is already implemented for us in @code{tree-translator}, in addition, it creates a new method named @code{fill-root-node} with the root node as an argument. In this method you should fill your root directory with the stuff you want.
 
 For this case, this might be implemented like this:
 
@@ -564,7 +572,7 @@ For this case, this might be implemented like this:
               node))
 @end lisp
 
-As you can see it defines the translator slots with fresh meta data templates and then executes the function @code{%fill-node} with arguments the translator, the directory structure (as read from the @code{+file+}) and the root node.
+As you can see it defines the translator slots with fresh meta data templates and then executes the function @code{%fill-node} with these arguments: the translator, the directory structure (as read from the @code{+file+}) and the root node.
 
 @lisp
 (defun %fill-node (translator ls node)
@@ -599,13 +607,13 @@ As you can see it defines the translator slots with fresh meta data templates an
           (add-entry node new name))))))
 @end lisp
 
-This is a recursive function. It checks the requested file type, creates the specific node with that type and then it is put in the directory as a new directory entry.
+This is a recursive function. It checks the requested file type, creates the specific node with that type and then puts it in the directory as a new directory entry.
 
-You should always give the :parent argument when you are creating new 'entry's.
+You should always give the :parent argument when you are creating new @code{entry}'s.
 
-Take special attention for the symbolic links case "@code{(setf (link new) target)}". It defines the link (as a string) this link points to, but it also sets the file type to :lnk, even if it was not specified above.
+Take special attention for the symbolic links case "@code{(setf (link new) target)}". It defines the link (as a string) this node points to, but it also sets the file type to :lnk, even if it was not specified in @code{make-stat}.
 
-You may also be wondering what's that test-entry thing, but, it's just a new kind of node/entry.
+You may also be wondering what's that @code{test-entry} class, well, it's just a new kind of @code{node}.
 
 @lisp
 (defclass test-entry (entry)
@@ -614,7 +622,7 @@ You may also be wondering what's that test-entry thing, but, it's just a new kin
              :accessor data)))
 @end lisp
 
-In this case we add a new slot that contains the file data, and that %create-data-array just creates a new adjustable array:
+In this case we add a new slot that contains the file contents. And what does @code{%create-data-array} do? It just creates a new adjustable array:
 
 @lisp
 (defun %create-data-array (size contents)
@@ -625,7 +633,7 @@ In this case we add a new slot that contains the file data, and that %create-dat
               :element-type '(unsigned-byte 8)))
 @end lisp
 
-You can use the CLOS dispatch system to specialize node behaviors, for example, you can have various node types that react differently to the read-file method, one would always return the data in upper case and in some others all in lower case, for example.
+You can use the CLOS dispatch system to specialize node behaviors, for example, you can have various node types that react differently to the @code{read-file} method. For example, one node type would always return the data in upper case and in some others all in lower case.
 
 As for that @code{%read-file-data} function, here it is:
 
@@ -636,9 +644,9 @@ As for that @code{%read-file-data} function, here it is:
                             collect (char-code char))))
 @end lisp
 
-It takes the data string and converts it to an unsigned-byte array.
+It takes the data string and converts it to an @code{unsigned-byte} array.
 
-Now that the directory structure is being created, you need to start exposing the file contents with @code{read-file} (just like the first case). Please also keep in mind that you should always keep the st-size stat field updated after a refresh-node method call. Sometimes the translator clients want to know how much data there is to read, and the file size is an important factor in this case, when it's being compared to an internally saved file offset.
+Now that the directory structure is being created, you need to start exposing the file contents with @code{read-file} (just like in the first example). Please also keep in mind that you should always keep the @code{st-size stat} field updated after a refresh-node method call. Sometimes the translator clients want to know how much data there is to read, and the file size is an important factor in this case, when it's being compared to an internally saved file offset.
 
 @lisp
 (define-callback read-file test-translator
@@ -670,7 +678,7 @@ Another good thing to provide in translators (specially those with write support
     t))
 @end lisp
 
-First we verify if the file is a directory, and then if the requesting user has write access. When these tests are passed we can just adjust the file contents array and define a new size for that file in the stat object.
+First we verify if the file is a directory, and then if the requesting user has write access. When these tests are passed we can just adjust the file contents array and define a new size for that file in the @code{stat} object.
 
 And now for file writing!
 
@@ -700,11 +708,9 @@ And now for file writing!
    t))
 @end lisp
 
-Well, let's see. We first do some boring tests and then we read all data from the stream with @code{%read-sequence}, then we need to know how much data the file will now have, and then we have three possible situations: the data will just be replaced, the file will get new data and both. Anyway, we just need to know the maximum of the current size and the offset plus the new data.
+Well, let's see. We first do some boring tests and then we read all data from the stream with @code{%read-sequence}, after that we need to know how much data the file will now have, and then we have three possible situations: the data will just be replaced, the file will get new data, and both. Anyway, we simply just need to know the maximum of the current size and the offset plus the new data.
 
-After knowing the final size and if the file will grow we adjust the array according to this new size.
-
-Then simply replace the current array data with the stream data and update the file size. It's that simple.
+After knowing the final size and if the file will grow we adjust the array according to this new size. Then simply replace the current array data with the stream data and update the file size.
 
 Now, you'll probably want to support file creation, for that, you must implement the @code{create-file} method.
 
@@ -729,7 +735,6 @@ The create-file method has 4 arguments:
 node
 
 The directory where the user wants to create the file.
-
 @item
 user
 
@@ -744,30 +749,29 @@ mode
 Permission bits for that file.
 @end itemize
 
-As you can see, we just create a new test-entry instance with 'node' has the parent and the you add that entry to the directory and return it.
+As you can see, we just create a new @code{test-entry} instance with @code{node} as the parent directory and then we add this new node to the parent directory as a new directory entry.
 
-How about hard link creation? It's already implemented by default in the tree-translator.
+How about hard link creation? It's already implemented by default in the @code{tree-translator}. It works by simply using the same node reference and adding a new point of access using a new filename.
 
-And symbolic link creation? Two methods must be implemented for it to work:
+And symbolic link creation? Three methods must be implemented for it to work:
 
 @itemize @bullet
 @item
 @code{allow-link-p}
 
-Allows link reading, implemented by default by the translator class.
-
+Allows link reading, implemented by default by the @code{translator} class.
 @item
 @code{create-symlink}
 
-Turns a node into a symlink, implemented by default by the translator class.
+Turns a node into a symlink, implemented by default by the @code{translator} class.
 
 @item
 @code{create-anonymous-file}
 
-Not implemented. It must create a detached node. Detached means that file will have a parent directory but not present when listed, and it will exist as a Lisp object that will be hard linked to a new symlink node. See sysdeps/mach/hurd/symlink.c from glibc's source code for more insights and reasons for this.
+Not implemented. It must create a detached node. Detached means that file will have a parent directory but will not be present when listed, and it will exist as a Lisp object that will be hard linked to a new symlink node. See @file{sysdeps/mach/hurd/symlink.c} from glibc's source code for more insights and reasons for this.
 @end itemize
 
-Here's a simple implementation for create-anonymous-file:
+Here's a simple implementation for @code{create-anonymous-file}:
 
 @lisp
 (define-callback create-anonymous-file test-translator
@@ -779,18 +783,18 @@ Here's a simple implementation for create-anonymous-file:
                    :parent node)))
 @end lisp
 
-Here 'node' represents the parent directory and 'mode' the permission bits.
+Here @code{node} represents the parent directory and @code{mode} the permission bits.
 
-How about the start-up code? First we need to get the file from the arguments that will be passed to our program. This file contains the mentioned directory structure.
+How about the start-up code? First we need to get the file from the arguments that will be passed to our program when it is launched. This file contains the mentioned directory structure.
 
 @lisp
 (unless (= (length ext:*args*) 1)
-  (error "You must provide one argument with a file."))
+  (error "You must provide one argument with a spec file."))
 
 (defconstant +file+ (first ext:*args*))
 @end lisp
 
-Then the usual main function:
+Then, the usual main function:
 
 @lisp
 (defun main ()
