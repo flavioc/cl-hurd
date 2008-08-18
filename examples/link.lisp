@@ -5,7 +5,9 @@
 
 (in-package :link-translator)
 
-(assert (= (length ext:*args*) 1))
+(unless (= (length ext:*args*) 1)
+  (error "You must pass the link target as an argument."))
+
 (defconstant +target-link+ (first ext:*args*))
 
 (defclass link-translator (translator)
@@ -32,5 +34,3 @@
 
 (main)
 
-;; TODO:
-;; echo /mydir/a/b > foo = linking now to /mydir/a/b
