@@ -64,15 +64,12 @@
     (return-from write-file :is-a-directory))
   (let* ((size (stat-get (stat node) 'st-size))
          (arr (%read-sequence stream amount))
-         (amount (length arr))
          (final-size (max (+ amount offset) size)))
     (unless (= final-size size)
       (adjust-array (data node)
                     final-size
                     :fill-pointer t))
-    (loop for octet across arr
-          for i from offset
-          do (setf (aref (data node) i) octet))
+    (replace (data node) arr :start1 offset)
     ; Update stat size.
     (setf (stat-get (stat node) 'st-size) final-size)
     t))
