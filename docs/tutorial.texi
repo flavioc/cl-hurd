@@ -1,5 +1,5 @@
-\input tutorial-lisp.tex
-@setfilename tutorial-lisp.info
+\input lisp-tutorial.tex
+@setfilename lisp-tutorial.info
 @settitle Programming Lisp translators
 
 @copying
@@ -115,7 +115,7 @@ Not apt-get installable, but please grab the tarball from the project web page a
 
 @end itemize
 
-@node Installation, A /dev/zero like translator, Top, Top
+@node Installation, A /dev/zero like translator, Dependencies, Top
 @chapter Installation
 
 To install the translator library, grab the Hurd source tree from the branch @code{flaviocruz-soc2008-lisp-branch} and build it:
@@ -136,7 +136,7 @@ With everything in place I recommend you to compile everything before using the 
 * (asdf:operate 'asdf:load-op 'tree-translator)
 @end example
 
-@node A /dev/zero like translator, A more complex example, Top, Top
+@node A /dev/zero like translator, A more complex example, Installation, Top
 @chapter A /dev/zero like translator
 
 Now that we can really starting doing some interesting things, we will start with a basic translator that can easily introduce ourselves to important concepts and at the same time don't be overly complex.
@@ -487,7 +487,7 @@ Now, remove the translator:
 $ settrans -g zero
 @end example
 
-@node A more complex example, Conclusion, Top, Top
+@node A more complex example, Conclusion, A /dev/zero like translator, Top
 @chapter A more complex example
 
 Now we'll try to implement a more complex translator example.
@@ -831,7 +831,7 @@ lr--r----- 1 root root  1 Aug 14 19:13 g -> g
 lr--r----- 1 root root  4 Aug 14 19:13 h -> /usr
 @end example
 
-@node Conclusion, Top, Top
+@node Conclusion,, A more complex example, Top
 @chapter Conclusion
 
 Now that you got some taste of what's like to program Lisp translators, I invite you to read more complex translator examples that are present in the package, namely the zip and irc translators.
