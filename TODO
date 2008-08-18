@@ -1,9 +1,6 @@
 TODO list:
 
-- find... why?
 - fix fsys_getroot, fetch_root (broken for passive translators)
-- documentation
-- FIXME/XXX/TODO
 
 CLIENT RPCS:
 - file_chflags (not used)
