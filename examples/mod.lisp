@@ -6,7 +6,9 @@
 
 (in-package :mod-translator)
 
-(assert (= (length ext:*args*) 1))
+(unless (= (length ext:*args*) 1)
+  (error "You must pass the spec file as an argument."))
+
 (defconstant +file+ (first ext:*args*))
 
 (defclass mod-translator (tree-translator)
@@ -30,6 +32,12 @@
              :accessor data)))
 
 (defclass mod-dir-entry (dirty-entry dir-entry) ())
+
+(defun %create-data-array (size contents)
+  (make-array size
+              :initial-contents contents
+              :adjustable nil
+              :element-type '(unsigned-byte 8)))
 
 (define-callback allow-open-p mod-translator
                  (node user flags is-new-p)
@@ -69,9 +77,8 @@
                                 (declare (ignore name))
                                 (setf (dirty node) nil)
                                 t))
-        (warn "refreshing node...")
         (%update-data translator
-                      (%read-lisp-file)
+                      (with-open-file (s +file+) (read s))
                       (root translator))
         ; Now remove the nodes we have not visited during the update.
         (iterate-entries-deep (root translator)
@@ -123,16 +130,6 @@
     ; Flag this node as visited.
     (setf (dirty found) t)))
 
-(define-callback shutdown mod-translator ()
-  (warn "Mod translator going down!")
-  t)
-
-(defun %create-data-array (size contents)
-  (make-array size
-              :initial-contents contents
-              :adjustable nil
-              :element-type '(unsigned-byte 8)))
-
 (defun %read-file-data (str)
   (%create-data-array (length str)
                       (loop for char across str
@@ -162,23 +159,19 @@
 
 (define-callback fill-root-node mod-translator
                  ((node dir-entry))
-  (let ((data (%read-lisp-file)))
-    (setf (file-stat translator)
-          (make-stat (stat node)
-                     :mode (make-mode :perms '((:owner :read)
-                                               (:group :read)))
-                     :type :reg))
-    (setf (dir-stat translator)
-          (make-stat (stat node)
-                     :mode (make-mode :perms '((:owner :read :exec)
-                                               (:group :read :exec)))
-                     :type :dir))
-    (%fill-node translator data node)))
-
-
-(defun %read-lisp-file ()
-  (with-open-file (stream +file+)
-    (read stream)))
+  (setf (file-stat translator)
+        (make-stat (stat node)
+                   :mode (make-mode :perms '((:owner :read)
+                                             (:group :read)))
+                   :type :reg)
+        (dir-stat translator)
+        (make-stat (stat node)
+                   :mode (make-mode :perms '((:owner :read :exec)
+                                             (:group :read :exec)))
+                   :type :dir))
+  (%fill-node translator
+              (with-open-file (s +file+) (read s))
+              node))
 
 (defun main ()
   (with-port-deallocate (port (file-name-lookup +file+ :flags '(:read)))
