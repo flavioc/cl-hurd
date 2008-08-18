@@ -61,6 +61,8 @@
     (cond
       (found found)
       (t
+        (setf (stat-get (stat dir) 'st-mtime) +now-time-value+)
+        (setf (stat-get (stat dir) 'st-ctime) +now-time-value+)
         (incf (stat-get (stat dir) 'st-nlink)) ; New entry.
         (assert (>= (stat-get (stat dir) 'st-nlink) 2))
         (incf (stat-get (stat entry) 'st-nlink)) ; New link to this file
@@ -122,10 +124,13 @@
       ; Decrease link count.
       (decf (stat-get (stat dir) 'st-nlink))
       (decf (stat-get (stat found) 'st-nlink))
+      (setf (stat-get (stat dir) 'st-mtime) +now-time-value+)
+      (setf (stat-get (stat dir) 'st-ctime) +now-time-value+)
       t)))
 
 (defmethod get-dir-entries ((dir dir-entry) start n)
   "Get directory entries from start to start + n."
+  (setf (stat-get (stat dir) 'st-atime) +now-time-value+)
   (elements-from (entries dir) start n))
 
 (defmethod rename-dir-entry ((dir dir-entry) old-name (new-dir dir-entry) new-name &optional (force-p nil))
