@@ -1,5 +1,5 @@
 
-TARGET_DIRS = libs launcher
+TARGET_DIRS = libs launcher docs
 
 all:
 	@for dir in $(TARGET_DIRS); do \
