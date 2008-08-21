@@ -80,6 +80,12 @@
   "Gets an element using 'key'."
   (gethash key (table container)))
 
+(defmethod clear-elements ((container sorted-container))
+  "Clear all elements from the container."
+  (clrhash (table container))
+  (setf (sorted-list container) nil)
+  t)
+
 ;(defvar *a* (make-sorted-container #'string< #'first))
 ;(insert-element *a* (list "a" 2))
 ;(insert-element *a* (list "c" 5))
