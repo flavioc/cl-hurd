@@ -58,7 +58,8 @@
 (defclass users-entry (entry channel-obj-entry) ())
 (defclass log-entry (entry channel-obj-entry data-entry) ())
 (defclass notice-entry (log-entry) ())
-(defclass pvp-entry (log-entry)
+(defclass kick-entry (channel-obj-entry entry) ())
+(defclass pvt-entry (log-entry)
   ((user :initarg :user
          :accessor user)))
 
@@ -85,6 +86,11 @@
     (when (null (data node))
       (update-topic-data node))
     (read-from-data-entry node start amount stream)))
+
+(define-callback read-file irc-translator
+                 ((node kick-entry) user start amount stream)
+  (declare (ignore start amount stream))
+  (has-access-p node user :read)) ;; Nothing to read at all.
 
 (defun get-key-list (hashtable)
   (sort (loop for key being the hash-keys of hashtable
@@ -135,7 +141,7 @@
                  (octets-to-string array))))
 
 (define-callback write-file irc-translator
-                 ((node pvp-entry) user offset stream amount)
+                 ((node pvt-entry) user offset stream amount)
   (declare (ignore offset))
   (when (has-access-p node user :write)
     (let ((msg (get-message-stream stream amount)))
@@ -157,6 +163,23 @@
       (add-new-info node
                     (make-privmsg-string *nickname* msg))
       t)))
+
+(define-callback write-file irc-translator
+                 ((node kick-entry) user offset stream amount)
+  (declare (ignore offset))
+  (when (has-access-p node user :write)
+    (let* ((kick-str (string-trim " " (get-message-stream stream amount)))
+           (space-pos (position #\Space kick-str))
+           (reason-p (not (null space-pos))))
+      (let ((nick (if reason-p (subseq kick-str 0 space-pos) kick-str))
+            (reason (if reason-p (string-trim " " (subseq kick-str (1+ space-pos)))
+                      "no reason")))
+        (irc:kick (connection *translator*)
+                  (channel node)
+                  (irc:find-user (connection *translator*)
+                                 nick)
+                  reason)
+        t))))
 
 (define-callback report-no-users irc-translator
                  ((node topic-entry))
@@ -217,8 +240,8 @@
   (irc:quit (connection *translator*) "settrans -g")
   (sleep 0.5))
 
-(defun make-pvp-file (root user)
-  (let ((new-entry (make-instance 'pvp-entry
+(defun make-pvt-file (root user)
+  (let ((new-entry (make-instance 'pvt-entry
                                   :parent root
                                   :stat (make-stat (file-stat *translator*))
                                   :data (create-adjustable-array)
@@ -229,7 +252,7 @@
                  (node user filename mode)
   (declare (ignore user mode))
   (when (eq node (root translator))
-    (make-pvp-file (root translator)
+    (make-pvt-file (root translator)
                    filename)))
 
 (define-callback fill-root-node irc-translator
@@ -303,7 +326,12 @@
                                            :parent channel-dir
                                            :stat (make-stat (file-stat *translator*))
                                            :data (create-adjustable-array)
-                                           :channel channel-obj)))
+                                           :channel channel-obj))
+          (kick-entry (make-instance 'kick-entry
+                                     :parent channel-dir
+                                     :stat (make-stat (file-stat *translator*))
+                                     :channel channel-obj)))
+      (add-entry channel-dir kick-entry "kick")
       (add-entry channel-dir conversation-entry "conversation")
       (add-entry channel-dir users-entry "users")
       (add-entry channel-dir topic-entry "topic"))))
@@ -340,10 +368,10 @@
 (defun make-privmsg-string (who msg)
   (format nil "~s: ~a" who msg))
 
-(defun handle-privmsg-pvp (source msg)
+(defun handle-privmsg-pvt (source msg)
   (add-new-info (if (has-entry-p (root *translator*) source)
                   (get-entry (root *translator*) source)
-                  (make-pvp-file (root *translator*) source))
+                  (make-pvt-file (root *translator*) source))
                 (make-privmsg-string source msg)))
 
 (defun handle-privmsg (msg)
@@ -352,7 +380,7 @@
         (str (second (irc:arguments msg))))
     (cond
       ((string= dest *nickname*)
-       (handle-privmsg-pvp src str))
+       (handle-privmsg-pvt src str))
       (t
         (add-new-info (get-channel-name dest)
                       (make-privmsg-string src str))))))
@@ -371,6 +399,26 @@
                         (irc:source msg)
                         (join-string-list (irc:arguments msg)))))
 
+(defun handle-kick (msg)
+  (let* ((args (irc:arguments msg))
+         (orig-channel (first (irc:arguments msg)))
+         (channel (get-channel-name orig-channel))
+         (kicker (irc:source msg))
+         (kicked (second args))
+         (reason (if (= (length args) 3) (third args) "no reason")))
+    (add-new-info channel
+                  (format nil "~s kicks ~s from the room (~s)"
+                          kicker
+                          kicked
+                          reason))
+    (when (string= kicked *nickname*)
+      (remove-channel channel)
+      (add-new-info (notice-node *translator*)
+                    (format nil "KICK: You got kicked from ~s by ~s (~s)"
+                            orig-channel
+                            kicker
+                            reason)))))
+
 (defun handle-irc-message (msg)
   (let ((cmd (irc:command msg)))
     (cond
@@ -387,6 +435,8 @@
        (handle-notice msg))
       ((string= "QUIT" cmd)
        (handle-quit msg))
+      ((string= "KICK" cmd)
+       (handle-kick msg))
       ((or (string= "PING" cmd)
            (string= "UNKNOWN-REPLY" cmd))))))
 
