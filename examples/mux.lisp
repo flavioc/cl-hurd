@@ -13,7 +13,10 @@
 (defconstant +file-list+ (first ext:*args*))
 (defconstant +class-command+ (second ext:*args*))
 
-(defclass mux-translator (tree-translator) ())
+(defclass mux-translator (tree-translator)
+  ((timestamp :initform nil
+              :initarg :timestamp
+              :accessor timestamp)))
 
 (defclass mux-entry (entry)
   ((port :initarg :port
@@ -88,6 +91,17 @@
   (declare (ignore node user target))
   nil)
 
+(define-callback refresh-node mux-translator
+                 (node user)
+  (declare (ignore node user))
+  (let ((new-timestamp (get-timestamp)))
+    (when (time-value-newer-p new-timestamp (timestamp translator))
+      (let ((root (root *translator*)))
+        (clear-dir root)
+        (mirror-file-list root)
+        (setf (timestamp *translator*) new-timestamp)
+        t))))
+
 (defun read-file-lines (file)
   "Return a list of lines in file 'file'."
   (with-open-file (stream file)
@@ -105,20 +119,17 @@
   (first (last
            (split-sequence #\/ file))))
 
-(defun mirror-file (node dir-list full-name name)
+(defun mirror-file (node dir-list full-name name port)
   (let ((last-p (null dir-list)))
     (cond
       (last-p
-        (let ((port (file-name-lookup full-name
-                                      :flags '(:read :write :exec))))
-          (when (port-valid-p port)
-            (let ((file-stat (io-stat port)))
-              (let ((entry (make-instance 'mux-entry
-                                          :stat file-stat
-                                          :parent node
-                                          :port port)))
-                (tg:finalize entry (lambda () (port-deallocate port)))
-                (add-entry node entry name))))))
+        (let ((file-stat (io-stat port)))
+          (let ((entry (make-instance 'mux-entry
+                                      :stat file-stat
+                                      :parent node
+                                      :port port)))
+            (tg:finalize entry (lambda () (port-deallocate port)))
+            (add-entry node entry name))))
       (t
         (let ((dir-name (first dir-list))
               (rest-dir-name (rest dir-list)))
@@ -126,25 +137,39 @@
             (cond
               ((and found
                     (not (is-dir-p (stat found))))
-               (warn "~s could not be classified" full-name))
+               (warn "~s could not be classified" full-name)
+               (port-deallocate port)
+               (return-from mirror-file nil))
               ((not found)
                (setf found (make-instance 'dir-entry
                                           :parent node
                                           :stat (make-stat (stat node))))
                (add-entry node found dir-name)))
-            (mirror-file found rest-dir-name full-name name)))))))
+            (mirror-file found rest-dir-name full-name name port)))))))
+
+(defun mirror-file-list (node)
+  (loop for file in (read-file-lines +file-list+)
+        do (let ((port (file-name-lookup file
+                                         :flags '(:read :write :exec))))
+             (when (port-valid-p port)
+               (mirror-file node
+                            (classify-node file)
+                            file
+                            (file-basename file)
+                            port)))))
 
 (define-callback fill-root-node mux-translator
                  ((node dir-entry))
-  (loop for file in (read-file-lines +file-list+)
-        do (mirror-file node
-                        (classify-node file)
-                        file
-                        (file-basename file))))
+  (mirror-file-list node))
+
+(defun get-timestamp ()
+  (with-port-deallocate (port (file-name-lookup +file-list+ :flags '(:read :notrans)))
+    (stat-get (io-stat port) 'st-mtime)))
 
 (defun main ()
   (let ((translator (make-instance 'mux-translator
-                                   :name "mux-translator")))
+                                   :name "mux-translator"
+                                   :timestamp (get-timestamp))))
     (run-translator translator)))
 
 (main)
