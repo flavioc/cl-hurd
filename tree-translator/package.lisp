@@ -18,5 +18,6 @@
            :iterate-entries-deep
            :has-entry-p
            :get-dir-entries
-           :parent))
+           :parent
+           :clear-dir))
 

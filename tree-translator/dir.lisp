@@ -158,3 +158,11 @@
                                 (typep node 'dir-entry))
                        (iterate-entries-deep node fun)))))
 
+(defmethod clear-dir ((dir dir-entry))
+  "Clear all directory entries."
+  (clear-elements (entries dir))
+  (setf (stat-get (stat dir) 'st-nlink) 2)
+  (setf (stat-get (stat dir) 'st-mtime) +now-time-value+)
+  (setf (stat-get (stat dir) 'st-ctime) +now-time-value+)
+  t)
+
