@@ -181,6 +181,16 @@
                   reason)
         t))))
 
+(define-callback write-file irc-translator
+                 ((node topic-entry) user offset stream amount)
+  (declare (ignore offset))
+  (when (has-access-p node user :write)
+    (let ((new-topic (get-message-stream stream amount)))
+      (irc:topic- (connection *translator*)
+                  (channel node)
+                  new-topic)
+      t)))
+
 (define-callback report-no-users irc-translator
                  ((node topic-entry))
   (setf (data node) nil))
