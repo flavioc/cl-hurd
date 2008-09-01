@@ -1,0 +1,8 @@
+
+To install the cl-zip package in Debian GNU/Hurd:
+
+# apt-get install cl-inflate cl-trivial-gray-streams cl-salza
+# wget -c http://common-lisp.net/project/zip/zip.tgz
+# tar zxvf zip.tgz -C /usr/share/common-lisp/source/
+# ln -sf /usr/share/common-lisp/source/zip/zip.asd /usr/share/common-lisp/systems/
+
