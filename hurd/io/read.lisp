@@ -40,5 +40,5 @@
                                           do (vector-push
                                                (mem-aref new-ptr :unsigned-char i)
                                                ret))
-                                    ret))))))))))))
+                                    (values ret total)))))))))))))
 
