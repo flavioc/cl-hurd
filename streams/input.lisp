@@ -23,15 +23,17 @@
            :accessor offset)))
 
 (defun read-stream-cache (stream)
-  (let ((data (io-read (port stream)
-                       :offset (offset stream)
-                       :amount +default-read-ahead+)))
-    (setf (fill-pointer (cache stream)) (length data))
+  (multiple-value-bind (data total)
+    (io-read (port stream)
+             :offset (offset stream)
+             :amount +default-read-ahead+)
+    (setf (fill-pointer (cache stream)) total)
     (setf (cache-pos stream) 0)
     (replace (cache stream) data)
     t))
 
 (defmethod initialize-instance :after ((stream hurd-input-stream) &rest initargs)
+  (declare (ignore initargs))
   (with-accessors ((port port) (cache cache) (cache-pos cache-pos))
       stream
     (unless (port-valid-p port)
@@ -56,7 +58,7 @@
     (setf (port stream) nil)))
 
 (defmethod stream-element-type ((stream hurd-input-stream))
-  "The element type is always OCTET."
+  "The element type is always unsigned-byte 8."
   '(unsigned-byte 8))
 
 (defmethod stream-file-position ((stream hurd-input-stream))
@@ -156,7 +158,6 @@
         (return-from stream-read-sequence start))
       (let* ((size-cache (length cache))
              (cache-rest (- size-cache cache-pos))
-             (current-pos start)
              (this-size (min cache-rest total))
              (new-cache-pos (+ cache-pos this-size)))
         (replace sequence cache
