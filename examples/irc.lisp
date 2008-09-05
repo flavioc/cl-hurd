@@ -7,9 +7,6 @@
 
 (in-package :irc-translator)
 
-(unless (= (length ext:*args*) 2)
-  (error "You must pass a nickname and the server as arguments."))
-
 (defvar *nickname* (first ext:*args*))
 (defvar *server* (second ext:*args*))
 

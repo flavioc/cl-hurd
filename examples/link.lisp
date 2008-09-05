@@ -5,9 +5,6 @@
 
 (in-package :link-translator)
 
-(unless (= (length ext:*args*) 1)
-  (error "You must pass the link target as an argument."))
-
 (defconstant +target-link+ (first ext:*args*))
 
 (defclass link-translator (translator)

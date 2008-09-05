@@ -6,9 +6,6 @@
 
 (in-package :test-translator)
 
-(unless (= (length ext:*args*) 1)
-  (error "You must provide one argument with a file."))
-
 (defconstant +file+ (first ext:*args*))
 
 (defun %create-data-array (size contents)

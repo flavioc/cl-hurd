@@ -6,9 +6,6 @@
 
 (in-package :mod-translator)
 
-(unless (= (length ext:*args*) 1)
-  (error "You must pass the spec file as an argument."))
-
 (defconstant +file+ (first ext:*args*))
 
 (defclass mod-translator (tree-translator)

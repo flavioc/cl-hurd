@@ -13,9 +13,6 @@
 ;; Right now it supports file and directory listing.
 ;;
 
-(unless (= (length ext:*args*) 1)
-  (error "You must pass a zip file as an argument."))
-
 (defconstant +file+ (first ext:*args*))
 
 (defvar *zip* (open-zipfile +file+) "The zip handle.")

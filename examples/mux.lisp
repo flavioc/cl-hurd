@@ -7,9 +7,6 @@
 
 (in-package :mux-translator)
 
-(unless (= (length ext:*args*) 2)
-  (error "Argument syntax: <file list> <classification command>"))
-
 (defconstant +file-list+ (first ext:*args*))
 (defconstant +class-command+ (second ext:*args*))
 
