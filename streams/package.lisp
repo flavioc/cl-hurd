@@ -7,5 +7,8 @@
   (:export :hurd-stream
            :hurd-input-stream
            :make-hurd-input-stream
-           :with-hurd-input-stream))
+           :with-hurd-input-stream
+           :hurd-output-stream
+           :make-hurd-output-stream
+           :with-hurd-output-stream))
 
