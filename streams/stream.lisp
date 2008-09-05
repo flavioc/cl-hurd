@@ -54,3 +54,9 @@
                                  :whence :seek-set)))
         (setf (offset stream) new-offset)))))
 
+(defun %create-adjustable-array (&optional (size 0))
+  (make-array size
+              :fill-pointer size
+              :adjustable t
+              :element-type '(unsigned-byte 8)))
+
