@@ -12,6 +12,7 @@ clean:
 	done
 
 install: all
-	ln -sf $(PWD)/{hurd-common,mach,hurd,hurd-translator,tree-translator}.asd /usr/share/common-lisp/systems
+	ln -sf $(PWD)/{hurd-common,mach,hurd,hurd-translator,tree-translator,hurd-streams}.asd \
+		/usr/share/common-lisp/systems
 	make -C libs install
 	make -C launcher install
