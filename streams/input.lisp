@@ -9,77 +9,43 @@
               :adjustable t
               :element-type '(unsigned-byte 8)))
 
-(defclass hurd-input-stream (trivial-gray-stream-mixin fundamental-binary-input-stream)
-  ((port :initform nil
-         :initarg :port
-         :accessor port)
-   (cache :initform (%create-adjustable-array +default-read-ahead+)
+(defclass hurd-input-stream (hurd-stream fundamental-binary-input-stream)
+  ((cache :initform (%create-adjustable-array +default-read-ahead+)
           :accessor cache)
    (last-byte :initform nil
               :accessor last-byte)
    (cache-pos :initform 0
-              :accessor cache-pos)
-   (offset :initform 0
-           :accessor offset)))
+              :accessor cache-pos)))
 
 (defun read-stream-cache (stream)
   (multiple-value-bind (data total)
     (io-read (port stream)
              :offset (offset stream)
              :amount +default-read-ahead+)
-    (setf (fill-pointer (cache stream)) total)
+    (unless data
+      (setf total 0))
     (setf (cache-pos stream) 0)
-    (replace (cache stream) data)
+    (setf (fill-pointer (cache stream)) total)
+    (when data
+      (replace (cache stream) data))
     t))
 
 (defmethod initialize-instance :after ((stream hurd-input-stream) &rest initargs)
   (declare (ignore initargs))
-  (with-accessors ((port port) (cache cache) (cache-pos cache-pos))
-      stream
-    (unless (port-valid-p port)
-      (error "Port not valid: ~A" port))
-    (read-stream-cache stream)))
-
-(defmethod print-object ((istream hurd-input-stream) stream)
-  (format stream "#<HURD-INPUT-STREAM port=~a offset=~a>"
-          (port istream)
-          (offset istream)))
-
-(defmethod open-stream-p ((stream hurd-input-stream))
-  "Returns a true value if STREAM is open."
-  (port-valid-p (port stream)))
+  (read-stream-cache stream))
 
 (defmethod close ((stream hurd-input-stream) &key abort)
   "Closes the stream STREAM."
   (declare (ignore abort))
   (when (open-stream-p stream)
-    (port-deallocate (port stream))
     (setf (cache stream) nil)
-    (setf (port stream) nil)))
-
-(defmethod stream-element-type ((stream hurd-input-stream))
-  "The element type is always unsigned-byte 8."
-  '(unsigned-byte 8))
-
-(defmethod stream-file-position ((stream hurd-input-stream))
-  (offset stream))
+    (call-next-method)))
 
 (defmethod (setf stream-file-position) (position (stream hurd-input-stream))
   "Sets the file offfset."
+  (declare (ignore position))
   (with-cleanup (read-stream-cache stream)
-    (case position
-      (:end
-        (setf (offset stream)
-              (io-seek (port stream)
-                       :offset 0
-                       :whence :seek-end)))
-      (otherwise
-        (when (eq position :start)
-          (setf position 0))
-        (let ((new-offset (io-seek (port stream)
-                                   :offset position
-                                   :whence :seek-set)))
-          (setf (offset stream) new-offset))))))
+     (call-next-method)))
 
 (defun %hurd-eof-reached-p (cache)
   (not (and cache

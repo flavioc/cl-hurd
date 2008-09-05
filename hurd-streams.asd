@@ -19,6 +19,8 @@
                 :trivial-gray-streams)
   :components ((:module streams
                         :components ((:file "package")
+                                     (:file "stream"
+                                            :depends-on ("package"))
                                      (:file "input"
-                                            :depends-on ("package"))))))
+                                            :depends-on ("stream"))))))
 
