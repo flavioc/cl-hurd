@@ -3,12 +3,6 @@
 
 (defconstant +default-read-ahead+ 512)
 
-(defun %create-adjustable-array (&optional (size 0))
-  (make-array size
-              :fill-pointer size
-              :adjustable t
-              :element-type '(unsigned-byte 8)))
-
 (defclass hurd-input-stream (hurd-stream fundamental-binary-input-stream)
   ((cache :initform (%create-adjustable-array +default-read-ahead+)
           :accessor cache)
@@ -139,15 +133,15 @@
                                   (+ start this-size)
                                   end)))))))
             
-(defmethod make-hurd-input-stream ((file string))
+(defmethod make-hurd-input-stream ((file string) &optional (flags '(:read)))
   (make-hurd-input-stream
-    (file-name-lookup file :flags '(:read))))
+    (file-name-lookup file :flags flags)))
 
-(defmethod make-hurd-input-stream ((port number))
-  (make-instance 'hurd-input-stream
-                 :port port))
+(defmethod make-hurd-input-stream ((port number) &optional flags)
+  (declare (ignore flags))
+  (make-instance 'hurd-input-stream :port port))
 
-(defmacro with-hurd-input-stream ((stream-name file) &body body)
-  `(with-stream (,stream-name (make-hurd-input-stream ,file))
+(defmacro with-hurd-input-stream ((stream-name file &optional (flags ''(:read))) &body body)
+  `(with-stream (,stream-name (make-hurd-input-stream ,file ,flags))
      ,@body))
 
