@@ -54,6 +54,11 @@
                                  :whence :seek-set)))
         (setf (offset stream) new-offset)))))
 
+(defmethod hurd-stream-file-length ((stream hurd-stream))
+  "Returns stream file length."
+  (let ((stat (io-stat (port stream))))
+    (stat-get stat 'st-size)))
+
 (defun %create-adjustable-array (&optional (size 0))
   (make-array size
               :fill-pointer size
