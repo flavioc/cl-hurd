@@ -1,0 +1,89 @@
+diff -Naur zip/package.lisp zip.new/package.lisp
+--- zip/package.lisp	2006-06-10 14:08:38.000000000 +0000
++++ zip.new/package.lisp	2008-09-11 15:17:27.410000000 +0000
+@@ -3,6 +3,7 @@
+ (defpackage :zip
+   (:use :cl #-allegro :trivial-gray-streams)
+   (:export #:zipfile                    ;reading ZIP files
++           #:zip-stream-file-length
+ 	   #:open-zipfile
+ 	   #:close-zipfile
+ 	   #:with-zipfile
+diff -Naur zip/zip.lisp zip.new/zip.lisp
+--- zip/zip.lisp	2006-06-10 14:08:38.000000000 +0000
++++ zip.new/zip.lisp	2008-09-05 17:23:58.000000000 +0000
+@@ -161,11 +161,14 @@
+           (setf crc (update-crc crc buf n)))
+     (values ntotal ntotal crc)))
+ 
++(defmethod zip-stream-file-length ((stream file-stream))
++  (file-length stream))
++
+ (defun seek-to-end-header (s)
+   (let* ((len (+ 65536 +end-header-length+))
+-	 (guess (max 0 (- (file-length s) len))))
++	 (guess (max 0 (- (zip-stream-file-length s) len))))
+     (file-position s guess)
+-    (let ((v (make-byte-array (min (file-length s) len))))
++    (let ((v (make-byte-array (min (zip-stream-file-length s) len))))
+       (read-sequence v s)
+       (let ((n (search #(80 75 5 6) v :from-end t)))
+ 	(unless n
+@@ -218,29 +221,35 @@
+ 			:compressed-size (cd/compressed-size header)
+ 			:comment comment)))
+ 
+-(defun open-zipfile
+-    (pathname &key (external-format (default-external-format)))
+-  (let* ((s (open pathname
+-                  #-allegro :element-type
+-                  #-allegro '(unsigned-byte 8))))
++(defgeneric open-zipfile (source &key external-format))
++
++(defmethod open-zipfile
++  ((pathname string) &key (external-format (default-external-format)))
++  (let* ((stream (open pathname
++                       #-allegro :element-type
++                       #-allegro '(unsigned-byte 8))))
+     (unwind-protect
+-	(progn
+-	  (seek-to-end-header s)
+-	  (let* ((end (make-end-header s))
+-		 (n (end/total-files end))
+-		 (entries (make-hash-table :test #'equal))
+-		 (zipfile (make-zipfile :stream s
+-                                        :entries entries
+-                                        :external-format external-format)))
+-	    (file-position s (end/central-directory-offset end))
+-	    (dotimes (x n)
+-	      (let ((entry (read-entry-object s external-format)))
+-		(setf (gethash (zipfile-entry-name entry) entries) entry)))
+-	    #+sbcl (let ((s s)) (sb-ext:finalize zipfile (lambda ()(close s))))
+-	    (setf s nil)
+-	    zipfile))
+-      (when s
+-	(close s)))))
++      (let ((ret (open-zipfile stream external-format)))
++        (when ret
++          (setf stream nil))
++        ret)
++      (when stream
++        (close stream)))))
++
++(defmethod open-zipfile
++  ((stream stream) &key (external-format (default-external-format)))
++  (seek-to-end-header stream)
++  (let* ((end (make-end-header stream))
++         (n (end/total-files end))
++         (entries (make-hash-table :test #'equal))
++         (zipfile (make-zipfile :stream stream
++                                :entries entries
++                                :external-format external-format)))
++    (file-position stream (end/central-directory-offset end))
++    (dotimes (x n)
++      (let ((entry (read-entry-object stream external-format)))
++        (setf (gethash (zipfile-entry-name entry) entries) entry)))
++    zipfile))
+ 
+ (defgeneric close-zipfile (zipfile))
+ (defgeneric get-zipfile-entry (name zipfile))
