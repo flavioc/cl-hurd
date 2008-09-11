@@ -3,7 +3,9 @@
   (:use :cl :hurd-common :mach
         :hurd :hurd-translator
         :hurd-tree-translator
+        :hurd-streams
         :flexi-streams
+        :trivial-gray-streams
         :zip))
 
 (in-package :zip-translator)
@@ -13,19 +15,15 @@
 ;; Right now it supports file and directory listing.
 ;;
 
-(defconstant +file+ (first ext:*args*))
-
-(defvar *zip* (open-zipfile +file+) "The zip handle.")
-
-(unless *zip*
-  (error "Error while opening the zip file ~a" +file+))
-
 (defconstant +seq-cache-size+ 10 "Number of reads before disposing the extract array sequence.")
 
 (defclass zip-translator (tree-translator)
   ((timestamp :initform nil
               :accessor timestamp
-              :initarg :timestamp))
+              :initarg :timestamp)
+   (underlying-stream :initform nil
+                      :accessor underlying-stream
+                      :initarg :stream))
   (:documentation "Zip translator."))
 
 (defclass dirty-entry ()
@@ -34,8 +32,7 @@
 
 (defclass zip-entry (entry dirty-entry)
   ((name :initarg :name
-         :accessor name
-         :documentation "Used to access the zip-entry from *zip*.")
+         :accessor name)
    (entry :initarg :entry
           :accessor entry
           :documentation "The zip entry associated with this file.")
@@ -95,8 +92,8 @@
 (define-callback refresh-node zip-translator
                  (node user)
   (declare (ignore node user))
-  (with-port-deallocate (port (file-name-lookup +file+ :flags '(:read :notrans)))
-    (let* ((stat (io-stat port))
+  (with-accessors ((underlying-node underlying-node)) translator
+    (let* ((stat (io-stat underlying-node))
            (new-timestamp (stat-get stat 'st-mtime)))
       (when (time-value-newer-p new-timestamp (timestamp translator))
         ; Mark every node as un-visited.
@@ -105,9 +102,11 @@
                                 (declare (ignore name))
                                 (setf (dirty node) nil)
                                 t))
-        (setf *zip* (open-zipfile +file+))
-        (do-zipfile-entries (name entry *zip*)
-                            (update-zip-file (root *translator*) (split-path name) entry))
+        (with-accessors ((underlying-stream underlying-stream) (root root)) translator
+          (setf (stream-file-position underlying-stream) :start)
+          (let ((zip-handle (open-zipfile underlying-stream)))
+            (do-zipfile-entries (name entry zip-handle)
+                                (update-zip-file root (split-path name) entry))))
         ; Now remove the nodes we have not visited during the update.
         (iterate-entries-deep (root translator)
                               (lambda (name node)
@@ -209,17 +208,27 @@
             (unless final-p
               (add-zip-file new-dir name-rest zip-entry))))))))
 
+(defmethod zip-stream-file-length ((stream hurd-input-stream))
+  (hurd-stream-file-length stream))
+
 (define-callback fill-root-node zip-translator
                  ((node dir-entry))
   "Add all entries found on the zip file."
-  (do-zipfile-entries (name entry *zip*)
-                      (add-zip-file node (split-path name) entry)))
+  (let ((zip-handle (open-zipfile (underlying-stream translator))))
+    (do-zipfile-entries (name entry zip-handle)
+                        (add-zip-file node (split-path name) entry))))
+
+(define-callback make-root-node zip-translator
+                 (underlying-node underlying-stat)
+  (setf (timestamp translator) (stat-get underlying-stat 'st-mtime)
+        (underlying-stream translator) (make-hurd-input-stream underlying-node))
+  (call-next-method))
 
 (defun main ()
-  (with-port-deallocate (port (file-name-lookup +file+ :flags '(:read)))
-    (run-translator (make-instance 'zip-translator
-                                   :timestamp (stat-get (io-stat port) 'st-mtime)
-                                   :name "zip-translator"))))
+  (run-translator (make-instance 'zip-translator
+                                 :name "zip-translator"
+                                 :version (list 0 1 0))
+                  :flags '(:notrans :read)))
 
 (main)
 
