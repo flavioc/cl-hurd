@@ -21,6 +21,8 @@
                         :components ((:file "package")
                                      (:file "stream"
                                             :depends-on ("package"))
+                                     (:file "output"
+                                            :depends-on ("stream"))
                                      (:file "input"
                                             :depends-on ("stream"))))))
 
