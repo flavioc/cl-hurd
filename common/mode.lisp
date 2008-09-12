@@ -407,7 +407,7 @@ You can also ignore user-type and the bits will be for all the user types.
                                                #\-))
                                            #\-))
                                  '(:read :write :exec))))
-    (mapcar #'show-perm-bits '(owner group others)))
+    (mapcar #'show-perm-bits '(:owner :group :others)))
   (if (is-vtx-p mode)
     (format stream " vtx"))
   (if (is-mmap-p mode)
