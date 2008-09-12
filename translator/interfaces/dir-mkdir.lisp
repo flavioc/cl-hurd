@@ -20,6 +20,7 @@
                                           name
                                           mode)))
             (cond
+              ((typep result 'node) t)
               ((eq result t) t)
               ((eq result nil) :not-permitted)
               (t result))))))))
