@@ -19,5 +19,6 @@
            :has-entry-p
            :get-dir-entries
            :parent
+           :not-permitted-entries-p
            :clear-dir))
 
