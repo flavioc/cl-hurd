@@ -38,7 +38,8 @@
     (fill-root-node translator obj)
     obj))
 
-(defmethod fill-root-node ((translator tree-translator) (root dir-entry))
+(define-callback fill-root-node tree-translator
+                 ((root dir-entry))
   "This should be used to construct the directory structure. 'root' is the newly created
 root node."
   nil)
@@ -70,7 +71,7 @@ root node."
 				(node user start end)
   (unless (has-access-p node user :read)
     (return-from get-entries nil))
-  (let* ((return-list nil)
+  (let* (return-list
          (real-start (max 0 (- start 2))))
     (when (and (<= start 1) (>= end 1))
       (push (make-dirent ".." 1 :dir) return-list))
@@ -97,8 +98,7 @@ root node."
                           'dir-entry
                           :stat (make-stat (stat node) :mode mode)
                           :parent node)
-                   name)
-        t))))
+                   name)))))
 
 (define-callback remove-directory-entry tree-translator
 				 (node user name)
