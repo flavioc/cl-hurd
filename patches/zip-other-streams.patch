@@ -1,6 +1,6 @@
 diff -Naur zip/package.lisp zip.new/package.lisp
---- zip/package.lisp	2006-06-10 14:08:38.000000000 +0000
-+++ zip.new/package.lisp	2008-09-11 15:17:27.410000000 +0000
+--- zip/package.lisp	2006-06-10 14:08:38.950000000 +0000
++++ zip.new/package.lisp	2008-09-12 00:59:10.000000000 +0000
 @@ -3,6 +3,7 @@
  (defpackage :zip
    (:use :cl #-allegro :trivial-gray-streams)
@@ -9,9 +9,19 @@ diff -Naur zip/package.lisp zip.new/package.lisp
  	   #:open-zipfile
  	   #:close-zipfile
  	   #:with-zipfile
+@@ -16,7 +17,9 @@
+ 	   #:unzip
+ 
+            #:with-output-to-zipfile     ;writing ZIP files
++           #:make-zipfile-writer
+            #:write-zipentry
++           #:zip-write-central-directory
+            #:zip
+ 
+            #:inflate                    ;inflate.lisp
 diff -Naur zip/zip.lisp zip.new/zip.lisp
---- zip/zip.lisp	2006-06-10 14:08:38.000000000 +0000
-+++ zip.new/zip.lisp	2008-09-05 17:23:58.000000000 +0000
+--- zip/zip.lisp	2006-06-10 14:08:38.980000000 +0000
++++ zip.new/zip.lisp	2008-09-12 16:06:37.790000000 +0000
 @@ -161,11 +161,14 @@
            (setf crc (update-crc crc buf n)))
      (values ntotal ntotal crc)))
@@ -29,7 +39,7 @@ diff -Naur zip/zip.lisp zip.new/zip.lisp
        (read-sequence v s)
        (let ((n (search #(80 75 5 6) v :from-end t)))
  	(unless n
-@@ -218,29 +221,35 @@
+@@ -218,29 +221,36 @@
  			:compressed-size (cd/compressed-size header)
  			:comment comment)))
  
@@ -65,6 +75,7 @@ diff -Naur zip/zip.lisp zip.new/zip.lisp
 -	(close s)))))
 +      (let ((ret (open-zipfile stream external-format)))
 +        (when ret
++          #+sbcl (let ((stream stream)) (sb-ext:finalize ret (lambda ()(close stream))))
 +          (setf stream nil))
 +        ret)
 +      (when stream
@@ -87,3 +98,54 @@ diff -Naur zip/zip.lisp zip.new/zip.lisp
  
  (defgeneric close-zipfile (zipfile))
  (defgeneric get-zipfile-entry (name zipfile))
+@@ -294,7 +304,7 @@
+       (write-sequence descriptor s))
+     name))
+ 
+-(defun write-central-directory (z)
++(defun zip-write-central-directory (z)
+   (let* ((s (zipwriter-stream z))
+          (pos (file-position s))
+          (n 0))
+@@ -367,21 +377,30 @@
+ 	 (progn ,@body)
+        (close-zipfile ,file))))
+ 
+-(defun make-zipfile-writer
+-    (pathname &key (if-exists :error)
+-                   (external-format (default-external-format)))
++(defgeneric make-zipfile-writer (source &key external-format))
++
++(defmethod make-zipfile-writer ((stream stream)
++                                &key
++                                (external-format (default-external-format)))
+   (let ((c (cons nil nil)))
+     (make-zipwriter
+-     :stream (open pathname
+-		   :direction :output
+-		   :if-exists if-exists
+-		   :element-type '(unsigned-byte 8))
+-     :external-format external-format
+-     :head c
+-     :tail c)))
++      :stream stream
++      :external-format external-format
++      :head c
++      :tail c)))
++
++(defmethod make-zipfile-writer ((pathname string)
++                                &key
++                                (if-exists :error)
++                                (external-format (default-external-format)))
++  (make-zipfile-writer (open pathname
++                             :direction :output
++                             :if-exists if-exists
++                             :element-type '(unsigned-byte 8))
++                       :external-format external-format))
+ 
+ (defun close-zipfile-writer (z)
+-  (write-central-directory z)
++  (zip-write-central-directory z)
+   (close (zipwriter-stream z)))
+ 
+ (defmacro with-output-to-zipfile
