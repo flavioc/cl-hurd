@@ -91,10 +91,6 @@
                  :stat (make-stat (stat node) :mode mode)
                  :parent node))
 
-(define-callback fill-root-node tmp-translator
-                 ((node dir-entry))
-  t)
-
 (defun main ()
   (run-translator (make-instance 'tmp-translator
                                  :name "tmp-translator")))
