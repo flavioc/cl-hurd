@@ -1,17 +1,18 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10 -*-
 
-(defpackage #:zip-translator-asd
+(defpackage #:unzip-translator-asd
   (:use :cl :asdf))
 
-(in-package :zip-translator-asd)
+(in-package :unzip-translator-asd)
 
-(defsystem zip-translator
-  :name "zip-translator"
+(defsystem unzip-translator
+  :name "unzip-translator"
   :version "0.0.0"
   :maintainer "Flavio Cruz"
   :author "Flavio Cruz"
   :license "GPL v3.0"
   :description "Simple, yet functional zip translator with read-only support."
   :depends-on (:zip :tree-translator :hurd-streams)
-  :components ((:file "zip-translator")))
+  :components ((:module unzip-translator
+                        :components (:file "unzip-translator"))))
 

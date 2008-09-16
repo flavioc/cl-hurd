@@ -1,5 +1,5 @@
 
-(defpackage :zip-translator
+(defpackage :unzip-translator
   (:use :cl :hurd-common :mach
         :hurd :hurd-translator
         :hurd-tree-translator
@@ -8,10 +8,10 @@
         :trivial-gray-streams
         :zip))
 
-(in-package :zip-translator)
+(in-package :unzip-translator)
 
 ;;
-;; This is a simple zip translator.
+;; This is a simple unzip translator.
 ;; Right now it supports file and directory listing.
 ;;
 
