@@ -13,5 +13,5 @@
   :license "GPL v3.0"
   :description "/dev/null translator."
   :depends-on (:hurd-translator)
-  :components ((:file "null")))
+  :components ((:file "null-translator")))
 
