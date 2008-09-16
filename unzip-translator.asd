@@ -11,8 +11,8 @@
   :maintainer "Flavio Cruz"
   :author "Flavio Cruz"
   :license "GPL v3.0"
-  :description "Simple, yet functional zip translator with read-only support."
+  :description "Simple, yet functional unzip translator."
   :depends-on (:zip :tree-translator :hurd-streams)
   :components ((:module unzip-translator
-                        :components (:file "unzip-translator"))))
+                        :components ((:file "unzip-translator")))))
 
