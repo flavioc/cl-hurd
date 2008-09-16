@@ -13,4 +13,5 @@
   :license "GPL v3.0"
   :description "Simple tmpfs like translator."
   :depends-on (:tree-translator)
-  :components ((:file "tmp")))
+  :components ((:file "tmp-translator")))
+
