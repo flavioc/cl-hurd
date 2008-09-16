@@ -13,4 +13,4 @@
   :license "GPL v3.0"
   :description "A proxy translator."
   :depends-on (:tree-translator)
-  :components ((:file "proxy")))
+  :components ((:file "proxy-translator")))
