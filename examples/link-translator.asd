@@ -13,4 +13,4 @@
   :license "GPL v3.0"
   :description "Translator that creates a simple link node."
   :depends-on (:hurd-translator)
-  :components ((:file "link")))
+  :components ((:file "link-translator")))
