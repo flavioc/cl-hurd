@@ -13,4 +13,5 @@
   :license "GPL v3.0"
   :description "A multiplexer translator."
   :depends-on (:tree-translator :split-sequence :trivial-garbage)
-  :components ((:file "mux")))
+  :components ((:file "mux-translator")))
+
