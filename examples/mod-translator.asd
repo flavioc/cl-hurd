@@ -13,4 +13,5 @@
   :license "GPL v3.0"
   :description "Translator that watches for changes in the underlying node."
   :depends-on (:tree-translator)
-  :components ((:file "mod")))
+  :components ((:file "mod-translator")))
+
