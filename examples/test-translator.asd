@@ -13,4 +13,4 @@
   :license "GPL v3.0"
   :description "Translator used for the tests."
   :depends-on (:tree-translator)
-  :components ((:file "test")))
+  :components ((:file "test-translator")))
