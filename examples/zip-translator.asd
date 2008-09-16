@@ -13,4 +13,5 @@
   :license "GPL v3.0"
   :description "Simple, yet functional zip translator with read-only support."
   :depends-on (:zip :tree-translator :hurd-streams)
-  :components ((:file "zip")))
+  :components ((:file "zip-translator")))
+
