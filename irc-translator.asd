@@ -13,5 +13,6 @@
   :license "GPL v3.0"
   :description "Irc client implemented as a filesystem."
   :depends-on (:cl-irc :tree-translator)
-  :components ((:file "irc-translator")))
+  :components ((:module irc-translator
+                        :components ((:file "irc-translator")))))
 
