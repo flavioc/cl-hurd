@@ -80,6 +80,7 @@ Proxy file systems (like hostmux, usermux, etc..).
 @menu
 * Dependencies:: What needs to be installed before using the library.
 * Installation:: How to install the library.
+* Using the provided translators:: How to use the unzip, irc, and mux translators
 * A /dev/zero like translator:: Introductory example.
 * A more complex example:: A more comprehensive example.
 * Conclusion:: Conclusion text.
@@ -136,7 +137,91 @@ With everything in place I recommend you to compile everything before using the 
 * (asdf:operate 'asdf:load-op 'tree-translator)
 @end example
 
-@node A /dev/zero like translator, A more complex example, Installation, Top
+@node Using the provided translators, A /dev/zero like translator, Installation, Top
+@chapter Using the provided translators
+
+This library already provides some Lisp translators that can be used production wise.
+
+The more noteworthy translators are as follow:
+
+@itemize @bullet
+@item unzip
+
+This translator will sit on a zip file node and expose the file contents as a traditional directory, where the packed files can be read and write as any other file in the system.
+
+To startup this translator
+
+@example
+$ settrans -a file.zip /hurd/unzip.lisp
+@end example
+
+If you change the contents of an archived file the translator, when shutdown, will zip the original file, saving the new modifications along the way.
+
+@item ircfs
+
+The ircfs translator is a simple IRC client that enables you to listen for private and channel messages, sending messages, join channels and kick people, among others. Everything using your beloved file system interface.
+
+To launch this translator, you should type:
+
+@example
+$ settrans -ac irc /hurd/irc.lisp your_nickname irc_server
+$ ls irc/
+notice
+@end example
+
+The first file the translator will create, is the @file{notice} file, it contains the server notices and messages.
+
+Also, you may want to join a channel:
+
+@example
+$ mkdir hurd
+$ ls hurd/
+conversation kick topic users
+@end example
+
+Each channel has four files:
+
+@itemize @bullet
+@item conversation
+
+Contains the channel's conversation log, for instance you can @command{tail -f conversation} to wait for new messages. To send a channel message, @command{echo "hello" > conversation}.
+
+@item kick
+
+Use this file to kick people on the channel @command{echo "user_you_dont_like" > kick}.
+
+@item topic
+
+Contains the channel topic.
+
+@item users
+
+Contains a list of the channel's users.
+
+@end itemize
+
+To part from a channel just remove the channel directory.
+To make private conversations:
+
+@example
+$ pwd
+.../irc
+$ touch nick
+@end example
+
+That @file{nick} file will act just like a channel's @file{conversation} file.
+
+@item mux
+
+The mux translator acts like a directory organizer. For example, you may want to organize your mp3 files in a per artist fashion, for that purpose you should write a script that outputs the mp3 artist and a file that lists all the files you want to classify, and then the translator will create virtual directories and proxies for the real files.
+
+@example
+$ settrans -ac organized /hurd/mux.lisp list-of-mp3s.txt ./classify-mp3.sh
+@end example
+
+@end itemize
+
+@node A /dev/zero like translator, A more complex example, Using the provided translators, Top
 @chapter A /dev/zero like translator
 
 Now that we can really starting doing some interesting things, we will start with a basic translator that can easily introduce ourselves to important concepts and at the same time don't be overly complex.
